@@ -376,8 +376,16 @@ function getMockResponse(type: string, content: string, speakingPart?: string, t
         confidence: Math.min(100, Math.max(30, 85 - (i % 5) * 8 + Math.floor(Math.random() * 20))),
         feedback: i % 4 === 0 ? "Clear and natural" : i % 4 === 1 ? "Good pronunciation" : i % 4 === 2 ? "Consider stress on this syllable" : "Natural liaison with surrounding words"
       })),
-      improvedNaturalness: content.replace(/\b(um|uh|like|you know|basically|actually|I mean|kind of|sort of)\b/gi, '').replace(/\s{2,}/g, ' ').trim(),
-      enhancedSpeech: content.replace(/\b(um|uh|like|you know|basically|actually|I mean|kind of|sort of)\b/gi, '').replace(/\s{2,}/g, ' ').trim(),
+      improvedNaturalness: (() => {
+        const clean = content.replace(/\b(um|uh|like|you know|basically|actually|I mean|kind of|sort of|right|okay)\b/gi, '').replace(/\s{2,}/g, ' ').trim();
+        const lc = clean.charAt(0).toLowerCase() + clean.slice(1);
+        return `Honestly, ${lc} It's something I feel quite strongly about, and I think it really shows in the way I approach things.`;
+      })(),
+      enhancedSpeech: (() => {
+        const clean = content.replace(/\b(um|uh|like|you know|basically|actually|I mean|kind of|sort of|right|okay)\b/gi, '').replace(/\s{2,}/g, ' ').trim();
+        const lc = clean.charAt(0).toLowerCase() + clean.slice(1);
+        return `From an analytical standpoint, ${lc} This perspective reflects a nuanced understanding that is characteristic of sophisticated discourse, demonstrating both personal insight and broader contextual awareness.`;
+      })(),
       taskResponse: {
         score: 6.5,
         feedback: "The response addresses the question directly and provides relevant qualities. To further enhance the answer, consider elaborating on why these qualities matter personally and providing specific examples from your experience."
@@ -928,7 +936,7 @@ Provide your response in this JSON format:
 
     // Writing needs Sonnet for rubric-heavy analysis; Speaking & Reading use Haiku for speed
     const analysisModel = type === "writing" ? "claude-sonnet-4-6" : "claude-haiku-4-5-20251001";
-    const maxTokens = type === "writing" ? 3000 : type === "speaking" ? 2500 : 800;
+    const maxTokens = type === "writing" ? 3000 : type === "speaking" ? 3500 : 800;
 
     console.log("Calling Claude API with type:", type, "model:", analysisModel, "taskType:", taskType, "isRevision:", isRevision);
 

@@ -731,6 +731,9 @@ export default function SpeakingModule() {
                   ))
                 : improved}
             </p>
+            {showDiff && diffWords.every(dw => !dw.isNew) && (
+              <p className="text-xs text-muted-foreground italic mt-2">No significant word differences found — the AI rewrote structure and phrasing rather than swapping individual words.</p>
+            )}
             <p className="text-xs text-muted-foreground mt-2">Word Count: {imprCount}</p>
           </div>
         </div>
