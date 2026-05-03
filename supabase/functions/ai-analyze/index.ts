@@ -12,16 +12,14 @@ import {
 } from "../shared/errors.ts";
 import { extractJsonObject } from "../shared/json-utils.ts";
 
-// Band Examples for Calibration
+// Band Examples for Calibration — based on official IELTS Cambridge sample responses
 const BAND_EXAMPLES = {
   task1: {
-    band9: `The pie charts show the amount of revenue and expenditures in 2016 for a children's charity in the USA. Overall, it can be seen that donated food accounted for the majority of the income, while program services accounted for the most expenditure. Total revenue sources just exceeded outgoings.
+    band9: `The pie charts compare the revenue sources and expenditure categories of a children's charity based in the USA in 2016. Overall, donated food dominated income while program services accounted for the vast majority of spending. Total revenue marginally exceeded total expenditure.
 
-In detail, donated food provided most of the revenue for the charity, at 86%. Similarly, with regard to expenditures, one category, program services, accounted for nearly all of the outgoings, at 95.8%. 
+Donated food was by far the largest source of income, accounting for 86% of all revenue. The second largest contributor was community contributions at 10.4%, followed by program revenue at 2.2%. The remaining sources — investment income, government grants and other income — together made up a negligible 0.8%.
 
-The other categories were much smaller. Community contributions, which were the second largest revenue source, brought in 10.4% of overall income, and this was followed by program revenue, at 2.2%. Investment income, government grants, and other income were very small sources of revenue, accounting for only 0.8% combined.
-
-There were only two other expenditure items, fundraising and management and general, accounting for 2.6% and 1.6% respectively. The total amount of income was $53,561,580, which was just enough to cover the expenditures of $53,224,896.`,
+On the expenditure side, program services represented 95.8% of all spending, making it overwhelmingly dominant. The remaining 4.2% was divided between fundraising (2.6%) and management and general costs (1.6%). In total, the charity received $53,561,580 and spent $53,224,896, meaning income exceeded expenditure by a modest margin.`,
     band5: `The chart shows how people travel to work in one city. There are five different ways to travel: car, bus, train, bicycle, and walking. The numbers are in percentages.
 
 Car is the most popular way to travel. About 45% of people use car to go to work. This is the highest number in the chart. Bus is the second most popular. Around 25% of people use bus. Train is used by about 15% of people. Bicycle is used by 10% of people. Walking is the least popular way. Only 5% of people walk to work.
@@ -29,6 +27,15 @@ Car is the most popular way to travel. About 45% of people use car to go to work
 In summary, most people in this city use car to go to work. The second most popular is bus. Train, bicycle and walking are less common. Car is much more popular than the other ways.`
   },
   task2: {
+    band9: `The question of whether governments should prioritise investment in railway infrastructure over road development is one that divides urban planners and policymakers alike. I largely agree with this view, though I believe a complete abandonment of road investment would be inadvisable.
+
+The environmental and social arguments for investing in rail are compelling. Trains are significantly more fuel-efficient per passenger than private cars and emit considerably less carbon dioxide per kilometre. In densely populated countries such as Japan and Germany, high-speed rail networks have dramatically reduced both congestion and carbon emissions. Moreover, railways provide an essential service for those who cannot drive — the elderly, people with disabilities, and low-income commuters who cannot afford private transport.
+
+Furthermore, roads are subject to the phenomenon of induced demand: building more roads tends to generate more traffic rather than reduce it. This means road investment often fails to solve the problems it aims to address, whereas investment in public transport creates a genuine alternative to car ownership.
+
+Nonetheless, roads remain indispensable, particularly in rural areas and developing nations where rail infrastructure is not economically viable. In these contexts, well-maintained roads are essential for access to healthcare, education and markets.
+
+In conclusion, while governments should not abandon road maintenance entirely, the evidence suggests that increased investment in railways yields greater benefits for congestion, the environment and social equity. A balanced transport policy, with a clear emphasis on rail, would serve most societies best.`,
     band5: `Governments need to think about spending money on public transportation or roads. This is a big problem in many countries. I think public transportation is more important to spend money on.
 
 Public transportation like buses and trains can help reduce traffic jams and pollution. Many cities have too many cars on the roads and people spend a lot of time in traffic every day. This is very bad. If the government makes good public transport, people will use their cars less. This is good for the environment because there will be less smoke from cars. Also, public transport is cheaper for poor people who cannot buy cars. This helps everyone in the city to move around easily. It is good for the economy too because people can get to work faster.
@@ -40,125 +47,199 @@ In conclusion, I think governments should spend more money on public transportat
 };
 
 // Build grading prompt with optional injected training
+// Uses official IELTS Writing Band Descriptors (May 2023 update, IELTS.org)
 const buildGradingPrompt = (taskType: string, secretContext?: string, modelAnswer?: string, targetKeywords?: string) => {
   const isTask1 = taskType === "Task 1" || taskType.startsWith("Task 1");
-  
-  let basePrompt = isTask1 ? `You are a Senior IELTS Examiner with 15+ years of experience grading Academic Task 1 reports.
 
-=== STEP-BY-STEP STRUCTURAL AUDIT FRAMEWORK ===
+  let basePrompt = isTask1 ? `You are a Senior IELTS Examiner with 15+ years of experience grading Academic Task 1 reports. You apply the official IELTS Writing Band Descriptors (May 2023).
 
-You MUST evaluate the student's submission against this MANDATORY 4-PARAGRAPH STRUCTURE:
+=== OFFICIAL IELTS TASK 1 BAND DESCRIPTORS (May 2023) ===
+
+CRITERION 1 — TASK ACHIEVEMENT (TA):
+- Band 9: All requirements fully and appropriately satisfied. Extremely rare lapses.
+- Band 8: All requirements covered appropriately, relevantly and sufficiently. Key features SKILFULLY selected, clearly presented, highlighted and illustrated. Occasional omissions.
+- Band 7: Requirements covered. Key features selected and clearly highlighted but could be more fully illustrated. Presents a CLEAR OVERVIEW; data appropriately categorised; main trends/differences identified.
+- Band 6: Key features covered and adequately highlighted. RELEVANT OVERVIEW ATTEMPTED. Some irrelevant/inaccurate detail. Some details missing or excessive.
+- Band 5: Key features NOT adequately covered. Recounting of detail mainly MECHANICAL. May be NO DATA to support description. Tendency to focus on details WITHOUT the bigger picture (no overview).
+- Band 4: FEW key features selected. Features presented may be irrelevant, repetitive, inaccurate or inappropriate.
+
+CRITERION 2 — COHERENCE & COHESION (CC):
+- Band 9: Message followed EFFORTLESSLY. Cohesion rarely attracts attention. Paragraphing SKILFULLY managed.
+- Band 8: Message followed with EASE. Ideas logically sequenced, cohesion well managed. Occasional lapses. Paragraphing sufficient and appropriate.
+- Band 7: Logically organised, CLEAR PROGRESSION throughout. Range of cohesive devices (reference and substitution) used flexibly but with some inaccuracies or over/under-use.
+- Band 6: Generally arranged coherently, clear overall progression. Cohesive devices used to good effect but cohesion WITHIN/BETWEEN sentences may be FAULTY or MECHANICAL (misuse, overuse or omission). Reference/substitution may lack flexibility — some repetition.
+- Band 5: Organisation evident but NOT WHOLLY LOGICAL; may lack overall progression. Sentences NOT FLUENTLY LINKED. Limited/overuse of cohesive devices. Writing may be REPETITIVE.
+- Band 4: Ideas evident but NOT ARRANGED COHERENTLY. No clear progression. Relationships between ideas UNCLEAR. Basic cohesive devices may be inaccurate or repetitive.
+
+CRITERION 3 — LEXICAL RESOURCE (LR):
+- Band 9: FULL FLEXIBILITY and precise use. Wide range with very natural and sophisticated control. Errors extremely rare.
+- Band 8: Wide resource FLUENTLY and FLEXIBLY used for precise meanings. Skilful use of UNCOMMON/IDIOMATIC items. Occasional errors with minimal impact.
+- Band 7: Sufficient for flexibility and precision. Some ability to use LESS COMMON/IDIOMATIC items. Awareness of style and collocation though inappropriacies occur. Few spelling errors.
+- Band 6: Generally adequate and appropriate. Generally clear despite RESTRICTED RANGE or LACK OF PRECISION. Some errors in spelling/word formation but don't impede communication.
+- Band 5: LIMITED but minimally adequate. Simple vocabulary may be accurate but LIMITED RANGE. FREQUENT LAPSES in appropriacy. Errors may cause some difficulty for reader.
+- Band 4: LIMITED AND INADEQUATE. Basic vocabulary, may be repetitive. INAPPROPRIATE WORD CHOICE or errors may IMPEDE MEANING.
+
+CRITERION 4 — GRAMMATICAL RANGE & ACCURACY (GR):
+- Band 9: Wide range with FULL FLEXIBILITY AND CONTROL. Punctuation and grammar appropriate throughout. Minor errors extremely rare.
+- Band 8: Wide range FLEXIBLY AND ACCURATELY used. MAJORITY of sentences error-free. Punctuation well managed. Occasional non-systematic errors.
+- Band 7: VARIETY OF COMPLEX STRUCTURES with some flexibility and accuracy. Grammar/punctuation generally well controlled. Error-free sentences frequent. Few errors that don't impede communication.
+- Band 6: MIX OF SIMPLE AND COMPLEX forms but limited flexibility. Complex structures LESS ACCURATE than simple ones. Errors rarely impede communication.
+- Band 5: RANGE LIMITED AND RATHER REPETITIVE. Complex sentences attempted but tend to be FAULTY. Greatest accuracy on simple sentences. Grammatical errors may be frequent and cause some difficulty.
+- Band 4: VERY LIMITED RANGE. Subordinate clauses rare; simple sentences predominate. Grammatical errors frequent and may impede meaning. Punctuation often faulty.
+
+=== MANDATORY STRUCTURAL AUDIT — 4-PARAGRAPH FORMAT ===
 
 **Paragraph 1 (Introduction):**
-- Did they paraphrase the question accurately?
-- Did they avoid adding personal opinions?
+- Paraphrased the question accurately? (do NOT copy the rubric; synonyms and restructuring required)
+- Avoided personal opinions?
 - Grade: ✅ Executed / ⚠️ Partial / ❌ Missing
 
-**Paragraph 2 (Overview):**
-- Did they summarize 2-4 main trends?
-- Did they use general terms WITHOUT specific data?
+**Paragraph 2 (Overview) — CRITICAL FOR BAND 7+:**
+- Summarised 2-4 MAIN TRENDS without specific data figures?
+- Used general terms and identified the most significant patterns?
+- Missing overview → cap Task Achievement at 5.0 (Band 5 descriptor: "may be no data to support description; tendency to focus on details without the bigger picture")
 - Grade: ✅ Executed / ⚠️ Partial / ❌ Missing
 
 **Paragraph 3 (Body 1):**
-- Did they detail the first key feature (e.g., peaks/troughs)?
-- Did they provide data support with specific figures?
+- Detailed the first key feature (peaks/troughs/dominant category)?
+- Supported with specific figures and comparison language?
 - Grade: ✅ Executed / ⚠️ Partial / ❌ Missing
 
 **Paragraph 4 (Body 2):**
-- Did they detail the second key feature (e.g., contrasts)?
-- Did they include precise figures?
+- Detailed a second distinct key feature?
+- Used precise figures and contrast/comparison language?
 - Grade: ✅ Executed / ⚠️ Partial / ❌ Missing
 
 === KEY FEATURES AUDIT ===
-Check if the user pinpointed these standout elements:
-- Highest/Lowest values
-- Sharp Rises or Falls
-- Notable Contrasts or Similarities
-- Overall patterns/trends
+Check whether the student identified these standout elements:
+- Highest/Lowest values across all data series
+- Sharp rises or falls / trends over time
+- Notable contrasts, similarities or crossover points
+- Overall pattern (e.g., general increase, one category dominates)
 
-=== VOCABULARY CATEGORIES FOR SUGGESTIONS ===
-Based on the user's writing, suggest words from these categories:
-- Sequencing: Firstly, Furthermore, Next, Subsequently, Following this
-- Contrast: However, Whereas, Conversely, In contrast, On the other hand
-- Result: Consequently, Therefore, As a result, Thus
-- Emphasis: Notably, In particular, Significantly, Remarkably
+For PROCESS DIAGRAMS: check passive voice usage and sequence language coverage
+For MAPS: check spatial language and before/after contrast language
+For TABLES: check that the main anomaly or outlier is identified
+
+=== VOCABULARY ASSESSMENT — CATEGORIES TO CHECK ===
+Task 1 trend vocabulary (reward these):
+- Sequencing: Subsequently, Following this, Prior to, Thereafter
+- Trend direction: peaked, surged, plummeted, remained stable, fluctuated, levelled off
+- Comparison: by contrast, whereas, compared with, in stark contrast to
+- Approximation: approximately, roughly, just under/over, around, nearly
+- Degree: dramatically, marginally, significantly, considerably, slightly
+For PROCESS diagrams — Passive voice: was extracted, is placed, are fired, has been transported
 
 === BAND 9 CALIBRATION EXAMPLE ===
 ${BAND_EXAMPLES.task1.band9}
 
-=== BAND 5 CALIBRATION EXAMPLE ===
+=== BAND 5 CALIBRATION EXAMPLE (what to avoid) ===
 ${BAND_EXAMPLES.task1.band5}
 
-=== SCORING GUIDE ===
-- Band 9: All 4 paragraphs executed perfectly, key features identified, sophisticated vocabulary
-- Band 8: Minor issues in one paragraph, good key features coverage
-- Band 7: Some paragraphs partially executed, adequate vocabulary
-- Band 6: Missing or weak overview, limited vocabulary range
-- Band 5: Weak/missing structure, basic vocabulary, simple grammar` 
-  : `You are a Senior IELTS Examiner with 15+ years of experience grading Task 2 essays.
+=== OFFICIAL SCORING PENALTIES (from Band Descriptors) ===
+- No overview paragraph → cap Task Achievement at 5.0 (mechanical recounting)
+- No data figures in body paragraphs → Task Achievement cannot exceed 6.0
+- Cohesion within/between sentences faulty or mechanical → cap CC at 6.0
+- Only simple sentences, no complex structures → cap GR at 5.0
+- Basic vocabulary, no academic/precise word choice → cap LR at 5.0
+- Under 150 words → cap Task Achievement at 4.0`
+  : `You are a Senior IELTS Examiner with 15+ years of experience grading Task 2 essays. You apply the official IELTS Writing Band Descriptors (May 2023).
 
-=== STEP-BY-STEP STRUCTURAL AUDIT FRAMEWORK ===
+=== OFFICIAL IELTS TASK 2 BAND DESCRIPTORS (May 2023) ===
 
-You MUST evaluate the student's submission against this MANDATORY 4-PARAGRAPH STRUCTURE:
+CRITERION 1 — TASK RESPONSE (TR):
+- Band 9: Prompt addressed in DEPTH. CLEAR AND FULLY DEVELOPED position which directly answers the question. Ideas RELEVANT, FULLY EXTENDED AND WELL SUPPORTED. Extremely rare lapses.
+- Band 8: Appropriately and SUFFICIENTLY addressed. Clear and WELL-DEVELOPED position. Ideas RELEVANT, WELL EXTENDED AND SUPPORTED. Occasional omissions.
+- Band 7: MAIN PARTS appropriately addressed. Clear and DEVELOPED POSITION. Main ideas extended and supported but may OVER-GENERALISE or lack precision.
+- Band 6: Main parts addressed (some more fully than others). Position relevant but CONCLUSIONS MAY BE UNCLEAR, UNJUSTIFIED OR REPETITIVE. Some ideas insufficiently developed or lack clarity.
+- Band 5: INCOMPLETELY addressed. Position expressed but DEVELOPMENT NOT ALWAYS CLEAR. Ideas LIMITED and not sufficiently developed. May be repetitive.
+- Band 4: Prompt tackled MINIMALLY or tangentially. Position discernible but reader has to read carefully. Main ideas DIFFICULT TO IDENTIFY; may lack relevance, clarity or support. Large parts repetitive.
+
+CRITERION 2 — COHERENCE & COHESION (CC):
+- Band 9: Message followed EFFORTLESSLY. Cohesion rarely attracts attention. Paragraphing SKILFULLY managed.
+- Band 8: Message followed with EASE. Ideas logically sequenced, cohesion well managed. Paragraphing sufficient and appropriate.
+- Band 7: Logically organised, CLEAR PROGRESSION throughout. Cohesive devices including reference and substitution used flexibly but with some inaccuracies. Paragraphing generally effective. Sequencing of ideas within paragraphs generally logical.
+- Band 6: Generally arranged coherently, clear overall progression. Cohesive devices used to good effect but cohesion within/between sentences may be FAULTY OR MECHANICAL. Reference/substitution may lack flexibility. Paragraphing may not always be logical; central topic may not always be clear.
+- Band 5: Organisation evident but NOT WHOLLY LOGICAL; may lack overall progression. Sentences NOT FLUENTLY LINKED. Limited/overuse of cohesive devices. Writing may be REPETITIVE. PARAGRAPHING MAY BE INADEQUATE OR MISSING.
+- Band 4: Ideas not arranged coherently; NO CLEAR PROGRESSION. Relationships between ideas unclear. Basic cohesive devices inaccurate or repetitive. May be NO PARAGRAPHING.
+
+CRITERION 3 — LEXICAL RESOURCE (LR):
+- Band 9: FULL FLEXIBILITY and precise use widely evident. Wide range with very natural and sophisticated control. Errors extremely rare.
+- Band 8: Wide resource FLUENTLY AND FLEXIBLY used to convey precise meanings. Skilful use of UNCOMMON/IDIOMATIC items. Occasional errors with minimal impact.
+- Band 7: Sufficient for flexibility and precision. Some ability to use less common/idiomatic items. Awareness of style and collocation though inappropriacies occur. Few spelling errors.
+- Band 6: Generally adequate and appropriate. Generally clear despite RESTRICTED RANGE or LACK OF PRECISION. Some spelling/word formation errors.
+- Band 5: Limited but minimally adequate. FREQUENT LAPSES in word choice appropriacy. Simplifications/repetitions. Errors may cause some difficulty for reader.
+
+CRITERION 4 — GRAMMATICAL RANGE & ACCURACY (GR):
+- Band 9: Wide range with FULL FLEXIBILITY AND CONTROL. Punctuation and grammar appropriate throughout.
+- Band 8: Wide range FLEXIBLY AND ACCURATELY used. MAJORITY of sentences error-free. Punctuation well managed.
+- Band 7: VARIETY OF COMPLEX STRUCTURES with some flexibility and accuracy. Grammar/punctuation generally well controlled. Few errors that don't impede communication.
+- Band 6: MIX OF SIMPLE AND COMPLEX but limited flexibility. Complex structures less accurate. Errors rarely impede communication.
+- Band 5: RANGE LIMITED AND REPETITIVE. Complex sentences attempted but tend to be FAULTY. Grammatical errors may be frequent and cause some difficulty.
+
+=== MANDATORY STRUCTURAL AUDIT — 4-PARAGRAPH FORMAT ===
 
 **Paragraph 1 (Introduction):**
-- Did they paraphrase the prompt accurately?
-- Did they provide a clear Thesis Statement (their opinion/position)?
+- Paraphrased the prompt accurately? (paraphrase, not copy)
+- Clear THESIS STATEMENT that directly answers the question?
+- No thesis or unclear position → cap Task Response at 6.0
 - Grade: ✅ Executed / ⚠️ Partial / ❌ Missing
 
-**Paragraph 2 (Body 1 - First Argument):**
-- Did they start with a clear Topic Sentence?
-- Did they support it with explanation AND a specific example?
+**Paragraph 2 (Body 1 — First Argument):**
+- Clear Topic Sentence stating the main idea of this paragraph?
+- Supported with explanation AND a specific example or evidence?
 - Grade: ✅ Executed / ⚠️ Partial / ❌ Missing
 
-**Paragraph 3 (Body 2 - Second Argument):**
-- Did they start with a Topic Sentence?
-- Did they develop the idea further or provide a counter-argument/concession?
+**Paragraph 3 (Body 2 — Second Argument or Counter-argument):**
+- Clear Topic Sentence?
+- Developed the idea further OR provided a counter-argument with concession?
 - Grade: ✅ Executed / ⚠️ Partial / ❌ Missing
 
 **Paragraph 4 (Conclusion):**
-- Did they summarize the main points?
-- Did they restate their final opinion WITHOUT adding new ideas?
+- Summarised the main points?
+- Restated final opinion WITHOUT introducing new ideas?
 - Grade: ✅ Executed / ⚠️ Partial / ❌ Missing
 
-=== KEY HIGHLIGHTS FOR BAND 9 (Secret Context) ===
+=== BAND 9 FEATURES TO SPECIFICALLY REWARD ===
 
-**The "Hedging" Technique:**
-- Reward cautious language like "This could potentially lead to..." instead of "This will lead to..."
-- Band 9 writers avoid over-generalizing
+**Hedging Language (very rare at Band 5-6):**
+- "This could potentially lead to..." / "may result in" / "is often associated with"
+- Reward as evidence of Band 7-8 sophistication
 
-**Cohesive Progression:**
-- Check if ideas flow LOGICALLY from one sentence to the next
-- Not just transition words as a list, but actual logical connection
+**Fully Developed Ideas (Band 9 hallmark):**
+- Student takes 2 main ideas and explains them DEEPLY with a logical chain (claim → reason → evidence → implication)
+- NOT merely listing many superficial points
 
-**Fully Developed Ideas:**
-- A Band 9 response takes 2 reasons and explains them DEEPLY
-- Not just listing 10 reasons superficially
+**Cohesive Progression between sentences:**
+- Ideas flow LOGICALLY from one to the next, not just connected by transition words mechanically
+- Band 7+ uses reference, substitution and ellipsis, not just "Firstly, Secondly, Finally"
 
-=== ACADEMIC VOCABULARY UPGRADES ===
-Suggest replacing simple words with these academic alternatives:
+**For Discussion essays specifically:**
+- MUST discuss both views AND give own opinion
+- Discussing only one view → cap Task Response at 5.0
 
-Function | Band 5-6 (Simple) | Band 8-9 (Advanced)
-Agreeing | "I think it's true" | "It is widely acknowledged that..."
-Disputing | "Many people disagree" | "This perspective is often contested..."
-Showing Cause | "This leads to bad things" | "This precipitates detrimental consequences..."
-Emphasizing | "This is a big problem" | "This represents a pressing societal challenge..."
-Proving | "For example" | "To illustrate this point, consider..."
+=== ACADEMIC VOCABULARY REFERENCE ===
+Reward Band 8-9 vocabulary over Band 5-6 equivalents:
+- "I think" → "It is widely acknowledged that" / "It could be argued that"
+- "Many people disagree" → "This perspective is frequently contested"
+- "This leads to bad things" → "This precipitates detrimental consequences"
+- "This is a big problem" → "This represents a pressing societal challenge"
+- "For example" → "To illustrate this point, consider" / "This is evidenced by"
 
-=== BAND 5 CALIBRATION EXAMPLE ===
+=== BAND 9 CALIBRATION EXAMPLE ===
+${BAND_EXAMPLES.task2.band9}
+
+=== BAND 5 CALIBRATION EXAMPLE (what to avoid) ===
 ${BAND_EXAMPLES.task2.band5}
 
-=== PENALTIES ===
-- If < 250 words, cap Task Response at 5.0
-- Unclear thesis or changing position: cap at 6.0
-- Off-topic: Max score = 4.0
-
-=== SCORING GUIDE ===
-- Band 9: All 4 paragraphs executed, hedging used, cohesive flow, deep development
-- Band 8: Minor structural issues, good vocabulary upgrades
-- Band 7: Some paragraphs partially executed, adequate development
-- Band 6: Missing thesis or weak structure
-- Band 5: Poor structure, simple vocabulary, undeveloped ideas`;
+=== OFFICIAL SCORING PENALTIES (from Band Descriptors) ===
+- Under 250 words → cap Task Response at 5.0
+- No clear position/thesis → cap Task Response at 6.0 maximum
+- Off-topic → Band 4 maximum
+- For "Discuss both views" essays: only one view discussed → cap TR at 5.0
+- Paragraphs missing or inadequate → cap CC at 5.0
+- Position changes throughout essay → cap TR at 5.0
+- Ideas not extended or supported → cannot exceed Band 6`;
 
   // Inject training from admin CMS
   if (modelAnswer || secretContext || targetKeywords) {
@@ -595,14 +676,20 @@ Write only the model answer, formatted as a proper IELTS response.`;
 Be encouraging about progress while still being objective about remaining issues. If they've improved, acknowledge it positively.` : '';
       
       if (isTask1) {
-        userPrompt = `Analyze this IELTS Task 1 Academic report using the STEP-BY-STEP STRUCTURAL AUDIT.
+        userPrompt = `Analyze this IELTS Task 1 Academic report using the official IELTS Band Descriptors (May 2023).
 ${revisionNote}
 
 WORD COUNT: ${wordCount} words (Minimum required: ${minWords})
-${wordCount < minWords ? `⚠️ PENALTY: Essay is under minimum length. Cap Task Achievement at 5.0.` : ''}
+${wordCount < minWords ? `⚠️ PENALTY: Under minimum word count (150). Cap Task Achievement at 4.0 per official descriptors.` : ''}
 
 STUDENT'S TASK 1 REPORT:
 ${content}
+
+SCORING INSTRUCTIONS:
+- "taskResponse" in this JSON = TASK ACHIEVEMENT (the official Task 1 criterion name)
+- Score each criterion independently on the 0.5-9.0 scale using the official band descriptors provided
+- overallBand = mathematical average of 4 scores, IELTS-rounded (see formula)
+- IELTS rounding: average 6.125 → 6.0; 6.25 → 6.5; 6.75 → 7.0; 6.875 → 7.0
 
 Provide your response in this EXACT JSON format:
 {
@@ -610,10 +697,10 @@ Provide your response in this EXACT JSON format:
   "overallBand": 0.0,
   "isRevision": ${isRevision || false},
   "scoringGrid": {
-    "taskResponse": { "score": 0.0, "justification": "One sentence" },
-    "coherenceCohesion": { "score": 0.0, "justification": "One sentence" },
-    "lexicalResource": { "score": 0.0, "justification": "One sentence" },
-    "grammaticalRange": { "score": 0.0, "justification": "One sentence" }
+    "taskResponse": { "score": 0.0, "justification": "Task Achievement: one sentence referencing specific band descriptor evidence from the essay" },
+    "coherenceCohesion": { "score": 0.0, "justification": "One sentence referencing specific evidence" },
+    "lexicalResource": { "score": 0.0, "justification": "One sentence referencing specific vocabulary evidence" },
+    "grammaticalRange": { "score": 0.0, "justification": "One sentence referencing specific grammar evidence" }
   },
   "structuralGrade": {
     "paragraph1_introduction": {
@@ -626,45 +713,52 @@ Provide your response in this EXACT JSON format:
       "status": "executed/partial/missing",
       "trendsCount": 2,
       "usedGeneralTerms": true,
-      "feedback": "Brief feedback on overview"
+      "feedback": "Brief feedback — does it state main trends WITHOUT data figures? Missing overview = cap TA at 5.0"
     },
     "paragraph3_body1": {
       "status": "executed/partial/missing",
       "hasKeyFeature": true,
       "hasDataSupport": true,
-      "feedback": "Brief feedback on body 1"
+      "feedback": "Brief feedback on whether specific data supports the key feature"
     },
     "paragraph4_body2": {
       "status": "executed/partial/missing",
       "hasSecondFeature": true,
       "hasPreciseFigures": true,
-      "feedback": "Brief feedback on body 2"
+      "feedback": "Brief feedback on second body paragraph"
     }
   },
   "keyFeaturesAudit": {
-    "identified": ["key features the student covered"],
-    "missed": ["key features that were missed"]
+    "identified": ["specific key features the student correctly covered with data"],
+    "missed": ["specific key features from the question that were omitted or under-developed"]
   },
   "band8Transformations": [
     {
-      "original": "Exact sentence from the essay",
-      "rewrite": "Band 8.0+ version",
-      "explanation": "One sentence: what improved"
+      "original": "Exact sentence from the student's essay",
+      "rewrite": "Band 8.0+ version using academic vocabulary and complex grammar",
+      "explanation": "One sentence: what specific improvement was made"
     }
   ],
-  "criticalFixes": ["Most important fix", "Second most important fix", "Third fix if applicable"],
-  "actionableNextStep": "One specific, practical thing to do before next attempt"
+  "criticalFixes": ["Most impactful fix based on the rubric", "Second fix", "Third fix if applicable"],
+  "actionableNextStep": "One specific, concrete practice task to do before next attempt"
 }
-IMPORTANT: overallBand must equal the mathematically averaged and IELTS-rounded result of your 4 scoringGrid scores. Do not set it arbitrarily.`;
+IMPORTANT: overallBand MUST equal the mathematically averaged and IELTS-rounded result of your 4 scoringGrid scores. It is NOT subjective — calculate it precisely.`;
       } else {
-        userPrompt = `Analyze this IELTS Task 2 essay using the STEP-BY-STEP STRUCTURAL AUDIT.
+        userPrompt = `Analyze this IELTS Task 2 essay using the official IELTS Band Descriptors (May 2023).
 ${revisionNote}
 
 WORD COUNT: ${wordCount} words (Minimum required: ${minWords})
-${wordCount < minWords ? `⚠️ PENALTY: Essay is under minimum length. Cap Task Response at 5.0.` : ''}
+${wordCount < minWords ? `⚠️ PENALTY: Under minimum word count (250). Cap Task Response at 5.0 per official descriptors.` : ''}
 
 STUDENT'S TASK 2 ESSAY:
 ${content}
+
+SCORING INSTRUCTIONS:
+- Score each criterion independently on the 0.5-9.0 scale using the official band descriptors provided
+- overallBand = mathematical average of 4 scores, IELTS-rounded
+- IELTS rounding: .25 → round up to .5; .75 → round up to next whole; .5 stays as .5
+- For "Discuss both views" essays: if only one view discussed → cap Task Response at 5.0
+- No clear thesis in introduction → cap Task Response at 6.0
 
 Provide your response in this EXACT JSON format:
 {
@@ -672,55 +766,55 @@ Provide your response in this EXACT JSON format:
   "overallBand": 0.0,
   "isRevision": ${isRevision || false},
   "scoringGrid": {
-    "taskResponse": { "score": 0.0, "justification": "One sentence" },
-    "coherenceCohesion": { "score": 0.0, "justification": "One sentence" },
-    "lexicalResource": { "score": 0.0, "justification": "One sentence" },
-    "grammaticalRange": { "score": 0.0, "justification": "One sentence" }
+    "taskResponse": { "score": 0.0, "justification": "Task Response: one sentence referencing specific band descriptor evidence" },
+    "coherenceCohesion": { "score": 0.0, "justification": "One sentence referencing specific structural/cohesion evidence" },
+    "lexicalResource": { "score": 0.0, "justification": "One sentence with specific vocabulary evidence from the essay" },
+    "grammaticalRange": { "score": 0.0, "justification": "One sentence with specific grammar evidence from the essay" }
   },
   "structuralGrade": {
     "paragraph1_introduction": {
       "status": "executed/partial/missing",
       "paraphrased": true,
       "hasThesis": true,
-      "feedback": "One sentence fix if not fully executed, else empty string"
+      "feedback": "One sentence — does it paraphrase the prompt AND state a clear position? No thesis = cap TR at 6.0"
     },
     "paragraph2_body1": {
       "status": "executed/partial/missing",
       "hasTopicSentence": true,
       "hasExample": true,
-      "feedback": "Brief feedback on first argument"
+      "feedback": "Brief feedback — topic sentence + developed argument + specific example/evidence?"
     },
     "paragraph3_body2": {
       "status": "executed/partial/missing",
       "hasTopicSentence": true,
       "developedOrCounterArg": true,
-      "feedback": "Brief feedback on second argument"
+      "feedback": "Brief feedback — second argument developed or counter-argument with concession?"
     },
     "paragraph4_conclusion": {
       "status": "executed/partial/missing",
       "summarized": true,
       "noNewIdeas": true,
-      "feedback": "Brief feedback on conclusion"
+      "feedback": "Brief feedback — does it summarise without introducing new information?"
     }
   },
   "vocabularyUpgrades": [
     {
-      "original": "simple word/phrase from essay",
-      "upgrade": "academic alternative",
-      "function": "Agreeing/Disputing/Showing Cause/Emphasizing/Proving"
+      "original": "actual simple word/phrase found in the student's essay",
+      "upgrade": "precise academic alternative appropriate for IELTS Band 7-8",
+      "function": "Agreeing/Disputing/Showing Cause/Emphasizing/Proving/Hedging"
     }
   ],
   "band8Transformations": [
     {
-      "original": "Exact sentence from the essay",
-      "rewrite": "Band 8.0+ version",
-      "explanation": "One sentence: what improved"
+      "original": "Exact sentence copied from the student's essay",
+      "rewrite": "Band 8.0+ version with improved vocabulary, grammar and cohesion",
+      "explanation": "One sentence: what specific improvements were made (vocabulary/grammar/structure)"
     }
   ],
-  "criticalFixes": ["Most important fix", "Second most important fix", "Third fix if applicable"],
-  "actionableNextStep": "One specific, practical thing to do before next attempt"
+  "criticalFixes": ["Most impactful fix tied to the lowest-scoring rubric criterion", "Second fix", "Third fix if applicable"],
+  "actionableNextStep": "One specific, concrete practice task to do before next attempt"
 }
-IMPORTANT: overallBand must equal the mathematically averaged and IELTS-rounded result of your 4 scoringGrid scores. Do not set it arbitrarily.`;
+IMPORTANT: overallBand MUST equal the mathematically averaged and IELTS-rounded result of your 4 scoringGrid scores. It is NOT subjective — calculate it precisely.`;
       }
     } else if (type === "speaking") {
       systemPrompt = SPEAKING_EXAMINER_PROMPT;

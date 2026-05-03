@@ -717,7 +717,7 @@ export default function WritingModule() {
         {feedbackData.scoringGrid && (
           <div className="grid grid-cols-2 gap-x-6 gap-y-1 flex-1">
             {[
-              { label: "Task Response", val: feedbackData.scoringGrid.taskResponse?.score },
+              { label: isTask1 ? "Task Achievement" : "Task Response", val: feedbackData.scoringGrid.taskResponse?.score },
               { label: "Coherence", val: feedbackData.scoringGrid.coherenceCohesion?.score },
               { label: "Vocabulary", val: feedbackData.scoringGrid.lexicalResource?.score },
               { label: "Grammar", val: feedbackData.scoringGrid.grammaticalRange?.score },
@@ -777,7 +777,7 @@ export default function WritingModule() {
       {/* Criterion justifications */}
       {feedbackData.scoringGrid && (
         <div className="grid md:grid-cols-2 gap-3">
-          <ScoreCell label="Task Response" score={feedbackData.scoringGrid.taskResponse?.score || 0} justification={feedbackData.scoringGrid.taskResponse?.justification} />
+          <ScoreCell label={isTask1 ? "Task Achievement" : "Task Response"} score={feedbackData.scoringGrid.taskResponse?.score || 0} justification={feedbackData.scoringGrid.taskResponse?.justification} />
           <ScoreCell label="Coherence & Cohesion" score={feedbackData.scoringGrid.coherenceCohesion?.score || 0} justification={feedbackData.scoringGrid.coherenceCohesion?.justification} />
           <ScoreCell label="Lexical Resource" score={feedbackData.scoringGrid.lexicalResource?.score || 0} justification={feedbackData.scoringGrid.lexicalResource?.justification} />
           <ScoreCell label="Grammatical Range & Accuracy" score={feedbackData.scoringGrid.grammaticalRange?.score || 0} justification={feedbackData.scoringGrid.grammaticalRange?.justification} />
