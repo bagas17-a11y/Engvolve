@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PLANS, PROMO_CODE, resolvePrice, type PlanDefinition } from "@/lib/plans";
 import { OPERATOR, buildWhatsAppLink, CONTACT_MESSAGES } from "@/lib/contact";
+import { selfServiceActivateFree } from "@/lib/subscription";
 
 interface DisplayPlan extends PlanDefinition {
   computedDisplayPrice: string;
@@ -59,17 +60,25 @@ export default function PricingSelection() {
 
   const plans = buildDisplayPlans(promoApplied);
 
-  // If user arrived with ?plan=… preset, advance them straight into the transfer flow.
+  // If user arrived with ?plan=… preset, jump them straight into the right path:
+  //   - Free  → auto-activate and route to /dashboard (once they're logged in)
+  //   - Pro/Elite → straight into the bank-transfer flow
   useEffect(() => {
     const planKeyParam = searchParams.get("plan");
     if (!planKeyParam) return;
     const target = plans.find((p) => p.planKey === planKeyParam);
     if (!target) return;
-    if (target.tier === "free") return;
+
+    if (target.tier === "free") {
+      if (!user) return; // wait until auth resolves
+      void handleSelectPlan(target);
+      return;
+    }
+
     setSelectedPlan(target);
     setShowBankTransfer(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, user]);
 
   const copyAccount = () => {
     navigator.clipboard.writeText(bankDetails.accountNumber);
@@ -96,19 +105,25 @@ export default function PricingSelection() {
 
   const handleSelectPlan = async (plan: DisplayPlan) => {
     if (plan.tier === "free") {
-      if (user) {
-        await supabase
-          .from("profiles")
-          .update({ is_verified: true })
-          .eq("user_id", user.id);
-        await refreshProfile();
+      if (!user) {
+        navigate("/auth?mode=signup&plan=free");
+        return;
       }
+
+      const result = await selfServiceActivateFree(user.id);
+      if (!result.success) {
+        toast.error(result.errorMessage ?? "Could not activate your Free plan.");
+        return;
+      }
+
+      await refreshProfile();
       navigate("/dashboard");
       toast.success("Welcome! You can start practising now.");
-    } else {
-      setSelectedPlan(plan);
-      setShowBankTransfer(true);
+      return;
     }
+
+    setSelectedPlan(plan);
+    setShowBankTransfer(true);
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {

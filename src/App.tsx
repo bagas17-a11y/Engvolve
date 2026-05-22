@@ -22,7 +22,6 @@ import StatsPage from "./pages/dashboard/StatsPage";
 import DiagnosticQuiz from "./pages/dashboard/DiagnosticQuiz";
 import PricingSelection from "./pages/PricingSelection";
 import PaymentVerification from "./pages/admin/PaymentVerification";
-import AdminVerify from "./pages/admin/AdminVerify";
 import ContentManager from "./pages/admin/ContentManager";
 import ListeningManager from "./pages/admin/ListeningManager";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -51,12 +50,13 @@ const App = () => (
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/admin/payments" element={<PaymentVerification />} />
-            <Route path="/admin/verify" element={<AdminVerify />} />
+            <Route path="/admin/verify" element={<PaymentVerification />} />
             <Route path="/admin/content" element={<ContentManager />} />
             <Route path="/admin/content-manager" element={<ContentManager />} />
             <Route path="/admin/listening" element={<ListeningManager />} />
             <Route path="/admin/listening-manager" element={<ListeningManager />} />
             <Route path="/admin/users" element={<UserManagement />} />
+            {/* /admin/subscriptions is an alias for /admin/users (kept for old links) */}
             <Route path="/admin/subscriptions" element={<UserManagement />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/diagnostic-test" element={<DiagnosticTest />} />

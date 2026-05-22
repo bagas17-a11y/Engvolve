@@ -14,7 +14,17 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Check, X, Eye, Loader2, Shield, Users, CreditCard, MessageSquare, AlertTriangle } from "lucide-react";
+import {
+  Check,
+  X,
+  Eye,
+  Loader2,
+  Shield,
+  CreditCard,
+  MessageSquare,
+  AlertTriangle,
+  Inbox,
+} from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -49,24 +59,12 @@ interface PaymentVerification {
   };
 }
 
-interface UserProfile {
-  id: string;
-  user_id: string;
-  full_name: string | null;
-  email: string | null;
-  subscription_tier: string;
-  current_reading_score: number | null;
-  current_listening_score: number | null;
-  current_writing_score: number | null;
-  current_speaking_score: number | null;
-}
-
 export default function PaymentVerification() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [payments, setPayments] = useState<PaymentVerification[]>([]);
-  const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -101,47 +99,44 @@ export default function PaymentVerification() {
 
   const fetchData = async () => {
     setLoading(true);
-    
-    // Fetch pending payments
-    const { data: paymentsData, error: paymentsError } = await supabase
-      .from("payment_verifications")
-      .select("*")
-      .order("created_at", { ascending: false });
+    setLoadError(null);
 
-    if (paymentsError) {
-      console.error("Error fetching payments:", paymentsError);
-    } else {
-      // Fetch user profiles for each payment
-      const paymentsWithProfiles = await Promise.all(
-        (paymentsData || []).map(async (payment) => {
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("full_name, email")
-            .eq("user_id", payment.user_id)
-            .single();
-          
-          return {
-            ...payment,
-            profiles: profileData || { full_name: null, email: null },
-          };
-        })
-      );
+    try {
+      const { data: paymentsData, error: paymentsError } = await supabase
+        .from("payment_verifications")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (paymentsError) throw paymentsError;
+
+      // Batch-fetch related profiles in one query instead of N+1
+      const userIds = Array.from(new Set((paymentsData ?? []).map((p) => p.user_id)));
+      const profilesByUserId = new Map<string, { full_name: string | null; email: string | null }>();
+
+      if (userIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, email")
+          .in("user_id", userIds);
+
+        if (profilesError) throw profilesError;
+        (profilesData ?? []).forEach((p) =>
+          profilesByUserId.set(p.user_id, { full_name: p.full_name, email: p.email })
+        );
+      }
+
+      const paymentsWithProfiles = (paymentsData ?? []).map((payment) => ({
+        ...payment,
+        profiles: profilesByUserId.get(payment.user_id) ?? { full_name: null, email: null },
+      }));
+
       setPayments(paymentsWithProfiles);
+    } catch (err: any) {
+      console.error("Error loading payments:", err);
+      setLoadError(err?.message ?? "Failed to load payments.");
+    } finally {
+      setLoading(false);
     }
-
-    // Fetch all users
-    const { data: usersData, error: usersError } = await supabase
-      .from("profiles")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (usersError) {
-      console.error("Error fetching users:", usersError);
-    } else {
-      setUsers(usersData || []);
-    }
-
-    setLoading(false);
   };
 
   const handleApprove = async (payment: PaymentVerification) => {
@@ -149,15 +144,19 @@ export default function PaymentVerification() {
     setProcessingId(payment.id);
 
     try {
-      // Step 1: Approve the payment
-      const { error } = await supabase.rpc("approve_payment", {
+      // approve_payment now returns JSON { success, error?, code?, ... }
+      const { data, error } = await supabase.rpc("approve_payment", {
         payment_id: payment.id,
         admin_id: user.id,
       });
 
       if (error) throw error;
 
-      // Step 2: Send verification email
+      const payload = data as { success?: boolean; error?: string; code?: string } | null;
+      if (payload && payload.success === false) {
+        throw new Error(payload.error ?? "Approval failed");
+      }
+
       const userEmail = payment.profiles?.email;
       const userName = payment.profiles?.full_name;
       const planName = payment.plan_type === "road_to_8" ? "elite" : "pro";
@@ -244,17 +243,25 @@ export default function PaymentVerification() {
     setProcessingId(paymentId);
 
     try {
-      const { error } = await supabase
-        .from("payment_verifications")
-        .update({
-          status: "rejected",
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: user.id,
-          admin_notes: rejectReason,
-        })
-        .eq("id", paymentId);
+      const { data, error } = await supabase.rpc("reject_payment", {
+        payment_id: paymentId,
+        admin_id: user.id,
+        rejection_reason: rejectReason,
+      });
 
       if (error) throw error;
+
+      const payload = data as { success?: boolean; error?: string } | null;
+      if (payload && payload.success === false) {
+        throw new Error(payload.error ?? "Rejection failed");
+      }
+
+      // The RPC logs to admin_logs but doesn't persist the textual reason on
+      // payment_verifications.admin_notes — mirror it for the in-app history.
+      await supabase
+        .from("payment_verifications")
+        .update({ admin_notes: rejectReason })
+        .eq("id", paymentId);
 
       toast.success("Payment rejected.");
       setRejectingId(null);
@@ -291,19 +298,6 @@ export default function PaymentVerification() {
     }
   };
 
-  const getTierBadge = (tier: string) => {
-    switch (tier) {
-      case "free":
-        return <Badge variant="outline">Free</Badge>;
-      case "pro":
-        return <Badge variant="outline" className="bg-accent/10 text-accent border-accent/30">Pro</Badge>;
-      case "elite":
-        return <Badge variant="outline" className="bg-elite-gold/10 text-elite-gold border-elite-gold/30">Elite</Badge>;
-      default:
-        return <Badge variant="outline">{tier}</Badge>;
-    }
-  };
-
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -311,6 +305,9 @@ export default function PaymentVerification() {
       </div>
     );
   }
+
+  const pendingPayments = payments.filter((p) => p.status === "pending");
+  const otherPayments = payments.filter((p) => p.status !== "pending");
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -322,168 +319,201 @@ export default function PaymentVerification() {
               <Shield className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <h1 className="text-2xl font-light text-foreground">Admin Dashboard</h1>
-              <p className="text-sm text-muted-foreground">Payment verification & user management</p>
+              <h1 className="text-2xl font-light text-foreground">Payment verification</h1>
+              <p className="text-sm text-muted-foreground">
+                Review transfer proofs and unlock paid plans.
+              </p>
             </div>
           </div>
-          <Button variant="ghost" onClick={() => navigate("/dashboard")}>
-            Back to Dashboard
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => navigate("/admin/users")}>
+              Manage users
+            </Button>
+            <Button variant="ghost" onClick={() => navigate("/admin")}>
+              Back to admin
+            </Button>
+          </div>
         </div>
 
-        <Tabs defaultValue="payments" className="space-y-6">
-          <TabsList className="glass-card">
-            <TabsTrigger value="payments" className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4" />
-              Payments
-            </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Users
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Payments Tab */}
-          <TabsContent value="payments">
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="text-xl font-light">Payment Verifications</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="w-8 h-8 animate-spin text-accent" />
-                  </div>
-                ) : payments.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No payment requests found.</p>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>User</TableHead>
-                        <TableHead>Plan</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {payments.map((payment) => (
-                        <TableRow key={payment.id}>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{payment.profiles?.full_name || "Unknown"}</p>
-                              <p className="text-sm text-muted-foreground">{payment.profiles?.email}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell className="capitalize">
-                            {payment.plan_type === "road_to_8" ? "Road to 8.0+" : "Pro"}
-                          </TableCell>
-                          <TableCell>IDR {payment.amount.toLocaleString()}</TableCell>
-                          <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                          <TableCell>
-                            {new Date(payment.created_at).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => viewReceipt(payment.receipt_url)}
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                              {payment.status === "pending" && (
-                                <>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setApprovingPayment(payment)}
-                                    disabled={processingId === payment.id}
-                                    className="text-green-500 hover:text-green-400"
-                                    title="Approve payment"
-                                  >
-                                    {processingId === payment.id ? (
-                                      <Loader2 className="w-4 h-4 animate-spin" />
-                                    ) : (
-                                      <Check className="w-4 h-4" />
-                                    )}
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setRejectingId(payment.id)}
-                                    disabled={processingId === payment.id}
-                                    className="text-red-500 hover:text-red-400"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </Button>
-                                </>
+        {(() => {
+          const renderTable = (rows: PaymentVerification[], showActions: boolean) => (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Plan</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">
+                          {payment.profiles?.full_name || "Unknown"}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {payment.profiles?.email}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="capitalize">
+                      {payment.plan_type === "road_to_8" || payment.plan_type === "elite"
+                        ? "Elite"
+                        : "Pro"}
+                    </TableCell>
+                    <TableCell>IDR {payment.amount.toLocaleString()}</TableCell>
+                    <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                    <TableCell>
+                      {new Date(payment.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => viewReceipt(payment.receipt_url)}
+                          title="View receipt"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        {showActions && payment.status === "pending" && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setApprovingPayment(payment)}
+                              disabled={processingId === payment.id}
+                              className="text-green-500 hover:text-green-400"
+                              title="Approve payment"
+                            >
+                              {processingId === payment.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Check className="w-4 h-4" />
                               )}
-                              {payment.status === "rejected" && payment.admin_notes && (
-                                <span className="text-xs text-muted-foreground max-w-[150px] truncate" title={payment.admin_notes}>
-                                  {payment.admin_notes}
-                                </span>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setRejectingId(payment.id)}
+                              disabled={processingId === payment.id}
+                              className="text-red-500 hover:text-red-400"
+                              title="Reject payment"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
+                        {payment.status === "rejected" && payment.admin_notes && (
+                          <span
+                            className="text-xs text-muted-foreground max-w-[150px] truncate"
+                            title={payment.admin_notes}
+                          >
+                            {payment.admin_notes}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          );
 
-          {/* Users Tab */}
-          <TabsContent value="users">
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="text-xl font-light">User Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="w-8 h-8 animate-spin text-accent" />
-                  </div>
-                ) : users.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No users found.</p>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Tier</TableHead>
-                        <TableHead>Reading</TableHead>
-                        <TableHead>Listening</TableHead>
-                        <TableHead>Writing</TableHead>
-                        <TableHead>Speaking</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {users.map((u) => (
-                        <TableRow key={u.id}>
-                          <TableCell className="font-medium">
-                            {u.full_name || "—"}
-                          </TableCell>
-                          <TableCell>{u.email || "—"}</TableCell>
-                          <TableCell>{getTierBadge(u.subscription_tier)}</TableCell>
-                          <TableCell>{u.current_reading_score ?? "—"}</TableCell>
-                          <TableCell>{u.current_listening_score ?? "—"}</TableCell>
-                          <TableCell>{u.current_writing_score ?? "—"}</TableCell>
-                          <TableCell>{u.current_speaking_score ?? "—"}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          if (loading) {
+            return (
+              <Card className="glass-card">
+                <CardContent className="flex justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-accent" />
+                </CardContent>
+              </Card>
+            );
+          }
+
+          if (loadError) {
+            return (
+              <Card className="glass-card border-destructive/40">
+                <CardContent className="py-10 text-center space-y-3">
+                  <AlertTriangle className="w-8 h-8 text-destructive mx-auto" />
+                  <p className="text-sm text-foreground">Couldn't load payments.</p>
+                  <p className="text-xs text-muted-foreground">{loadError}</p>
+                  <Button variant="outline" onClick={fetchData}>
+                    Try again
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          }
+
+          return (
+            <Tabs defaultValue="pending" className="space-y-6">
+              <TabsList className="glass-card">
+                <TabsTrigger value="pending" className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4" />
+                  Pending ({pendingPayments.length})
+                </TabsTrigger>
+                <TabsTrigger value="history" className="flex items-center gap-2">
+                  <Inbox className="w-4 h-4" />
+                  History ({otherPayments.length})
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="pending">
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-light">
+                      Pending payments
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Approve to instantly upgrade the user and unlock paid features.
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    {pendingPayments.length === 0 ? (
+                      <div className="py-12 text-center space-y-3">
+                        <Inbox className="w-10 h-10 text-muted-foreground/40 mx-auto" />
+                        <p className="text-sm text-foreground">No pending payments.</p>
+                        <p className="text-xs text-muted-foreground">
+                          You're all caught up. New transfers will show up here.
+                        </p>
+                      </div>
+                    ) : (
+                      renderTable(pendingPayments, true)
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="history">
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-light">Payment history</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Approved and rejected transfers from past pilots.
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    {otherPayments.length === 0 ? (
+                      <div className="py-12 text-center space-y-2">
+                        <Inbox className="w-10 h-10 text-muted-foreground/40 mx-auto" />
+                        <p className="text-sm text-muted-foreground">
+                          No payments processed yet.
+                        </p>
+                      </div>
+                    ) : (
+                      renderTable(otherPayments, false)
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          );
+        })()}
 
         {/* Receipt Preview Dialog */}
         <Dialog open={!!selectedReceipt} onOpenChange={() => setSelectedReceipt(null)}>

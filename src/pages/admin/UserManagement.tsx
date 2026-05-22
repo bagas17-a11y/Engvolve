@@ -53,17 +53,18 @@ import {
   XCircle,
   AlertCircle,
   Loader2,
-  Clock,
   CalendarPlus,
   ArrowLeft,
   UserCog,
   CreditCard,
   RefreshCw,
+  CreditCard as CreditCardIcon,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format, differenceInDays, isPast } from "date-fns";
+import { changeUserPlan, PLAN_DEFAULT_DAYS, type Tier } from "@/lib/subscription";
 
 interface UserProfile {
   id: string;
@@ -138,6 +139,12 @@ export default function UserManagement() {
     user: UserProfile;
     currentlyAdmin: boolean;
   } | null>(null);
+
+  // Change-plan dialog state
+  const [planDialogUser, setPlanDialogUser] = useState<UserProfile | null>(null);
+  const [planTier, setPlanTier] = useState<Tier>("free");
+  const [planDuration, setPlanDuration] = useState<string>("30");
+  const [planSaving, setPlanSaving] = useState(false);
 
   // Debounced search
   useEffect(() => {
@@ -335,34 +342,62 @@ export default function UserManagement() {
     }
   };
 
-  const handleVerifyUser = async (targetUserId: string) => {
-    if (!user) return;
-    setProcessingUserId(targetUserId);
+  const openChangePlanDialog = (target: UserProfile) => {
+    setPlanDialogUser(target);
+    const currentTier = (target.subscription_tier as Tier) || "free";
+    setPlanTier(currentTier);
+    setPlanDuration(String(PLAN_DEFAULT_DAYS[currentTier] ?? 30));
+  };
 
+  const closeChangePlanDialog = () => {
+    if (planSaving) return;
+    setPlanDialogUser(null);
+  };
+
+  const handleChangePlan = async () => {
+    if (!user || !planDialogUser) return;
+    setPlanSaving(true);
     try {
-      const { error } = await supabase.rpc("unlock_user", {
-        target_user_id: targetUserId,
-        admin_id: user.id,
+      const parsedDuration =
+        planTier === "pro" ? Math.max(1, parseInt(planDuration, 10) || 30) : null;
+
+      const result = await changeUserPlan({
+        targetUserId: planDialogUser.user_id,
+        tier: planTier,
+        durationDays: parsedDuration ?? undefined,
+        adminId: user.id,
       });
 
-      if (error) throw error;
+      if (!result.success) {
+        toast({
+          title: "Could not change plan",
+          description: result.errorMessage ?? "Unknown error",
+          variant: "destructive",
+        });
+        return;
+      }
 
       toast({
-        title: "User Verified",
-        description: "User has been manually verified.",
+        title: "Plan updated",
+        description: `${planDialogUser.email ?? "User"} is now on the ${planTier.toUpperCase()} plan.`,
       });
 
-      fetchUsers();
-    } catch (error: any) {
+      setPlanDialogUser(null);
+      await fetchUsers();
+    } catch (err: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to verify user",
+        description: err?.message ?? "Failed to change plan",
         variant: "destructive",
       });
     } finally {
-      setProcessingUserId(null);
+      setPlanSaving(false);
     }
   };
+
+  // Note: `unlock_user` RPC is no longer surfaced here. The "Change plan"
+  // button is the single way to grant access — assigning any tier
+  // (including Free) sets is_verified=true via change_user_plan.
 
   const openUserDetail = async (u: UserProfile) => {
     setSelectedUser(u);
@@ -720,6 +755,18 @@ export default function UserManagement() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-1">
+                              {/* Change Plan (Free / Pro / Elite) */}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openChangePlanDialog(u)}
+                                title="Change plan (Free / Pro / Elite)"
+                                className="h-8"
+                              >
+                                <CreditCardIcon className="w-3.5 h-3.5 mr-1" />
+                                Change plan
+                              </Button>
+
                               {/* View Details */}
                               <Button
                                 variant="ghost"
@@ -730,7 +777,7 @@ export default function UserManagement() {
                                 <Eye className="w-4 h-4" />
                               </Button>
 
-                              {/* Extend Subscription */}
+                              {/* Extend Subscription (Pro only) */}
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -738,28 +785,10 @@ export default function UserManagement() {
                                   setExtendUserId(u.user_id);
                                   setExtendDialogOpen(true);
                                 }}
-                                title="Extend Subscription"
+                                title="Extend current subscription end date"
                               >
                                 <CalendarPlus className="w-4 h-4" />
                               </Button>
-
-                              {/* Verify User */}
-                              {!u.is_verified && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleVerifyUser(u.user_id)}
-                                  disabled={processingUserId === u.user_id}
-                                  title="Verify User"
-                                  className="text-green-500 hover:text-green-400"
-                                >
-                                  {processingUserId === u.user_id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <Shield className="w-4 h-4" />
-                                  )}
-                                </Button>
-                              )}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -1123,6 +1152,118 @@ export default function UserManagement() {
                   <CalendarPlus className="w-4 h-4 mr-2" />
                 )}
                 Extend by {extendDays} days
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Change Plan Dialog */}
+        <Dialog
+          open={!!planDialogUser}
+          onOpenChange={(open) => !open && closeChangePlanDialog()}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CreditCardIcon className="w-5 h-5 text-accent" />
+                Change plan
+              </DialogTitle>
+            </DialogHeader>
+            {planDialogUser && (
+              <div className="space-y-4">
+                <div className="rounded-lg border border-border/60 bg-secondary/30 p-3 text-sm space-y-1">
+                  <p>
+                    <span className="text-muted-foreground">User:</span>{" "}
+                    <span className="font-medium">{planDialogUser.full_name || "—"}</span>
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">Email:</span>{" "}
+                    {planDialogUser.email || "—"}
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">Current plan:</span>{" "}
+                    <span className="font-medium uppercase">
+                      {planDialogUser.subscription_tier}
+                    </span>
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">New plan</label>
+                  <Select
+                    value={planTier}
+                    onValueChange={(value) => {
+                      const next = value as Tier;
+                      setPlanTier(next);
+                      setPlanDuration(String(PLAN_DEFAULT_DAYS[next] ?? 30));
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="free">Free — no expiry</SelectItem>
+                      <SelectItem value="pro">Pro — monthly</SelectItem>
+                      <SelectItem value="elite">Elite — one-time (no expiry)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {planTier === "pro" && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Duration (days from today)
+                    </label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="365"
+                      value={planDuration}
+                      onChange={(e) => setPlanDuration(e.target.value)}
+                    />
+                    <p className="text-[11px] text-muted-foreground">
+                      Default is 30 days. The user's subscription will expire on{" "}
+                      {(() => {
+                        const days = Math.max(1, parseInt(planDuration, 10) || 30);
+                        const d = new Date();
+                        d.setDate(d.getDate() + days);
+                        return format(d, "MMM d, yyyy");
+                      })()}
+                      .
+                    </p>
+                  </div>
+                )}
+
+                {planTier === "elite" && (
+                  <div className="rounded-lg border border-elite-gold/30 bg-elite-gold/10 p-3 text-xs text-foreground/80">
+                    Elite is a one-time purchase — no expiry. The user will keep access
+                    until you manually move them off Elite.
+                  </div>
+                )}
+
+                {planTier === "free" && (
+                  <div className="rounded-lg border border-border/60 bg-secondary/30 p-3 text-xs text-muted-foreground">
+                    Free users keep their account but lose paid features. Their
+                    subscription end date is cleared.
+                  </div>
+                )}
+              </div>
+            )}
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={closeChangePlanDialog}
+                disabled={planSaving}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleChangePlan} disabled={planSaving}>
+                {planSaving ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <CreditCardIcon className="w-4 h-4 mr-2" />
+                )}
+                Confirm plan change
               </Button>
             </DialogFooter>
           </DialogContent>

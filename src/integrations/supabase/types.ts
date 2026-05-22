@@ -449,7 +449,16 @@ export type Database = {
     Functions: {
       approve_payment: {
         Args: { admin_id: string; payment_id: string }
-        Returns: undefined
+        Returns: Json
+      }
+      change_user_plan: {
+        Args: {
+          target_user_id: string
+          new_tier: Database["public"]["Enums"]["subscription_tier"]
+          duration_days?: number | null
+          admin_id?: string | null
+        }
+        Returns: Json
       }
       extend_subscription: {
         Args: { target_user_id: string; days_to_add: number; admin_id: string }
@@ -461,6 +470,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      reject_payment: {
+        Args: {
+          payment_id: string
+          admin_id: string
+          rejection_reason?: string | null
+        }
+        Returns: Json
       }
       toggle_admin_role: {
         Args: { target_user_id: string; admin_id: string }

@@ -261,12 +261,12 @@ export default function AdminDashboard() {
       title: "Payment Verification",
       description: "Review and approve pending payments",
       icon: <ShieldCheck className="w-6 h-6" />,
-      path: "/admin/verify",
+      path: "/admin/payments",
       color: "text-green-500",
     },
     {
       title: "User Management",
-      description: "Manage users, roles, and subscriptions",
+      description: "Change plan, extend subscription, manage roles",
       icon: <Users className="w-6 h-6" />,
       path: "/admin/users",
       color: "text-accent",
@@ -284,13 +284,6 @@ export default function AdminDashboard() {
       icon: <Headphones className="w-6 h-6" />,
       path: "/admin/listening",
       color: "text-blue-500",
-    },
-    {
-      title: "Subscription Management",
-      description: "Manage plans and subscription status",
-      icon: <CreditCard className="w-6 h-6" />,
-      path: "/admin/subscriptions",
-      color: "text-elite-gold",
     },
   ];
 
