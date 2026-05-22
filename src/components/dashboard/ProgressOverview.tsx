@@ -327,8 +327,21 @@ export function ProgressOverview() {
               </div>
             </ScrollArea>
           ) : (
-            <div className="h-[200px] flex items-center justify-center text-muted-foreground text-sm">
-              No exam history yet. Start practicing!
+            <div className="h-[200px] flex flex-col items-center justify-center gap-3 text-center px-4">
+              <p className="text-sm text-muted-foreground">
+                No exam history yet. Take your first practice and your scores will appear here.
+              </p>
+              <div className="flex gap-2 flex-wrap justify-center">
+                <Button size="sm" variant="outline" asChild>
+                  <a href="/dashboard/diagnostic">Diagnostic</a>
+                </Button>
+                <Button size="sm" variant="outline" asChild>
+                  <a href="/dashboard/reading">Reading</a>
+                </Button>
+                <Button size="sm" variant="outline" asChild>
+                  <a href="/dashboard/writing">Writing</a>
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>

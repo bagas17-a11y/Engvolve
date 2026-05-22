@@ -857,9 +857,22 @@ export default function SpeakingModule() {
 
             {/* Browser Support Warning */}
             {!isSupported && (
-              <p className="text-sm text-destructive mb-4">
-                ⚠️ Speech recognition not supported. Please use Chrome or Edge.
-              </p>
+              <div className="w-full max-w-md mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-foreground/80">
+                <p className="font-medium text-foreground mb-1">
+                  Your browser doesn't support live speech recognition
+                </p>
+                <p className="text-xs mb-2">
+                  This is a Chrome/Edge limitation, not an IELTSinAja bug. For the best
+                  Speaking experience, open this page in Chrome on desktop or Android.
+                </p>
+                <ul className="text-xs list-disc pl-5 space-y-1">
+                  <li>iPhone Safari users: switch to the iOS Chrome app and try again.</li>
+                  <li>
+                    Want a human reviewer? Send your recording to us on WhatsApp and we'll
+                    grade it manually.
+                  </li>
+                </ul>
+              </div>
             )}
 
             {/* Controls */}

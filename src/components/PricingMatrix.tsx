@@ -1,87 +1,37 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, Sparkles, Crown, Tag } from "lucide-react";
+import {
+  Check,
+  Sparkles,
+  Crown,
+  Tag,
+  ArrowRight,
+  ShieldCheck,
+  Building2,
+  Receipt,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-
-const getPlans = (hasPromoCode: boolean) => [
-  {
-    name: "Free",
-    price: "IDR 0",
-    originalPrice: null,
-    period: "",
-    description: "Try 1 practice for each feature",
-    amount: 0,
-    features: [
-      "1 Reading practice",
-      "1 Listening practice",
-      "1 Writing practice",
-      "1 Speaking practice",
-    ],
-    highlighted: false,
-    badge: null,
-    tier: "free",
-    planKey: "free",
-  },
-  {
-    name: "Pro",
-    price: hasPromoCode ? "IDR 250K" : "IDR 500K",
-    originalPrice: hasPromoCode ? "IDR 500K" : null,
-    period: "per month",
-    description: "Complete AI suite for serious learners",
-    amount: hasPromoCode ? 250000 : 500000,
-    features: [
-      "Unlimited AI Reading Analysis",
-      "Full Listening Lab access",
-      "Instant AI Writing Band Scores",
-      "Voice-to-Text Speaking Practice",
-      "Progress analytics dashboard",
-      "Priority support",
-    ],
-    highlighted: true,
-    badge: "Recommended",
-    tier: "pro",
-    planKey: "pro",
-  },
-  {
-    name: "Elite",
-    price: "IDR 2.5M",
-    originalPrice: null,
-    period: "one-time",
-    description: "Premium experience with personal consultation",
-    amount: 2500000,
-    features: [
-      "Everything in Pro",
-      "5 hours 1-on-1 consultation",
-      "Senior Consultant Sessions",
-      "Bespoke Study Roadmap",
-      "Manual Examiner Essay Reviews",
-      "VIP Priority Support",
-    ],
-    highlighted: false,
-    badge: "Limited Spots",
-    tier: "elite",
-    planKey: "road_to_8",
-  },
-];
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { PLANS, PROMO_CODE, resolvePrice } from "@/lib/plans";
+import { buildWhatsAppLink, CONTACT_MESSAGES } from "@/lib/contact";
 
 export const PricingMatrix = () => {
+  const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [revealedCards, setRevealedCards] = useState<Set<number>>(new Set());
   const [showPromoInput, setShowPromoInput] = useState(false);
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const plans = getPlans(promoApplied);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const index = cardRefs.current.findIndex(
-              (ref) => ref === entry.target
-            );
+            const index = cardRefs.current.findIndex((ref) => ref === entry.target);
             if (index !== -1) {
               setRevealedCards((prev) => new Set([...prev, index]));
             }
@@ -99,27 +49,42 @@ export const PricingMatrix = () => {
   }, []);
 
   const handleApplyPromo = () => {
-    if (promoCode.toUpperCase() === "BAGASCUTS") {
+    if (promoCode.trim().toUpperCase() === PROMO_CODE) {
       setPromoApplied(true);
-      toast.success("Promo code applied! 50% off Pro plan.");
+      toast.success("Promo applied — 50% off Pro for your first month.");
     } else {
       toast.error("Invalid promo code");
     }
   };
 
+  const handleSelectPlan = (planKey: string) => {
+    // Logged-in users go straight to the in-app pricing/payment flow so their
+    // profile is updated correctly. Cold visitors go to signup with the plan
+    // they wanted carried through.
+    const target = user
+      ? `/pricing-selection?plan=${planKey}`
+      : `/auth?mode=signup&plan=${planKey}`;
+    navigate(target);
+  };
+
+  const getCtaLabel = (planKey: string) => {
+    if (planKey === "free") return user ? "Continue with Free" : "Start free";
+    if (planKey === "pro") return profile?.subscription_tier === "pro" ? "Manage Pro" : "Choose Pro";
+    return profile?.subscription_tier === "elite" ? "You're on Elite" : "Talk to us for Elite";
+  };
+
   return (
     <section id="pricing" className="py-24 md:py-32 relative">
       <div className="container mx-auto px-6">
-        {/* Section Header */}
-        <div className="text-center mb-16 md:mb-20">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-light mb-6">
-            Investment in Your <span className="text-gradient">Future</span>
+        <div className="text-center mb-14 md:mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-light mb-4">
+            Simple pricing for your <span className="text-gradient">band-score plan</span>
           </h2>
-          <p className="text-lg max-w-2xl mx-auto mb-8">
-            Choose the path that matches your ambition. Every plan is designed
-            to deliver measurable results.
+          <p className="text-base md:text-lg max-w-2xl mx-auto mb-8 text-foreground/70">
+            Start free to see if IELTSinAja fits your routine. Upgrade only when you're
+            ready for unlimited practice or live coaching.
           </p>
-          
+
           {/* Promo Code Section */}
           <div className="max-w-sm mx-auto">
             {!showPromoInput ? (
@@ -140,11 +105,8 @@ export const PricingMatrix = () => {
                   className="flex-1"
                   disabled={promoApplied}
                 />
-                <Button 
-                  onClick={handleApplyPromo}
-                  disabled={promoApplied || !promoCode}
-                >
-                  {promoApplied ? "Applied!" : "Apply"}
+                <Button onClick={handleApplyPromo} disabled={promoApplied || !promoCode}>
+                  {promoApplied ? "Applied" : "Apply"}
                 </Button>
               </div>
             )}
@@ -153,8 +115,11 @@ export const PricingMatrix = () => {
 
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
-          {plans.map((plan, index) => {
+          {PLANS.map((plan, index) => {
             const isRevealed = revealedCards.has(index);
+            const { displayPrice, originalDisplayPrice } = resolvePrice(plan, promoApplied);
+            const isCurrent = profile?.subscription_tier === plan.tier;
+            const isElite = plan.tier === "elite";
 
             return (
               <div
@@ -162,25 +127,25 @@ export const PricingMatrix = () => {
                 ref={(el) => (cardRefs.current[index] = el)}
                 className={`relative transition-all duration-700 ${
                   isRevealed ? "revealed" : "scroll-reveal"
-                } ${plan.highlighted ? "lg:-mt-4 lg:mb-4" : ""}`}
+                } ${plan.badge === "Recommended" ? "lg:-mt-4 lg:mb-4" : ""}`}
                 style={{ transitionDelay: `${index * 150}ms` }}
               >
-                {/* Highlight glow for Pro plan */}
-                {plan.highlighted && (
+                {plan.badge === "Recommended" && (
                   <div className="absolute -inset-0.5 bg-gradient-to-b from-accent/50 to-accent/20 rounded-2xl blur-sm -z-10" />
                 )}
-
-                {/* Elite gold glow */}
-                {plan.tier === "elite" && (
+                {isElite && (
                   <div className="absolute -inset-0.5 bg-gradient-to-b from-elite-gold/50 to-elite-gold/20 rounded-2xl blur-sm -z-10" />
                 )}
 
                 <div
                   className={`glass-card p-8 h-full flex flex-col ${
-                    plan.highlighted ? "border-accent/30" : plan.tier === "elite" ? "border-elite-gold/30" : ""
+                    plan.badge === "Recommended"
+                      ? "border-accent/30"
+                      : isElite
+                      ? "border-elite-gold/30"
+                      : ""
                   }`}
                 >
-                  {/* Badge */}
                   {plan.badge && (
                     <div
                       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium mb-6 w-fit ${
@@ -198,45 +163,105 @@ export const PricingMatrix = () => {
                     </div>
                   )}
 
-                  {/* Plan Name */}
-                  <h3 className="text-2xl font-light mb-2 text-foreground">
-                    {plan.name}
-                  </h3>
+                  <h3 className="text-2xl font-light mb-2 text-foreground">{plan.name}</h3>
 
-                  {/* Price */}
-                  <div className="flex items-baseline gap-2 mb-4">
+                  <div className="flex items-baseline gap-2 mb-1">
                     <span className="text-4xl md:text-5xl font-light text-foreground">
-                      {plan.price}
+                      {displayPrice}
                     </span>
-                    <span className="text-muted-foreground">{plan.period}</span>
+                    {plan.period && (
+                      <span className="text-muted-foreground">{plan.period}</span>
+                    )}
                   </div>
-                  {plan.originalPrice && (
+                  {originalDisplayPrice && (
                     <p className="text-sm text-muted-foreground line-through mb-2">
-                      {plan.originalPrice}
+                      {originalDisplayPrice}
                     </p>
                   )}
 
-                  {/* Description */}
-                  <p className="text-foreground/60 mb-8">{plan.description}</p>
+                  <p className="text-foreground/60 mb-6">{plan.description}</p>
 
-                  {/* Features */}
-                  <ul className="space-y-4 mb-8 flex-1">
+                  <ul className="space-y-3 mb-8 flex-1">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-3">
                         <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                           <Check className="w-3 h-3 text-accent" />
                         </div>
-                        <span className="text-sm text-foreground/80">
-                          {feature}
-                        </span>
+                        <span className="text-sm text-foreground/80">{feature}</span>
                       </li>
                     ))}
                   </ul>
 
+                  {/* CTA */}
+                  {isElite ? (
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        onClick={() => handleSelectPlan(plan.planKey)}
+                        variant="outline"
+                        className="w-full border-elite-gold/30 text-elite-gold hover:bg-elite-gold/10"
+                        disabled={isCurrent}
+                      >
+                        {isCurrent ? "You're on Elite" : "Buy Elite"}
+                        {!isCurrent && <ArrowRight className="w-4 h-4 ml-2" />}
+                      </Button>
+                      <a
+                        href={buildWhatsAppLink(CONTACT_MESSAGES.bookConsultation)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-center text-muted-foreground hover:text-elite-gold transition-colors"
+                      >
+                        or chat with us first on WhatsApp →
+                      </a>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={() => handleSelectPlan(plan.planKey)}
+                      variant={plan.badge === "Recommended" ? "neumorphicPrimary" : "outline"}
+                      className="w-full"
+                      disabled={isCurrent}
+                    >
+                      {isCurrent ? "Current plan" : getCtaLabel(plan.planKey)}
+                      {!isCurrent && <ArrowRight className="w-4 h-4 ml-2" />}
+                    </Button>
+                  )}
                 </div>
               </div>
             );
           })}
+        </div>
+
+        {/* How payment works */}
+        <div className="max-w-4xl mx-auto mt-16 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="glass-card p-5 flex items-start gap-3">
+            <Building2 className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Bank transfer (BCA)</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                We're a pilot product, so we accept BCA transfer. You'll see the account
+                and the exact amount before you pay.
+              </p>
+            </div>
+          </div>
+          <div className="glass-card p-5 flex items-start gap-3">
+            <Receipt className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Upload receipt</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Snap a screenshot of your transfer confirmation. We'll review it within
+                24 hours — usually much faster.
+              </p>
+            </div>
+          </div>
+          <div className="glass-card p-5 flex items-start gap-3">
+            <ShieldCheck className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Get full access</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                We email you the moment your account unlocks. Need help mid-flow? Ping us
+                on WhatsApp.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

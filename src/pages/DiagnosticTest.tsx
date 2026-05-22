@@ -1,12 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
+/**
+ * Internal developer diagnostic — admin-only.
+ * Verifies that the AI generation edge function is reachable for the current session.
+ */
 export default function DiagnosticTest() {
+  const navigate = useNavigate();
+  const { user, isAdmin, isLoading, isCheckingAdmin } = useAuth();
   const [results, setResults] = useState<any[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+
+  useEffect(() => {
+    if (isLoading || isCheckingAdmin) return;
+    if (!user || !isAdmin) {
+      navigate("/", { replace: true });
+    }
+  }, [user, isAdmin, isLoading, isCheckingAdmin, navigate]);
+
+  if (isLoading || isCheckingAdmin || !user || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+      </div>
+    );
+  }
 
   const addResult = (test: string, passed: boolean, details: any) => {
     setResults(prev => [...prev, { test, passed, details, timestamp: new Date().toISOString() }]);

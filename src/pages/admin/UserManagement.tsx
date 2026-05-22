@@ -34,6 +34,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Users,
   Search,
   Download,
@@ -122,6 +132,12 @@ export default function UserManagement() {
   const [extendDialogOpen, setExtendDialogOpen] = useState(false);
   const [extendUserId, setExtendUserId] = useState<string | null>(null);
   const [extendDays, setExtendDays] = useState("30");
+
+  // Toggle-admin confirmation state
+  const [pendingAdminToggle, setPendingAdminToggle] = useState<{
+    user: UserProfile;
+    currentlyAdmin: boolean;
+  } | null>(null);
 
   // Debounced search
   useEffect(() => {
@@ -693,7 +709,9 @@ export default function UserManagement() {
                           <TableCell>
                             <Switch
                               checked={isAdmin}
-                              onCheckedChange={() => handleToggleAdmin(u.user_id)}
+                              onCheckedChange={() =>
+                                setPendingAdminToggle({ user: u, currentlyAdmin: isAdmin })
+                              }
                               disabled={processingUserId === u.user_id}
                             />
                           </TableCell>
@@ -1053,6 +1071,22 @@ export default function UserManagement() {
                 This will add days to the user's current subscription end date.
                 If they have no active subscription, it starts from today.
               </p>
+              {(() => {
+                const target = users.find((x) => x.user_id === extendUserId);
+                if (target && target.subscription_tier === "free") {
+                  return (
+                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 flex items-start gap-2 text-xs text-amber-700 dark:text-amber-300">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <p>
+                        This user is on the <strong>Free</strong> tier. Extending only sets an
+                        end date — it does not upgrade them to Pro/Elite. To grant paid
+                        access, approve their payment instead or change their tier first.
+                      </p>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Days to add</label>
                 <Input
@@ -1093,6 +1127,74 @@ export default function UserManagement() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Toggle Admin Role Confirmation */}
+        <AlertDialog
+          open={!!pendingAdminToggle}
+          onOpenChange={(open) => !open && setPendingAdminToggle(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-amber-500" />
+                {pendingAdminToggle?.currentlyAdmin
+                  ? "Revoke admin privileges?"
+                  : "Grant admin privileges?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-2">
+                  <p>
+                    {pendingAdminToggle?.currentlyAdmin ? (
+                      <>
+                        This user will lose access to the admin portal, payment verification,
+                        and user management.
+                      </>
+                    ) : (
+                      <>
+                        This user will gain <strong>full admin access</strong> — payment
+                        approvals, user management, and subscription extension. Only do this
+                        if you absolutely trust them.
+                      </>
+                    )}
+                  </p>
+                  {pendingAdminToggle && (
+                    <div className="rounded-lg border border-border/60 bg-secondary/30 p-3 text-sm">
+                      <p>
+                        <span className="text-muted-foreground">User:</span>{" "}
+                        <span className="font-medium text-foreground">
+                          {pendingAdminToggle.user.full_name || "Unknown"}
+                        </span>
+                      </p>
+                      <p>
+                        <span className="text-muted-foreground">Email:</span>{" "}
+                        {pendingAdminToggle.user.email || "—"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (pendingAdminToggle) {
+                    const targetId = pendingAdminToggle.user.user_id;
+                    setPendingAdminToggle(null);
+                    handleToggleAdmin(targetId);
+                  }
+                }}
+                className={
+                  pendingAdminToggle?.currentlyAdmin
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-amber-600 hover:bg-amber-700"
+                }
+              >
+                {pendingAdminToggle?.currentlyAdmin ? "Yes, revoke admin" : "Yes, grant admin"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

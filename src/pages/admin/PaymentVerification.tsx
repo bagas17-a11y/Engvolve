@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Check, X, Eye, Loader2, Shield, Users, CreditCard, MessageSquare } from "lucide-react";
+import { Check, X, Eye, Loader2, Shield, Users, CreditCard, MessageSquare, AlertTriangle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -22,6 +22,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PaymentVerification {
@@ -62,6 +72,7 @@ export default function PaymentVerification() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [approvingPayment, setApprovingPayment] = useState<PaymentVerification | null>(null);
 
   useEffect(() => {
     checkAdminAccess();
@@ -388,9 +399,10 @@ export default function PaymentVerification() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => handleApprove(payment)}
+                                    onClick={() => setApprovingPayment(payment)}
                                     disabled={processingId === payment.id}
                                     className="text-green-500 hover:text-green-400"
+                                    title="Approve payment"
                                   >
                                     {processingId === payment.id ? (
                                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -488,6 +500,51 @@ export default function PaymentVerification() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Approve Confirmation Dialog */}
+        <AlertDialog
+          open={!!approvingPayment}
+          onOpenChange={(open) => !open && setApprovingPayment(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500" />
+                Approve this payment?
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-2">
+                  <p>You're about to grant paid access to:</p>
+                  <div className="rounded-lg border border-border/60 bg-secondary/30 p-3 text-sm">
+                    <p><span className="text-muted-foreground">User:</span> <span className="font-medium text-foreground">{approvingPayment?.profiles?.full_name || "Unknown"}</span></p>
+                    <p><span className="text-muted-foreground">Email:</span> {approvingPayment?.profiles?.email || "—"}</p>
+                    <p><span className="text-muted-foreground">Plan:</span> {approvingPayment?.plan_type === "road_to_8" ? "Road to 8.0+" : "Pro"}</p>
+                    <p><span className="text-muted-foreground">Amount:</span> IDR {approvingPayment?.amount.toLocaleString()}</p>
+                  </div>
+                  <p className="text-xs">
+                    A verification email will be sent and the user will be unlocked
+                    immediately. This action is logged and cannot be silently undone.
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (approvingPayment) {
+                    const payment = approvingPayment;
+                    setApprovingPayment(null);
+                    handleApprove(payment);
+                  }
+                }}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Yes, approve & unlock
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Reject Reason Dialog */}
         <Dialog open={!!rejectingId} onOpenChange={() => { setRejectingId(null); setRejectReason(""); }}>

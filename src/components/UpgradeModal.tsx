@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Lock, Sparkles, Crown, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { PLANS } from "@/lib/plans";
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -15,37 +16,14 @@ interface UpgradeModalProps {
   featureName: string;
 }
 
-const plans = [
-  {
-    name: "Pro",
-    price: "IDR 500K",
-    period: "for 2 months",
-    features: [
-      "Unlimited practice for all modules",
-      "AI-powered feedback",
-      "Progress analytics",
-    ],
-    highlighted: true,
-  },
-  {
-    name: "Road to 8.0+",
-    price: "IDR 2.5M",
-    period: "one-time",
-    features: [
-      "Everything in Pro",
-      "1-on-1 consultation",
-      "VIP support",
-    ],
-    highlighted: false,
-  },
-];
+const upgradePlans = PLANS.filter((p) => p.tier !== "free");
 
 export function UpgradeModal({ isOpen, onClose, featureName }: UpgradeModalProps) {
   const navigate = useNavigate();
 
-  const handleUpgrade = () => {
+  const handleUpgrade = (planKey?: string) => {
     onClose();
-    navigate("/pricing-selection");
+    navigate(planKey ? `/pricing-selection?plan=${planKey}` : "/pricing-selection");
   };
 
   return (
@@ -56,57 +34,67 @@ export function UpgradeModal({ isOpen, onClose, featureName }: UpgradeModalProps
             <Lock className="w-8 h-8 text-accent" />
           </div>
           <DialogTitle className="text-2xl font-light">
-            Upgrade to Continue
+            Upgrade to keep practising
           </DialogTitle>
           <DialogDescription className="text-base">
-            You've used your free {featureName} practice. Upgrade to unlock unlimited access.
+            You've used your free {featureName} practice. Upgrade for unlimited AI-graded
+            practice across every module.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 mt-6">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`p-4 rounded-xl border ${
-                plan.highlighted
-                  ? "border-accent/30 bg-accent/5"
-                  : "border-elite-gold/30 bg-elite-gold/5"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  {plan.highlighted ? (
-                    <Sparkles className="w-4 h-4 text-accent" />
-                  ) : (
-                    <Crown className="w-4 h-4 text-elite-gold" />
-                  )}
-                  <span className="font-medium text-foreground">{plan.name}</span>
+          {upgradePlans.map((plan) => {
+            const highlighted = plan.tier === "pro";
+            return (
+              <button
+                key={plan.name}
+                onClick={() => handleUpgrade(plan.planKey)}
+                className={`w-full p-4 rounded-xl border text-left transition-all hover:shadow-md ${
+                  highlighted
+                    ? "border-accent/40 bg-accent/5 hover:border-accent/60"
+                    : "border-elite-gold/40 bg-elite-gold/5 hover:border-elite-gold/60"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    {highlighted ? (
+                      <Sparkles className="w-4 h-4 text-accent" />
+                    ) : (
+                      <Crown className="w-4 h-4 text-elite-gold" />
+                    )}
+                    <span className="font-medium text-foreground">{plan.name}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-lg font-light text-foreground">{plan.displayPrice}</span>
+                    {plan.period && (
+                      <span className="text-xs text-muted-foreground ml-1">{plan.period}</span>
+                    )}
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-lg font-light text-foreground">{plan.price}</span>
-                  <span className="text-xs text-muted-foreground ml-1">{plan.period}</span>
-                </div>
-              </div>
-              <ul className="space-y-1">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Check className="w-3 h-3 text-accent" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+                <ul className="space-y-1">
+                  {plan.features.slice(0, 3).map((feature) => (
+                    <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-3 h-3 text-accent" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </button>
+            );
+          })}
         </div>
 
         <div className="flex gap-3 mt-6">
           <Button variant="outline" onClick={onClose} className="flex-1">
-            Maybe Later
+            Maybe later
           </Button>
-          <Button onClick={handleUpgrade} className="flex-1">
-            View Plans
+          <Button onClick={() => handleUpgrade()} className="flex-1">
+            See full plans
           </Button>
         </div>
+        <p className="text-[11px] text-muted-foreground text-center mt-2">
+          Pay by BCA transfer — we verify within 24 hours.
+        </p>
       </DialogContent>
     </Dialog>
   );

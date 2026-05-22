@@ -1,10 +1,20 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useUserProgress } from "@/hooks/useUserProgress";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { SubscriptionBanner } from "@/components/dashboard/SubscriptionBanner";
 import { BridgeToSuccess } from "@/components/dashboard/BridgeToSuccess";
-import { BookOpen, Headphones, PenTool, Mic, Target, Edit2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  BookOpen,
+  Headphones,
+  PenTool,
+  Mic,
+  Edit2,
+  Sparkles,
+  ArrowRight,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,8 +56,12 @@ const moduleCards = [
 export default function Dashboard() {
   const { profile, user, isLoading, isAdmin, isCheckingAdmin, refreshProfile } = useAuth();
   const { isExpired, tier } = useSubscriptionStatus();
+  const { progress } = useUserProgress();
   const navigate = useNavigate();
   const [isEditingTarget, setIsEditingTarget] = useState(false);
+
+  const diagnosticTaken = progress.some((p) => (p.exam_type as string) === "diagnostic");
+  const firstName = profile?.full_name?.split(" ")[0];
 
   const handleTargetChange = async (value: string) => {
     if (!user) return;
@@ -86,12 +100,37 @@ export default function Dashboard() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-light mb-2">
-          Welcome back, <span className="text-accent">{profile?.full_name?.split(" ")[0] || "Student"}</span>
+          {diagnosticTaken ? "Welcome back" : "Welcome"},{" "}
+          <span className="text-accent">{firstName || "Student"}</span>
         </h1>
         <p className="text-muted-foreground">
-          Continue your journey to IELTS excellence
+          {diagnosticTaken
+            ? "Continue your journey to IELTS excellence."
+            : "Start by taking the 5-minute diagnostic so we can tailor your path."}
         </p>
       </div>
+
+      {/* First-action highlight for new users */}
+      {!diagnosticTaken && (
+        <div className="glass-card p-5 mb-8 border border-accent/30 bg-accent/5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-5 h-5 text-accent" />
+            </div>
+            <div>
+              <p className="font-medium text-foreground">Start with the diagnostic</p>
+              <p className="text-sm text-muted-foreground">
+                4 quick questions + 15 graded ones. Takes about 5 minutes. We'll personalise
+                everything below afterwards.
+              </p>
+            </div>
+          </div>
+          <Button onClick={() => navigate("/dashboard/diagnostic")}>
+            Take diagnostic
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </div>
+      )}
 
       {/* Target Score */}
       <div className="glass-card p-6 mb-8 max-w-xs">

@@ -1,4 +1,26 @@
 import { useEffect, useRef, useState } from "react";
+import { Sparkles, Users2, MessageCircle } from "lucide-react";
+
+const valuePillars = [
+  {
+    icon: Sparkles,
+    label: "AI for volume",
+    description:
+      "Generate fresh Reading, Listening, Writing, and Speaking practice on demand, with band-score feedback in seconds.",
+  },
+  {
+    icon: Users2,
+    label: "Humans for nuance",
+    description:
+      "Elite members get 5 hours of live coaching with an 8.5+ scorer who'll point at the exact sentence that's holding your band back.",
+  },
+  {
+    icon: MessageCircle,
+    label: "Indonesian first",
+    description:
+      "Hybrid English + Bahasa explanations, WhatsApp support during Jakarta hours, and a payment flow built for Indonesia.",
+  },
+];
 
 export const MissionBridge = () => {
   const [isRevealed, setIsRevealed] = useState(false);
@@ -22,14 +44,9 @@ export const MissionBridge = () => {
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative py-32 md:py-40 overflow-hidden"
-    >
-      {/* Dark background with gradient */}
+    <section ref={sectionRef} className="relative py-24 md:py-32 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-navy to-background" />
-      
-      {/* Atmospheric elements */}
+
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
@@ -43,50 +60,51 @@ export const MissionBridge = () => {
             isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           }`}
         >
-          {/* Decorative element */}
-          <div className="flex items-center justify-center gap-4 mb-12">
+          <div className="flex items-center justify-center gap-4 mb-8">
             <div className="w-12 h-px bg-accent/50" />
             <div className="w-2 h-2 rounded-full bg-accent animate-pulse-glow" />
             <div className="w-12 h-px bg-accent/50" />
           </div>
 
-          <blockquote className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light leading-[1.3] mb-8">
-            <span className="text-foreground/90">AI automates the practice,</span>
+          <blockquote className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light leading-[1.3] mb-6">
+            <span className="text-foreground/90">AI handles the practice,</span>
             <br />
-            <span className="text-foreground/90">but humans </span>
-            <span className="text-gradient">master the nuance</span>
+            <span className="text-foreground/90">humans handle the </span>
+            <span className="text-gradient">nuance</span>
             <span className="text-foreground/90">.</span>
           </blockquote>
 
-          <p className="text-lg md:text-xl text-foreground/60 max-w-2xl mx-auto">
-            We built IELTS Elite to bridge the gap between{" "}
-            <span className="text-foreground/90">'good enough'</span> and{" "}
-            <span className="text-accent">Band 9</span>.
+          <p className="text-base md:text-lg text-foreground/60 max-w-2xl mx-auto mb-16">
+            We're a pilot-stage product. Honest about it. We're building IELTSinAja with
+            real Indonesian learners — and we read every piece of feedback.
           </p>
+        </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 mt-16 pt-16 border-t border-border/30">
-            {[
-              { value: "50,000+", label: "Students Trained" },
-              { value: "8.2", label: "Average Band Score" },
-              { value: "97%", label: "Success Rate" },
-            ].map((stat, index) => (
+        <div
+          className={`grid md:grid-cols-3 gap-5 max-w-5xl mx-auto transition-all duration-700 ${
+            isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
+          style={{ transitionDelay: "300ms" }}
+        >
+          {valuePillars.map((pillar) => {
+            const Icon = pillar.icon;
+            return (
               <div
-                key={stat.label}
-                className={`transition-all duration-700 ${
-                  isRevealed
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-5"
-                }`}
-                style={{ transitionDelay: `${300 + index * 150}ms` }}
+                key={pillar.label}
+                className="glass-card p-6 text-left"
               >
-                <p className="text-3xl md:text-4xl font-light text-accent mb-2">
-                  {stat.value}
+                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
+                  <Icon className="w-5 h-5 text-accent" />
+                </div>
+                <h3 className="text-lg font-light text-foreground mb-2">
+                  {pillar.label}
+                </h3>
+                <p className="text-sm text-foreground/65 leading-relaxed">
+                  {pillar.description}
                 </p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
     </section>

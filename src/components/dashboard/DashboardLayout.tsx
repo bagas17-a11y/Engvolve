@@ -2,6 +2,7 @@ import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "./AppSidebar";
+import { MobileBottomNav } from "./MobileBottomNav";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { Loader2 } from "lucide-react";
 
@@ -42,11 +43,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <header className="h-12 flex items-center border-b border-border/30 px-4">
             <SidebarTrigger className="-ml-1" />
           </header>
-          <main className="p-6">
+          <main className="p-6 pb-24 md:pb-6">
             {children}
           </main>
         </SidebarInset>
       </div>
+      <MobileBottomNav />
     </SidebarProvider>
   );
 }

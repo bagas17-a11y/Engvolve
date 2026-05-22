@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, Mail, LogOut } from "lucide-react";
+import { Clock, Mail, LogOut, MessageCircle } from "lucide-react";
+import { buildWhatsAppLink, CONTACT_MESSAGES } from "@/lib/contact";
 
 export default function WaitingRoom() {
   const navigate = useNavigate();
@@ -89,34 +90,49 @@ export default function WaitingRoom() {
 
           <div className="space-y-3">
             <h1 className="text-3xl font-light text-foreground">
-              Verification in Progress
+              Verifying your transfer
             </h1>
             <p className="text-muted-foreground leading-relaxed">
-              Thank you for your payment! Our team of examiners is currently
-              verifying your transfer. You will gain full access to your
-              dashboard within <span className="text-accent font-medium">24 hours</span>.
+              Terima kasih! We've received your receipt and the team is checking your
+              transfer manually. You'll be unlocked within{" "}
+              <span className="text-accent font-medium">24 hours</span> — usually much
+              faster during Jakarta business hours.
             </p>
           </div>
 
           <div className="p-4 bg-muted/20 rounded-lg border border-border/30">
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <Mail className="w-4 h-4" />
-              <span>We'll notify you at <span className="text-foreground">{user?.email}</span></span>
+              <span>
+                We'll email you at <span className="text-foreground">{user?.email}</span>
+              </span>
             </div>
           </div>
 
           <div className="space-y-3">
             <p className="text-xs text-muted-foreground">
-              This page will automatically refresh once your account is verified.
+              This page refreshes automatically once your account unlocks.
             </p>
-            
+
+            <a
+              href={buildWhatsAppLink(CONTACT_MESSAGES.paymentTransferred)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Button variant="outline" className="w-full">
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Nudge us on WhatsApp
+              </Button>
+            </a>
+
             <Button
               variant="ghost"
               onClick={handleSignOut}
               className="text-muted-foreground hover:text-foreground"
             >
               <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
+              Sign out
             </Button>
           </div>
         </CardContent>

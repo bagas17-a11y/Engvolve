@@ -14,13 +14,23 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Check, X, Eye, Loader2, Shield, Unlock } from "lucide-react";
+import { Check, X, Eye, Loader2, Shield, Unlock, AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface PaymentWithProfile {
   id: string;
@@ -43,6 +53,8 @@ export default function AdminVerify() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [approvingPayment, setApprovingPayment] = useState<PaymentWithProfile | null>(null);
+  const [rejectingPayment, setRejectingPayment] = useState<PaymentWithProfile | null>(null);
 
   useEffect(() => {
     checkAdminAccess();
@@ -323,7 +335,7 @@ export default function AdminVerify() {
                               <Button
                                 variant="default"
                                 size="sm"
-                                onClick={() => handleApproveAndUnlock(payment)}
+                                onClick={() => setApprovingPayment(payment)}
                                 disabled={processingId === payment.id}
                                 className="bg-green-600 hover:bg-green-700 text-white"
                               >
@@ -339,9 +351,10 @@ export default function AdminVerify() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleReject(payment.id)}
+                                onClick={() => setRejectingPayment(payment)}
                                 disabled={processingId === payment.id}
                                 className="text-red-500 hover:text-red-400"
+                                title="Reject payment"
                               >
                                 <X className="w-4 h-4" />
                               </Button>
@@ -375,6 +388,85 @@ export default function AdminVerify() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Approve Confirmation */}
+        <AlertDialog
+          open={!!approvingPayment}
+          onOpenChange={(open) => !open && setApprovingPayment(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500" />
+                Approve and unlock this user?
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-2">
+                  <p>This will grant paid access:</p>
+                  <div className="rounded-lg border border-border/60 bg-secondary/30 p-3 text-sm">
+                    <p><span className="text-muted-foreground">User:</span> <span className="font-medium text-foreground">{approvingPayment?.user_name || "Unknown"}</span></p>
+                    <p><span className="text-muted-foreground">Email:</span> {approvingPayment?.user_email || "—"}</p>
+                    <p><span className="text-muted-foreground">Plan:</span> {approvingPayment ? getPlanName(approvingPayment.plan_type) : "—"}</p>
+                    <p><span className="text-muted-foreground">Amount:</span> IDR {approvingPayment?.amount.toLocaleString()}</p>
+                  </div>
+                  <p className="text-xs">
+                    The user will be marked verified immediately. This action is logged.
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (approvingPayment) {
+                    const payment = approvingPayment;
+                    setApprovingPayment(null);
+                    handleApproveAndUnlock(payment);
+                  }
+                }}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Yes, approve & unlock
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Reject Confirmation */}
+        <AlertDialog
+          open={!!rejectingPayment}
+          onOpenChange={(open) => !open && setRejectingPayment(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-500" />
+                Reject this payment?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                The payment will be marked rejected. The user will need to upload a new
+                receipt. (Reach out via WhatsApp to explain why — automatic rejection
+                emails are not yet wired.)
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (rejectingPayment) {
+                    const id = rejectingPayment.id;
+                    setRejectingPayment(null);
+                    handleReject(id);
+                  }
+                }}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Yes, reject payment
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

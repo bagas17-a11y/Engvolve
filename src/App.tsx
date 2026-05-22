@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import { AIChatbot } from "@/components/AIChatbot";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import VerifyEmail from "./pages/VerifyEmail";
@@ -28,7 +27,6 @@ import ContentManager from "./pages/admin/ContentManager";
 import ListeningManager from "./pages/admin/ListeningManager";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
-import Admin from "./pages/Admin";
 import WaitingRoom from "./pages/WaitingRoom";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
@@ -61,6 +59,7 @@ const App = () => (
             <Route path="/admin/users" element={<UserManagement />} />
             <Route path="/admin/subscriptions" element={<UserManagement />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/diagnostic-test" element={<DiagnosticTest />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/reading" element={<ReadingModule />} />
@@ -75,11 +74,9 @@ const App = () => (
             <Route path="/dashboard/revision-notes" element={<RevisionNotesPage />} />
             <Route path="/dashboard/flashcards" element={<FlashcardsPage />} />
             <Route path="/dashboard/flashcards/topic" element={<FlashcardsTopicPage />} />
-            <Route path="/diagnostic-test" element={<DiagnosticTest />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <AIChatbot />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

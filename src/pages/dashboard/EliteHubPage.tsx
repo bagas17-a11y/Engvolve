@@ -12,14 +12,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -39,7 +31,6 @@ import {
   Sparkles,
   Crown,
   Lock,
-  Star,
   Calendar,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -55,42 +46,44 @@ const featureBadges = [
   { icon: ListOrdered, label: "Step-by-step mark schemes" },
 ];
 
-const mockExams = [
-  { id: "1", type: "Academic", time: "2h 45m", status: "not_started" as const },
-  { id: "2", type: "Academic", time: "2h 45m", status: "not_started" as const },
-  { id: "3", type: "General Training", time: "2h 45m", status: "not_started" as const },
-];
-
-const consultants = [
+const sectionPractice = [
   {
-    name: "Dr. Sarah Mitchell",
-    title: "Former IELTS Chief Examiner",
-    experience: "15+ years",
-    specialization: "Writing & Speaking",
-    rating: 4.9,
-    image: null,
+    id: "reading",
+    title: "Reading practice",
+    description: "AI-generated passages with answer-evidence highlighting.",
+    time: "60 min",
+    route: "/dashboard/reading",
   },
   {
-    name: "Prof. James Crawford",
-    title: "Ex-British Council Examiner",
-    experience: "12+ years",
-    specialization: "Academic Writing",
-    rating: 4.8,
-    image: null,
+    id: "listening",
+    title: "Listening practice",
+    description: "AI-generated 4-section listening tests with full transcripts.",
+    time: "30 min",
+    route: "/dashboard/listening",
   },
   {
-    name: "Ms. Emily Chen",
-    title: "IELTS Master Trainer",
-    experience: "10+ years",
-    specialization: "Speaking & Fluency",
-    rating: 4.9,
-    image: null,
+    id: "writing",
+    title: "Writing practice",
+    description: "Task 1 + Task 2 with band-score feedback and Band 8 rewrites.",
+    time: "60 min",
+    route: "/dashboard/writing",
+  },
+  {
+    id: "speaking",
+    title: "Speaking practice",
+    description: "Parts 1–3 with AI fluency analysis on your recorded answer.",
+    time: "11–14 min",
+    route: "/dashboard/speaking",
   },
 ];
 
-const pastConsultationsPlaceholder = [
-  { date: "15 Feb 2025", consultant: "Dr. Sarah Mitchell", duration: "60 min", status: "Completed" },
-  { date: "8 Feb 2025", consultant: "Prof. James Crawford", duration: "60 min", status: "Completed" },
+const coaches = [
+  {
+    name: "Bagas H. Wicaksono",
+    title: "Founder & lead coach",
+    specialization: "Writing & Speaking strategy",
+    score: "IELTS 8.5",
+  },
 ];
 
 export default function EliteHubPage() {
@@ -315,64 +308,53 @@ export default function EliteHubPage() {
           </TabsContent>
 
           <TabsContent value="mock-exams" className="mt-8 focus-visible:outline-none">
-            <p className="text-sm text-muted-foreground mb-6">
-              Full practice papers aligned to the exam. Practice in real exam conditions, then submit
-              and review with AI and mark schemes.
-            </p>
-            <div className="space-y-4">
-              <h3 className="text-base font-semibold text-foreground">Set A</h3>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {mockExams.map((exam) => (
-                  <Card key={exam.id} className="border-border bg-card">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">
-                          Paper {exam.id} · {exam.type}
-                        </CardTitle>
-                        <Badge variant="secondary" className="text-xs font-normal">
-                          {exam.type === "Academic" ? "Academic" : "General Training"}
-                        </Badge>
-                      </div>
-                      <CardDescription className="flex items-center gap-1.5 pt-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        {exam.time}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <Badge
-                        variant="outline"
-                        className="w-full justify-center py-1.5 text-muted-foreground border-border"
-                      >
-                        Paper not started
-                      </Badge>
-                      <div className="flex flex-col gap-2">
-                        <Button
-                          className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
-                          onClick={() => navigate("/dashboard/reading")}
-                        >
-                          Start Exam
-                        </Button>
-                        <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-                          <Sparkles className="h-3.5 w-3.5 text-elite-gold" />
-                          AI-Powered Scoring Available
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 mb-6 flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  Full back-to-back mock exams arrive after pilot
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  While we polish the timed full-mock runner, practice each section below.
+                  Each one is AI-generated, full-length, and scored automatically.
+                </p>
               </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+              {sectionPractice.map((s) => (
+                <Card key={s.id} className="border-border bg-card">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base">{s.title}</CardTitle>
+                      <Badge variant="secondary" className="text-xs font-normal flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {s.time}
+                      </Badge>
+                    </div>
+                    <CardDescription>{s.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+                      onClick={() => navigate(s.route)}
+                    >
+                      Start practice
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </TabsContent>
 
           <TabsContent value="consultation" className="mt-8 focus-visible:outline-none">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Meet your Tutors</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Meet your coach</h2>
             <div className="flex flex-wrap gap-6 mb-8">
-              {consultants.map((c) => (
+              {coaches.map((c) => (
                 <div
                   key={c.name}
                   className="flex flex-col items-center text-center gap-2"
                 >
-                  <Avatar className="h-14 w-14 border-2 border-border">
+                  <Avatar className="h-16 w-16 border-2 border-border">
                     <AvatarFallback className="bg-elite-gold/10 text-elite-gold text-sm font-medium">
                       {c.name
                         .split(" ")
@@ -385,10 +367,9 @@ export default function EliteHubPage() {
                     <p className="text-sm font-medium text-foreground">{c.name}</p>
                     <p className="text-xs text-muted-foreground">{c.title}</p>
                     <p className="text-xs text-muted-foreground">{c.specialization}</p>
-                    <div className="flex items-center justify-center gap-1 mt-1">
-                      <Star className="h-3.5 w-3.5 fill-elite-gold text-elite-gold" />
-                      <span className="text-xs text-foreground">{c.rating}</span>
-                    </div>
+                    <Badge variant="outline" className="mt-2 bg-elite-gold/10 text-elite-gold border-elite-gold/30">
+                      {c.score}
+                    </Badge>
                   </div>
                 </div>
               ))}
@@ -399,19 +380,20 @@ export default function EliteHubPage() {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-elite-gold" />
-                    Next available slot
+                    How booking works
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Select a date and time to book your 1-on-1 session.
+                    Send us your preferred date and time on WhatsApp. We'll confirm within
+                    24 hours during the pilot. Each session is 60 minutes.
                   </p>
                   <Button
                     variant="outline"
                     className="w-full border-elite-gold/30 text-elite-gold hover:bg-elite-gold/10"
                     onClick={() => navigate("/dashboard/consultation")}
                   >
-                    Choose date & time
+                    Open Consultation Hub
                   </Button>
                 </CardContent>
               </Card>
@@ -422,34 +404,8 @@ export default function EliteHubPage() {
               className="w-full sm:w-auto bg-elite-gold/20 text-elite-gold border border-elite-gold/30 hover:bg-elite-gold/30"
               onClick={() => navigate("/dashboard/consultation")}
             >
-              Book 1-on-1 Session
+              Book a 1-on-1 session
             </Button>
-
-            <div className="mt-10">
-              <h3 className="text-base font-semibold text-foreground mb-4">Past Consultations</h3>
-              <Card className="border-border">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-border hover:bg-transparent">
-                      <TableHead className="text-muted-foreground">Date</TableHead>
-                      <TableHead className="text-muted-foreground">Consultant</TableHead>
-                      <TableHead className="text-muted-foreground">Duration</TableHead>
-                      <TableHead className="text-muted-foreground">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pastConsultationsPlaceholder.map((row, i) => (
-                      <TableRow key={i} className="border-border">
-                        <TableCell className="text-foreground">{row.date}</TableCell>
-                        <TableCell className="text-foreground">{row.consultant}</TableCell>
-                        <TableCell className="text-foreground">{row.duration}</TableCell>
-                        <TableCell className="text-foreground">{row.status}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Card>
-            </div>
           </TabsContent>
         </Tabs>
       </div>

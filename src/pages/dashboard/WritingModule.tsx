@@ -5,6 +5,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { PenTool, Loader2, ChevronRight, Star, AlertTriangle, Target, Edit3, ArrowRight, Lightbulb, FileText, BarChart3, CheckCircle, XCircle, RefreshCw, BookOpen, Play, ArrowLeft, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -409,14 +420,22 @@ export default function WritingModule() {
     }
 
     const essayContent = isRevision ? revisedEssay : essay;
-    
-    if (essayContent.trim().length < 50) {
+    const wordCount = essayContent.trim().split(/\s+/).filter(Boolean).length;
+
+    if (wordCount < 50) {
       toast({
         title: "Essay too short",
-        description: "Please write more content for meaningful feedback.",
+        description: `Write at least ${minWords} words for accurate band-score feedback. You currently have ${wordCount}.`,
         variant: "destructive",
       });
       return;
+    }
+
+    if (wordCount < minWords) {
+      const confirmed = window.confirm(
+        `IELTS requires a minimum of ${minWords} words for ${activeTask}. You currently have ${wordCount}. Submitting below the limit will lower your Task Response score.\n\nSubmit anyway?`
+      );
+      if (!confirmed) return;
     }
 
     generationStore.startGen('writing-analysis', { isRevision: !!isRevision });
@@ -1175,13 +1194,32 @@ export default function WritingModule() {
                     )}
                   </Button>
                   {feedback && (
-                    <Button
-                      variant="outline"
-                      onClick={handleRestartPractice}
-                    >
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Restart
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Restart
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Restart this practice?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Your essay, revision, and the feedback you just received will be
+                            cleared. This cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Keep my work</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleRestartPractice}
+                            className="bg-destructive hover:bg-destructive/90"
+                          >
+                            Yes, restart
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
                 </div>
               </div>

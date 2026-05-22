@@ -4,11 +4,15 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupConte
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, BookOpen, Headphones, PenTool, Mic, BarChart3, User, Settings, LogOut, GraduationCap, MessageCircle, Shield, Library, Crown, FileText, CreditCard } from "lucide-react";
+import { LayoutDashboard, BookOpen, Headphones, PenTool, Mic, BarChart3, User, Settings, LogOut, GraduationCap, MessageCircle, Shield, Library, Crown, FileText, CreditCard, Target } from "lucide-react";
 const mainNavItems = [{
   title: "Dashboard",
   path: "/dashboard",
   icon: LayoutDashboard
+}, {
+  title: "Diagnostic",
+  path: "/dashboard/diagnostic",
+  icon: Target
 }, {
   title: "Progress Stats",
   path: "/dashboard/stats",
@@ -35,6 +39,10 @@ const supportItems = [{
   title: "Elite Hub",
   path: "/dashboard/elite",
   icon: Crown
+}, {
+  title: "Materials",
+  path: "/dashboard/materials",
+  icon: Library
 }, {
   title: "Revision Notes",
   path: "/dashboard/revision-notes",

@@ -1,36 +1,44 @@
-export const SocialProofBar = () => {
-  const logos = [
-    { name: "British Council", short: "BC" },
-    { name: "IDP Education", short: "IDP" },
-    { name: "Cambridge", short: "CAM" },
-    { name: "ETS Global", short: "ETS" },
-    { name: "Education First", short: "EF" },
-  ];
+import { ShieldCheck, Users, MessageSquare, Sparkles, Globe } from "lucide-react";
 
+/**
+ * Honest pilot-stage trust strip.
+ * Replaces the previous fake "Trusted by British Council / IDP / Cambridge" claim.
+ */
+const trustItems = [
+  { icon: Users, label: "Built by 8.5+ IELTS scorers" },
+  { icon: Globe, label: "Indonesia-based founding team" },
+  { icon: Sparkles, label: "AI feedback on every practice" },
+  { icon: MessageSquare, label: "WhatsApp support in Bahasa" },
+  { icon: ShieldCheck, label: "Manual review before approval" },
+];
+
+export const SocialProofBar = () => {
   return (
-    <section className="py-12 border-y border-border/50 bg-secondary/20">
+    <section className="py-10 border-y border-border/50 bg-secondary/20">
       <div className="container mx-auto px-6">
-        <p className="text-center text-sm text-muted-foreground mb-8 tracking-wide uppercase">
-          Trusted by leading education institutions
+        <p className="text-center text-xs text-muted-foreground mb-6 tracking-wide uppercase">
+          Why IELTS candidates trust IELTSinAja
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
-          {logos.map((logo, index) => (
-            <div
-              key={logo.name}
-              className="group flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity duration-300"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center border border-border/50">
-                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                  {logo.short}
+        <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
+          {trustItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.label}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/40 border border-border/40"
+              >
+                <Icon className="w-4 h-4 text-accent flex-shrink-0" />
+                <span className="text-xs sm:text-sm text-foreground/80 whitespace-nowrap">
+                  {item.label}
                 </span>
               </div>
-              <span className="text-sm font-light text-muted-foreground group-hover:text-foreground transition-colors hidden md:block">
-                {logo.name}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
+        <p className="text-center text-[11px] text-muted-foreground/70 mt-6 max-w-xl mx-auto">
+          IELTSinAja is an independent IELTS-prep product currently in pilot. We are not
+          affiliated with British Council, IDP, or Cambridge.
+        </p>
       </div>
     </section>
   );

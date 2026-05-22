@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,9 @@ const phoneSchema = z.string()
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode");
+  const planParam = searchParams.get("plan");
   const [isLogin, setIsLogin] = useState(mode !== "signup");
+  const pricingDest = planParam ? `/pricing-selection?plan=${planParam}` : "/pricing-selection";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -108,7 +110,7 @@ export default function Auth() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/pricing-selection`,
+            emailRedirectTo: `${window.location.origin}${pricingDest}`,
             data: { full_name: fullName, phone_number: phoneNumber },
           },
         });
@@ -120,10 +122,10 @@ export default function Auth() {
 
         if (needsEmailConfirmation) {
           toast({ title: "Check your email!", description: "We sent you a 6-digit verification code." });
-          navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+          navigate(`/verify-email?email=${encodeURIComponent(email)}${planParam ? `&plan=${planParam}` : ""}`);
         } else {
-          toast({ title: "Account created!", description: "Redirecting to pricing selection..." });
-          navigate("/pricing-selection");
+          toast({ title: "Account created!", description: "Setting up your plan..." });
+          navigate(pricingDest);
         }
       }
     } catch (error: any) {
@@ -203,7 +205,13 @@ export default function Auth() {
                       placeholder="08123456789"
                     />
                   </div>
-                  {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+                  {errors.phone ? (
+                    <p className="text-xs text-destructive">{errors.phone}</p>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground">
+                      We use this for WhatsApp support and to confirm your payment.
+                    </p>
+                  )}
                 </div>
               </>
             )}
@@ -266,8 +274,22 @@ export default function Auth() {
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
+              {isLoading ? "Please wait..." : isLogin ? "Sign in" : "Create account"}
             </Button>
+
+            {!isLogin && (
+              <p className="text-[11px] text-muted-foreground text-center">
+                By creating an account you agree to our{" "}
+                <Link to="/terms-of-service" className="text-accent hover:underline">
+                  Terms
+                </Link>{" "}
+                and{" "}
+                <Link to="/privacy-policy" className="text-accent hover:underline">
+                  Privacy Policy
+                </Link>
+                .
+              </p>
+            )}
           </form>
 
           <div className="mt-6 text-center">

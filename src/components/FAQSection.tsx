@@ -5,37 +5,38 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useEffect, useRef, useState } from "react";
+import { buildWhatsAppLink, CONTACT_MESSAGES } from "@/lib/contact";
 
 const faqs = [
   {
-    question: "How accurate is the AI feedback compared to real examiners?",
+    question: "Apa itu IELTSinAja? / What is IELTSinAja?",
     answer:
-      "Our AI models are trained on thousands of examiner-graded essays and have been validated to match examiner scoring within 0.5 bands in 94% of cases. However, for nuanced feedback on coherence and task achievement, we always recommend combining AI insights with our human consultation sessions.",
+      "IELTSinAja is an AI-powered IELTS prep platform built for Indonesian learners. You can practice Reading, Listening, Writing, and Speaking with instant AI band-score feedback. The Elite plan adds live coaching with an 8.5+ scorer. We're in pilot, so prices and features are evolving — your feedback shapes the next version.",
   },
   {
-    question: "What qualifications do your consultants have?",
+    question: "How accurate is the AI feedback?",
     answer:
-      "All our consultants are former IELTS examiners with a minimum of 5 years examining experience. They've collectively assessed over 100,000 candidates and hold advanced degrees in linguistics, education, or related fields. Each consultant undergoes our rigorous internal certification process.",
+      "Our AI is calibrated against the official IELTS public band descriptors and uses GPT-class models to grade your work. Treat AI scores as a strong directional indicator (typically within ~0.5 bands of an examiner) — not an official IELTS result. For high-stakes feedback, upgrade to Elite and submit your essays for review by our 8.5+ scorer.",
   },
   {
-    question: "Can I switch between plans at any time?",
+    question: "How does payment work?",
     answer:
-      "Absolutely. You can upgrade or downgrade your plan at any point. When upgrading, you'll get immediate access to new features. When downgrading, your current plan benefits continue until the end of your billing cycle. All your progress and data is preserved across plan changes.",
+      "After you pick a plan we show you our bank account (BCA) and the exact IDR amount. You transfer the money, upload your receipt, and we'll verify it within 24 hours (usually much faster during Jakarta business hours). You'll keep limited access to Free features while you wait, and we'll email you the moment your account is activated.",
   },
   {
-    question: "How quickly will I see improvement in my scores?",
+    question: "Can I switch plans or cancel later?",
     answer:
-      "Most students see measurable improvement within 4-6 weeks of consistent practice. Our data shows that students who complete at least 3 practice sessions per week and attend regular consultation sessions improve by an average of 1.0 band score within 8 weeks.",
+      "Yes. You can upgrade at any time. Pro is billed monthly so simply stop renewing to cancel. Elite is a one-time purchase — once your 5 coaching hours are used or 90 days pass, that's it. For partial refunds during the first 7 days, contact us on WhatsApp and we'll review case-by-case.",
   },
   {
-    question: "Is there a money-back guarantee?",
+    question: "Who is behind IELTSinAja?",
     answer:
-      "Yes. We offer a 14-day money-back guarantee on all plans. If you're not satisfied with the platform for any reason within the first 14 days, we'll provide a full refund—no questions asked. For Elite plan members, we also offer a score improvement guarantee.",
+      "IELTSinAja is built by Bagas (8.5 IELTS scorer) and a small team in Indonesia. We are not affiliated with British Council, IDP, or Cambridge. We are a pilot-stage indie product and we are honest about that — that's also why we keep WhatsApp as our primary support channel.",
   },
   {
-    question: "What makes IELTS Elite different from other prep platforms?",
+    question: "Which browsers / devices are supported?",
     answer:
-      "We're the only platform that combines enterprise-grade AI technology with access to actual former examiners. While other platforms offer either AI-only or human-only approaches, we've built a hybrid system where AI handles the practice and analytics while humans provide the strategic insights that push you past scoring plateaus.",
+      "Reading, Listening, and Writing work on any modern browser (Chrome, Edge, Safari, Firefox) on desktop or mobile. Speaking practice uses your browser's speech recognition — for best results we recommend Chrome or Edge on desktop. iPhone Safari users can still type their answer if voice input is unavailable.",
   },
 ];
 
@@ -68,7 +69,6 @@ export const FAQSection = () => {
     >
       <div className="container mx-auto px-6">
         <div className="max-w-3xl mx-auto">
-          {/* Section Header */}
           <div
             className={`text-center mb-12 md:mb-16 transition-all duration-700 ${
               isRevealed
@@ -77,14 +77,14 @@ export const FAQSection = () => {
             }`}
           >
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-light mb-6">
-              Frequently Asked <span className="text-gradient">Questions</span>
+              Frequently asked <span className="text-gradient">questions</span>
             </h2>
             <p className="text-lg">
-              Everything you need to know about our platform and process.
+              Straight answers from a small Indonesian team building IELTSinAja in
+              public.
             </p>
           </div>
 
-          {/* FAQ Accordion */}
           <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((faq, index) => (
               <AccordionItem
@@ -108,6 +108,28 @@ export const FAQSection = () => {
               </AccordionItem>
             ))}
           </Accordion>
+
+          <div
+            className={`mt-10 text-center transition-all duration-700 ${
+              isRevealed
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-5"
+            }`}
+            style={{ transitionDelay: "900ms" }}
+          >
+            <p className="text-sm text-muted-foreground">
+              Still have a question?{" "}
+              <a
+                href={buildWhatsAppLink(CONTACT_MESSAGES.generalHelp)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent hover:underline"
+              >
+                Chat with us on WhatsApp
+              </a>
+              .
+            </p>
+          </div>
         </div>
       </div>
     </section>

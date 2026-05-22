@@ -1,54 +1,50 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Users, Calendar, Crown, Lock, Clock, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Users,
+  Calendar,
+  Crown,
+  Lock,
+  Clock,
+  MessageCircle,
+  CheckCircle2,
+  CalendarClock,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { buildWhatsAppLink } from "@/lib/contact";
 
-const consultants = [
+const COACHES = [
   {
-    name: "Dr. Sarah Mitchell",
-    title: "Former IELTS Chief Examiner",
-    experience: "15+ years",
-    specialization: "Writing & Speaking",
-    rating: 4.9,
-    sessions: 2400,
-    image: null,
-  },
-  {
-    name: "Prof. James Crawford",
-    title: "Ex-British Council Examiner",
-    experience: "12+ years",
-    specialization: "Academic Writing",
-    rating: 4.8,
-    sessions: 1850,
-    image: null,
-  },
-  {
-    name: "Ms. Emily Chen",
-    title: "IELTS Master Trainer",
-    experience: "10+ years",
-    specialization: "Speaking & Fluency",
-    rating: 4.9,
-    sessions: 1620,
-    image: null,
+    id: "bagas",
+    name: "Bagas H. Wicaksono",
+    title: "Founder & lead coach",
+    score: "IELTS 8.5",
+    bio: "Built IELTSinAja to give Indonesian learners the kind of feedback he wished he'd had. Focus: Writing & Speaking strategy.",
+    focus: ["Writing", "Speaking"],
   },
 ];
 
-const timeSlots = [
-  "09:00 AM", "10:00 AM", "11:00 AM",
-  "02:00 PM", "03:00 PM", "04:00 PM",
-  "07:00 PM", "08:00 PM",
+const roadmap = [
+  { week: "Week 1-2", focus: "Diagnose", tasks: "Take the diagnostic, identify your two weakest skills." },
+  { week: "Week 3-4", focus: "Build", tasks: "AI-graded daily writing, targeted listening drills." },
+  { week: "Week 5-6", focus: "Refine", tasks: "1-on-1 review sessions on your essays + speaking recordings." },
+  { week: "Week 7-8", focus: "Mock", tasks: "Full-section mock under timed conditions, dry run with your coach." },
 ];
 
 export default function ConsultationHub() {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const [selectedConsultant, setSelectedConsultant] = useState<typeof consultants[0] | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [selectedCoach, setSelectedCoach] = useState(COACHES[0]);
 
   const isElite = profile?.subscription_tier === "elite";
+
+  const waMessage = useMemo(() => {
+    const name = profile?.full_name?.trim() || "an IELTSinAja Elite member";
+    return `Hi IELTSinAja team, this is ${name}. I'd like to book a 1-on-1 coaching session with ${selectedCoach.name}.`;
+  }, [profile?.full_name, selectedCoach.name]);
 
   if (!isElite) {
     return (
@@ -58,21 +54,21 @@ export default function ConsultationHub() {
             <Lock className="w-10 h-10 text-elite-gold" />
           </div>
           <h1 className="text-3xl font-light mb-4">
-            Unlock <span className="text-elite-gold">Consultation Hub</span>
+            Unlock the <span className="text-elite-gold">Consultation Hub</span>
           </h1>
           <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Get personalized 1-on-1 sessions with former IELTS examiners. 
-            Upgrade to the Road to 8.0+ plan to access this exclusive feature.
+            1-on-1 coaching is part of the Elite plan. Get 5 hours of live coaching with
+            an 8.5+ scorer who'll give you the kind of feedback the AI can't.
           </p>
           <div className="glass-card p-6 mb-8">
-            <h3 className="text-lg font-light mb-4">What's Included:</h3>
+            <h3 className="text-lg font-light mb-4">What's included</h3>
             <ul className="space-y-3 text-left max-w-md mx-auto">
               {[
-                "5 hours of 1-on-1 consultation",
-                "Personalized study roadmap",
-                "Manual examiner essay reviews",
-                "VIP priority support",
-                "Guaranteed score improvement",
+                "5 hours of 1-on-1 video coaching",
+                "Manual essay reviews by an 8.5+ scorer",
+                "Personalised 4-week study roadmap",
+                "Priority WhatsApp support",
+                "Scheduling within 24 hours of payment",
               ].map((feature) => (
                 <li key={feature} className="flex items-center gap-3 text-foreground/80">
                   <Crown className="w-4 h-4 text-elite-gold flex-shrink-0" />
@@ -84,10 +80,10 @@ export default function ConsultationHub() {
           <Button
             variant="neumorphicPrimary"
             size="lg"
-            onClick={() => navigate("/#pricing")}
+            onClick={() => navigate("/pricing-selection")}
             className="bg-elite-gold/20 text-elite-gold border-elite-gold/30"
           >
-            Upgrade to Road to 8.0+
+            See Elite plan
           </Button>
         </div>
       </DashboardLayout>
@@ -96,7 +92,7 @@ export default function ConsultationHub() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl">
+      <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <div className="w-12 h-12 rounded-xl bg-elite-gold/10 flex items-center justify-center">
@@ -104,134 +100,124 @@ export default function ConsultationHub() {
           </div>
           <div>
             <h1 className="text-2xl font-light">Consultation Hub</h1>
-            <p className="text-sm text-muted-foreground">Book 1-on-1 sessions with ex-examiners</p>
+            <p className="text-sm text-muted-foreground">
+              Book a 1-on-1 session with your IELTSinAja coach.
+            </p>
           </div>
         </div>
 
-        {/* Consultant Cards */}
-        <h2 className="text-lg font-light mb-4">Master Consultants</h2>
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          {consultants.map((consultant) => (
-            <button
-              key={consultant.name}
-              onClick={() => setSelectedConsultant(consultant)}
-              className={`glass-card p-6 text-left transition-all duration-300 ${
-                selectedConsultant?.name === consultant.name
+        {/* Honest pilot framing */}
+        <div className="glass-card p-5 mb-8 border border-elite-gold/20 bg-elite-gold/5">
+          <p className="text-sm text-foreground/90 flex items-start gap-2">
+            <CalendarClock className="w-5 h-5 text-elite-gold flex-shrink-0 mt-0.5" />
+            <span>
+              <strong>How booking works during the pilot.</strong> Send us a WhatsApp message
+              with your preferred date/time and we'll confirm within 24 hours. We're keeping
+              scheduling personal until we have a critical mass of Elite members.
+            </span>
+          </p>
+        </div>
+
+        {/* Coach card */}
+        <h2 className="text-lg font-light mb-4">Your coach</h2>
+        <div className="grid md:grid-cols-1 gap-6 mb-8">
+          {COACHES.map((coach) => (
+            <div
+              key={coach.id}
+              onClick={() => setSelectedCoach(coach)}
+              className={`glass-card p-6 text-left cursor-pointer transition-all ${
+                selectedCoach.id === coach.id
                   ? "border-elite-gold/50 bg-elite-gold/5"
                   : "hover:border-border/50"
               }`}
             >
-              {/* Avatar */}
-              <div className="w-16 h-16 rounded-full bg-elite-gold/20 flex items-center justify-center mb-4">
-                <span className="text-xl font-medium text-elite-gold">
-                  {consultant.name.split(" ").map((n) => n[0]).join("")}
-                </span>
-              </div>
-
-              <h3 className="text-lg font-light mb-1">{consultant.name}</h3>
-              <p className="text-sm text-elite-gold mb-2">{consultant.title}</p>
-              <p className="text-xs text-muted-foreground mb-4">
-                {consultant.experience} • {consultant.specialization}
-              </p>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-elite-gold fill-elite-gold" />
-                  <span className="text-sm text-foreground">{consultant.rating}</span>
+              <div className="flex items-start gap-4">
+                <div className="w-16 h-16 rounded-full bg-elite-gold/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xl font-medium text-elite-gold">
+                    {coach.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {consultant.sessions.toLocaleString()} sessions
-                </span>
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-baseline gap-2">
+                    <h3 className="text-lg font-light">{coach.name}</h3>
+                    <Badge variant="outline" className="bg-elite-gold/10 text-elite-gold border-elite-gold/30">
+                      {coach.score}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-elite-gold mt-0.5">{coach.title}</p>
+                  <p className="text-sm text-foreground/70 mt-2">{coach.bio}</p>
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {coach.focus.map((f) => (
+                      <Badge key={f} variant="outline" className="text-xs">
+                        {f}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </button>
+            </div>
           ))}
         </div>
 
-        {/* Booking Section */}
-        {selectedConsultant && (
-          <div className="glass-card p-6">
-            <h2 className="text-lg font-light mb-6 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-elite-gold" />
-              Book with {selectedConsultant.name}
-            </h2>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Date Selection */}
-              <div>
-                <label className="text-sm text-muted-foreground mb-3 block">Select Date</label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  min={new Date().toISOString().split("T")[0]}
-                  className="w-full p-3 rounded-xl bg-secondary/30 border border-border/30 text-foreground"
-                />
-              </div>
-
-              {/* Time Selection */}
-              <div>
-                <label className="text-sm text-muted-foreground mb-3 block">Select Time (WIB)</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {timeSlots.map((time) => (
-                    <button
-                      key={time}
-                      onClick={() => setSelectedTime(time)}
-                      className={`p-2 rounded-lg text-sm transition-all ${
-                        selectedTime === time
-                          ? "bg-elite-gold/20 text-elite-gold border border-elite-gold/30"
-                          : "bg-secondary/30 text-foreground/70 hover:bg-secondary/50"
-                      }`}
-                    >
-                      {time}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Session Info */}
-            <div className="flex items-center gap-4 mt-6 p-4 bg-secondary/20 rounded-xl">
-              <Clock className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-foreground">60-minute session</p>
-                <p className="text-xs text-muted-foreground">Includes video call and written feedback</p>
-              </div>
-            </div>
-
-            {/* Confirm Button */}
+        {/* Booking */}
+        <div className="glass-card p-6 mb-8">
+          <h2 className="text-lg font-light mb-4 flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-elite-gold" />
+            Book a session
+          </h2>
+          <ul className="space-y-2 text-sm text-foreground/80 mb-6">
+            {[
+              "60-minute video call + written follow-up notes",
+              "Counts toward your 5 included Elite coaching hours",
+              "We work on Jakarta hours (WIB), evening + weekend slots available",
+              "Cancel or reschedule up to 12 hours before",
+            ].map((line) => (
+              <li key={line} className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-elite-gold flex-shrink-0 mt-0.5" />
+                <span>{line}</span>
+              </li>
+            ))}
+          </ul>
+          <a
+            href={buildWhatsAppLink(waMessage)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block"
+          >
             <Button
               variant="neumorphicPrimary"
               size="lg"
-              className="w-full mt-6 bg-elite-gold/20 text-elite-gold"
-              disabled={!selectedDate || !selectedTime}
+              className="w-full bg-elite-gold/20 text-elite-gold border border-elite-gold/30"
             >
-              Confirm Booking
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Book on WhatsApp
             </Button>
-          </div>
-        )}
-
-        {/* Roadmap Section */}
-        <div className="glass-card p-6 mt-8">
-          <h2 className="text-lg font-light mb-4 flex items-center gap-2">
-            <Crown className="w-5 h-5 text-elite-gold" />
-            Your Personalized Roadmap
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            Based on your current performance, here's your customized path to Band 8.0+
+          </a>
+          <p className="text-xs text-muted-foreground text-center mt-3">
+            We aim to confirm your slot within a few hours during Jakarta business hours.
           </p>
-          <div className="space-y-4">
-            {[
-              { week: "Week 1-2", focus: "Foundation Building", tasks: "Grammar review, vocabulary expansion" },
-              { week: "Week 3-4", focus: "Writing Mastery", tasks: "Task 1 & 2 practice, structure refinement" },
-              { week: "Week 5-6", focus: "Speaking Fluency", tasks: "Mock interviews, pronunciation drills" },
-              { week: "Week 7-8", focus: "Full Mock Tests", tasks: "Timed practice, strategy refinement" },
-            ].map((phase, i) => (
+        </div>
+
+        {/* Roadmap */}
+        <div className="glass-card p-6">
+          <h2 className="text-lg font-light mb-2 flex items-center gap-2">
+            <Crown className="w-5 h-5 text-elite-gold" />
+            Sample 8-week roadmap
+          </h2>
+          <p className="text-muted-foreground mb-6 text-sm">
+            Your coach will tailor this to your diagnostic results during your first call.
+          </p>
+          <div className="space-y-3">
+            {roadmap.map((phase, i) => (
               <div key={i} className="flex items-start gap-4 p-4 bg-secondary/20 rounded-xl">
-                <div className="w-12 h-12 rounded-xl bg-elite-gold/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-elite-gold/10 flex items-center justify-center flex-shrink-0">
                   <span className="text-sm font-medium text-elite-gold">{i + 1}</span>
                 </div>
                 <div>
-                  <p className="text-sm text-elite-gold">{phase.week}</p>
+                  <p className="text-sm text-elite-gold flex items-center gap-2">
+                    {phase.week}
+                    <Clock className="w-3 h-3" />
+                  </p>
                   <p className="font-light text-foreground">{phase.focus}</p>
                   <p className="text-xs text-muted-foreground">{phase.tasks}</p>
                 </div>
