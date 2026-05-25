@@ -91,44 +91,56 @@ export default function PricingSelection() {
   };
 
   const handleSelectPlan = async (plan: DisplayPlan) => {
+    // Paid plan — open WhatsApp immediately regardless of auth state
+    if (plan.tier !== "free") {
+      setProcessingPlanKey(plan.planKey);
+      try {
+        if (user) {
+          await registerPaidPlanRequest(plan);
+        }
+
+        const waMessage = planSignupWhatsAppMessage({
+          email: user?.email ?? profile?.email ?? "—",
+          planName: plan.name,
+          displayPrice: plan.computedDisplayPrice,
+          fullName: profile?.full_name,
+          phoneNumber: profile?.phone_number,
+        });
+
+        window.open(buildWhatsAppLink(waMessage), "_blank", "noopener,noreferrer");
+
+        toast.success(
+          "Opening WhatsApp — send us your payment proof and we'll activate your account shortly!",
+          { duration: 8000 }
+        );
+
+        if (user) navigate("/waiting-room");
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Something went wrong";
+        console.error("Plan selection error:", error);
+        toast.error(message);
+      } finally {
+        setProcessingPlanKey(null);
+      }
+      return;
+    }
+
+    // Free plan — requires login
     if (!user) {
       navigate(`/auth?mode=signup&plan=${plan.planKey}`);
       return;
     }
 
     setProcessingPlanKey(plan.planKey);
-
     try {
-      if (plan.tier === "free") {
-        const result = await selfServiceActivateFree(user.id);
-        if (!result.success) {
-          toast.error(result.errorMessage ?? "Could not activate your Free plan.");
-          return;
-        }
-        await refreshProfile();
-        navigate("/dashboard");
-        toast.success("Welcome! You can start practising now.");
+      const result = await selfServiceActivateFree(user.id);
+      if (!result.success) {
+        toast.error(result.errorMessage ?? "Could not activate your Free plan.");
         return;
       }
-
-      await registerPaidPlanRequest(plan);
-
-      const waMessage = planSignupWhatsAppMessage({
-        email: user.email ?? profile?.email ?? "—",
-        planName: plan.name,
-        displayPrice: plan.computedDisplayPrice,
-        fullName: profile?.full_name,
-        phoneNumber: profile?.phone_number,
-      });
-
-      window.open(buildWhatsAppLink(waMessage), "_blank", "noopener,noreferrer");
-
-      toast.success(
-        "Opening WhatsApp — send us your payment proof and we'll activate your account shortly!",
-        { duration: 8000 }
-      );
-
-      navigate("/waiting-room");
+      await refreshProfile();
+      navigate("/dashboard");
+      toast.success("Welcome! You can start practising now.");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Something went wrong";
       console.error("Plan selection error:", error);
