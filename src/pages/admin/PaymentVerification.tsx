@@ -56,6 +56,7 @@ interface PaymentVerification {
   profiles?: {
     full_name: string | null;
     email: string | null;
+    phone_number: string | null;
   };
 }
 
@@ -119,12 +120,12 @@ export default function PaymentVerification() {
       if (userIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase
           .from("profiles")
-          .select("user_id, full_name, email")
+          .select("user_id, full_name, email, phone_number")
           .in("user_id", userIds);
 
         if (profilesError) throw profilesError;
         (profilesData ?? []).forEach((p) =>
-          profilesByUserId.set(p.user_id, { full_name: p.full_name, email: p.email })
+          profilesByUserId.set(p.user_id, { full_name: p.full_name, email: p.email, phone_number: p.phone_number })
         );
       }
 
@@ -371,6 +372,11 @@ export default function PaymentVerification() {
                         <p className="text-sm text-muted-foreground">
                           {payment.profiles?.email}
                         </p>
+                        {payment.profiles?.phone_number && (
+                          <p className="text-xs text-muted-foreground/70">
+                            {payment.profiles.phone_number}
+                          </p>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="capitalize">
@@ -571,10 +577,13 @@ export default function PaymentVerification() {
               <AlertDialogDescription asChild>
                 <div className="space-y-2">
                   <p>Confirm you received payment on WhatsApp, then assign:</p>
-                  <div className="rounded-lg border border-border/60 bg-secondary/30 p-3 text-sm">
+                  <div className="rounded-lg border border-border/60 bg-secondary/30 p-3 text-sm space-y-1">
                     <p><span className="text-muted-foreground">User:</span> <span className="font-medium text-foreground">{approvingPayment?.profiles?.full_name || "Unknown"}</span></p>
                     <p><span className="text-muted-foreground">Email:</span> {approvingPayment?.profiles?.email || "—"}</p>
-                    <p><span className="text-muted-foreground">Plan:</span> {approvingPayment?.plan_type === "road_to_8" ? "Road to 8.0+" : "Pro"}</p>
+                    {approvingPayment?.profiles?.phone_number && (
+                      <p><span className="text-muted-foreground">Phone:</span> {approvingPayment.profiles.phone_number}</p>
+                    )}
+                    <p><span className="text-muted-foreground">Plan:</span> {approvingPayment?.plan_type === "road_to_8" ? "Elite (Road to 8.0+)" : "Pro"}</p>
                     <p><span className="text-muted-foreground">Amount:</span> IDR {approvingPayment?.amount.toLocaleString()}</p>
                   </div>
                   <p className="text-xs">

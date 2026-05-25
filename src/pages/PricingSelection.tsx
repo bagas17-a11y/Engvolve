@@ -118,16 +118,17 @@ export default function PricingSelection() {
         planName: plan.name,
         displayPrice: plan.computedDisplayPrice,
         fullName: profile?.full_name,
+        phoneNumber: profile?.phone_number,
       });
 
       window.open(buildWhatsAppLink(waMessage), "_blank", "noopener,noreferrer");
 
       toast.success(
-        "Opening WhatsApp — send us your email and plan. You can use Free features on the dashboard while we confirm payment.",
+        "Opening WhatsApp — send us your payment proof and we'll activate your account shortly!",
         { duration: 8000 }
       );
 
-      navigate("/dashboard");
+      navigate("/waiting-room");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Something went wrong";
       console.error("Plan selection error:", error);

@@ -51,12 +51,14 @@ export function planSignupWhatsAppMessage(opts: {
   planName: string;
   displayPrice: string;
   fullName?: string | null;
+  phoneNumber?: string | null;
 }): string {
   const nameLine = opts.fullName ? `\nName: ${opts.fullName}` : "";
+  const phoneLine = opts.phoneNumber ? `\nPhone: ${opts.phoneNumber}` : "";
   return (
     `Hi IELTSinAja! I just signed up and want the *${opts.planName}* package.\n\n` +
-    `Email: ${opts.email}${nameLine}\n` +
+    `Email: ${opts.email}${nameLine}${phoneLine}\n` +
     `Package: ${opts.planName} (${opts.displayPrice})\n\n` +
-    `I'll send payment proof here on WhatsApp. Please activate my account when received.`
+    `Please activate my account after payment. Thank you!`
   );
 }

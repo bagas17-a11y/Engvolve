@@ -72,6 +72,7 @@ interface UserProfile {
   user_id: string;
   full_name: string | null;
   email: string | null;
+  phone_number: string | null;
   avatar_url: string | null;
   subscription_tier: string;
   subscription_status: string | null;
@@ -149,6 +150,10 @@ export default function UserManagement() {
 
   const [deleteDialogUser, setDeleteDialogUser] = useState<UserProfile | null>(null);
   const [deleteSaving, setDeleteSaving] = useState(false);
+
+  // Quick-approve state
+  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
+  const [approvingSaving, setApprovingSaving] = useState(false);
 
   // Debounced search
   useEffect(() => {
@@ -443,30 +448,57 @@ export default function UserManagement() {
     setSelectedUser(u);
     setDrawerOpen(true);
     setLoadingDetails(true);
+    setPendingPaymentId(null);
 
     try {
-      // Fetch payment history
-      const { data: payments } = await supabase
-        .from("payment_verifications")
-        .select("*")
-        .eq("user_id", u.user_id)
-        .order("created_at", { ascending: false });
+      const [paymentsResult, logsResult] = await Promise.all([
+        supabase
+          .from("payment_verifications")
+          .select("*")
+          .eq("user_id", u.user_id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("admin_logs")
+          .select("*")
+          .eq("target_user_id", u.user_id)
+          .order("created_at", { ascending: false })
+          .limit(20),
+      ]);
 
-      setUserPayments((payments as PaymentRecord[]) || []);
+      const payments = (paymentsResult.data as PaymentRecord[]) || [];
+      setUserPayments(payments);
+      setUserAdminLogs((logsResult.data as AdminLogRecord[]) || []);
 
-      // Fetch admin logs for this user
-      const { data: logs } = await supabase
-        .from("admin_logs")
-        .select("*")
-        .eq("target_user_id", u.user_id)
-        .order("created_at", { ascending: false })
-        .limit(20);
-
-      setUserAdminLogs((logs as AdminLogRecord[]) || []);
+      // Find the pending payment so we can offer a quick-approve
+      const pending = payments.find((p) => p.status === "pending");
+      setPendingPaymentId(pending?.id ?? null);
     } catch (error) {
       console.error("Error fetching user details:", error);
     } finally {
       setLoadingDetails(false);
+    }
+  };
+
+  const handleQuickApprove = async () => {
+    if (!user || !pendingPaymentId || !selectedUser) return;
+    setApprovingSaving(true);
+    try {
+      const { data, error } = await supabase.rpc("approve_payment", {
+        payment_id: pendingPaymentId,
+        admin_id: user.id,
+      });
+      if (error) throw error;
+      const payload = data as { success?: boolean; error?: string } | null;
+      if (payload && payload.success === false) throw new Error(payload.error ?? "Approval failed");
+
+      toast({ title: "Approved!", description: `${selectedUser.email ?? "User"} is now active.` });
+      setPendingPaymentId(null);
+      setDrawerOpen(false);
+      await fetchUsers();
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message ?? "Could not approve", variant: "destructive" });
+    } finally {
+      setApprovingSaving(false);
     }
   };
 
@@ -887,6 +919,12 @@ export default function UserManagement() {
                       </span>
                     </div>
                     <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Phone</span>
+                      <span className="text-sm font-medium">
+                        {selectedUser.phone_number || "—"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">
                         Registered
                       </span>
@@ -926,6 +964,28 @@ export default function UserManagement() {
                       </span>
                     </div>
                   </div>
+
+                  {/* Quick-approve for pending paid users */}
+                  {!selectedUser.is_verified && pendingPaymentId && (
+                    <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 space-y-2">
+                      <p className="text-xs text-yellow-700 dark:text-yellow-300 font-medium">
+                        Pending payment — confirm transfer on WhatsApp then approve:
+                      </p>
+                      <Button
+                        size="sm"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                        onClick={handleQuickApprove}
+                        disabled={approvingSaving}
+                      >
+                        {approvingSaving ? (
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        ) : (
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                        )}
+                        Approve & activate
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Subscription Info */}

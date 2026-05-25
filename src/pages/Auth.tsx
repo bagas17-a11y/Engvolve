@@ -63,6 +63,9 @@ export default function Auth() {
       return null;
     }
 
+    // Unverified users (chose paid plan, awaiting admin approval) → waiting room
+    if (!profile.is_verified) return "/waiting-room";
+
     return "/dashboard";
   };
 
