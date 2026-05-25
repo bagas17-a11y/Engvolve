@@ -346,8 +346,6 @@ export default function SpeakingModule() {
     setFeedback(null);
     setSpeakingDuration(null);
     setAudioUrl(null);
-    setActiveComparison(null);
-    setShowDiffs({ naturalness: false, enhanced: false });
     setTooltipWord(null);
   };
 
@@ -371,7 +369,6 @@ export default function SpeakingModule() {
     setFeedback(null);
     setAudioUrl(null);
     setSpeakingDuration(null);
-    setActiveComparison(null);
     recordingStartRef.current = Date.now();
     recordedChunksRef.current = [];
 
