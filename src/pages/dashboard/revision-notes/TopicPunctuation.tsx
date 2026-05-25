@@ -42,6 +42,9 @@ export function TopicPunctuation() {
         <p className="mt-3 text-sm text-slate-400">
           Avoid very long sentences with no commas or too many commas in random places.
         </p>
+        <p className="mt-3 text-sm text-slate-400">
+          Do NOT use a comma when connecting one independent and one dependent clause without a conjunction.
+        </p>
       </DefinitionCard>
       <SubSectionTitle title="2.4 Common comma mistakes" />
       <DefinitionCard>
@@ -99,31 +102,35 @@ export function TopicPunctuation() {
 
       <SectionTitle number={5} title="Dashes (—)" />
       <DefinitionCard>
-        <p className="mb-3">A dash shows a strong pause or adds extra information.</p>
-        <WorkedExample>
-          <>&quot;The results were surprising — almost 80% of participants preferred online learning.&quot;</>
-        </WorkedExample>
-        <p className="mt-3 text-sm text-slate-400">
-          Dashes are optional. If you are not confident, use a full stop or a comma instead.
-        </p>
+        <p className="mb-3">A dash shows a strong pause or adds extra information. Use cases:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Independent + Independent:</strong> Works like a semicolon, joining two separate but related independent clauses — E.g. &quot;The results were conclusive — the policy had failed.&quot;</>,
+            <><strong className="text-white">Independent + Dependent:</strong> When the dependent clause is a descriptor of the independent, adding emphasis (independent clause MUST come first) — E.g. &quot;Indonesia faces a major challenge — a sinking capital.&quot;</>,
+            <><strong className="text-white">Interruptor:</strong> Similar to parentheses, to insert additional information in the middle of the sentence — E.g. &quot;The participants—all of whom were over 60—reported better health.&quot; (The inserted information is just extra information; the sentence works fine without it.)</>,
+          ]}
+        />
       </DefinitionCard>
 
       <SectionTitle number={6} title="Mini practice – punctuation" />
+      <SubSectionTitle title="6.1 Identify the mistakes" />
       <MiniPractice
         title="Mini practice"
         prompt={
           <>
-            <p className="mb-2">Correct the punctuation:</p>
-            <ol className="list-decimal pl-5 space-y-2 text-sm text-slate-300">
-              <li>&quot;Firstly governments should invest more in public transport but many politicians ignore this.&quot;</li>
-              <li>&quot;The graph shows three main trends education health care and housing costs.&quot;</li>
-            </ol>
+            <p className="mb-3">Identify the 7 punctuation mistakes in the following paragraph and rewrite it with the corrections:</p>
+            <div className="p-4 rounded-lg bg-[#1e293b]/60 border border-[#334155] text-slate-200 italic text-sm">
+              &quot;Modern technology has revolutionized the way we communicate yet it has also created a sense of digital isolation. Many experts believe that social media—despite its name—actually distances individuals from real-life interaction. If a person spends all day online they may lose the ability to read body language. Furthermore, some studies show that constant notifications are harmful, they can lead to decreased focus and higher stress levels. Many teenagers use multiple apps at once; and this constant switching prevents deep concentration. There is one major consequence to this lifestyle—a decline in mental well-being. Ultimately, everyone should try to unplug occasionally, because a healthy balance is essential for a productive life.&quot;
+            </div>
           </>
         }
         modelLabel="Model answers"
         modelItems={[
-          <>&quot;Firstly, governments should invest more in public transport, but many politicians ignore this.&quot;</>,
-          <>&quot;The graph shows three main trends: education, healthcare, and housing costs.&quot;</>,
+          <><strong>Mistake 1:</strong> &quot;communicate yet&quot; — missing comma before coordinating conjunction joining two independent clauses. Fix: &quot;communicate, yet&quot;</>,
+          <><strong>Mistake 2:</strong> &quot;online they&quot; — missing comma after dependent clause at the start. Fix: &quot;online, they&quot;</>,
+          <><strong>Mistake 3:</strong> &quot;are harmful, they&quot; — comma splice (two independent clauses joined only by a comma). Fix: &quot;are harmful; they&quot; or &quot;are harmful. They&quot;</>,
+          <><strong>Mistake 4:</strong> &quot;at once; and&quot; — semicolon before a coordinating conjunction is incorrect. Fix: &quot;at once, and&quot;</>,
+          <><strong>Mistake 5:</strong> Check the paragraph for any remaining punctuation issues and correct them.</>,
         ]}
       />
     </div>

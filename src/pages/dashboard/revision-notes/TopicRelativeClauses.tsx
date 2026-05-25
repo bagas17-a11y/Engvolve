@@ -29,11 +29,17 @@ export function TopicRelativeClauses() {
       <DefinitionCard>
         <p className="mb-3">Defining clauses give <strong className="text-white">essential</strong> information. Without them, the reader cannot tell which person or thing you mean. Usually there are <strong className="text-white">no commas</strong>.</p>
         <p className="mb-2 text-sm text-slate-300">What counts as essential? Information that limits or identifies the noun — e.g. which specific students, which specific city.</p>
+        <p className="mb-2 font-semibold text-slate-200">Essential sentences:</p>
         <KeyList
           items={[
-            <>Essential: &quot;Students <strong>who study regularly</strong> often get higher scores.&quot; (identifies which students)</>,
-            <>Essential: &quot;The city <strong>that I live in</strong> has very heavy traffic.&quot; (identifies which city)</>,
-            <>Non‑essential for comparison: &quot;The students, who study regularly, often get higher scores.&quot; — here the clause adds extra info about all students; commas show it&apos;s removable.</>,
+            <>&quot;Students <strong>who study regularly</strong> often get higher scores.&quot; (identifies which type of students)</>,
+            <>&quot;The city <strong>that I live in</strong> has very heavy traffic.&quot; (identifies which city)</>,
+          ]}
+        />
+        <p className="mb-2 mt-3 font-semibold text-slate-200">Non-essential sentences:</p>
+        <KeyList
+          items={[
+            <>&quot;The students, <strong>who study regularly</strong>, often get higher scores.&quot; (adds extra info about all students, sentence still makes sense without the clause)</>,
           ]}
         />
       </DefinitionCard>
@@ -66,37 +72,50 @@ export function TopicRelativeClauses() {
         rows={[
           ["who", "People (subject)"],
           ["whom", "People (object, more formal)"],
-          ["which", "Things"],
-          ["that", "People or things (defining only)"],
           ["whose", "Possession"],
+          ["that", "People or things (defining only)"],
+          ["which", "Things"],
           ["where", "Places"],
           ["when", "Times"],
+          ["why", "Reasons"],
         ]}
       />
+
+      <SubSectionTitle title="Who vs whom vs whose vs that vs which vs where vs when vs why" />
       <DefinitionCard>
-        <p className="mb-2 font-semibold text-slate-200">Who vs whom vs whose:</p>
-        <KeyList
-          items={[
-            <>who — subject of the clause: &quot;The student <strong>who</strong> spoke first got the highest mark.&quot;</>,
-            <>whom — object (formal): &quot;The person <strong>whom</strong> I met yesterday is a teacher.&quot; (I met whom)</>,
-            <>whose — possession: &quot;The student <strong>whose</strong> essay won the prize is from Indonesia.&quot;</>,
-          ]}
-        />
-        <p className="mb-2 mt-4 font-semibold text-slate-200">That — people or things (defining only):</p>
+        <p className="mb-2 font-semibold text-slate-200">who — subject of the clause:</p>
+        <WorkedExample><>&quot;He <strong>who</strong> spoke first got the highest mark.&quot; — Subject: does the action (he/she/they/&quot;the person&quot;)</>
+        </WorkedExample>
+        <p className="mb-2 mt-4 font-semibold text-slate-200">whom — object (formal):</p>
+        <WorkedExample><>&quot;The person to <strong>whom</strong> I spoke was very helpful.&quot; — Object: receives the action (him/her/them/follows a preposition like &quot;to&quot;, &quot;with&quot;, &quot;for&quot;)</>
+        </WorkedExample>
+        <p className="mb-2 mt-4 font-semibold text-slate-200">whose — possessive:</p>
+        <WorkedExample><>&quot;The student <strong>whose</strong> essay won the prize is from Indonesia.&quot;</>
+        </WorkedExample>
+        <p className="mb-2 mt-4 font-semibold text-slate-200">that — people or things (defining only):</p>
         <KeyList
           items={[
             <>People: &quot;The man <strong>that</strong> I saw yesterday left.&quot;</>,
             <>Things: &quot;The city <strong>that</strong> I visited is beautiful.&quot;</>,
           ]}
         />
-        <p className="mb-2 mt-4 font-semibold text-slate-200">Where, when, why — places, times, reasons:</p>
+        <p className="mb-2 mt-4 font-semibold text-slate-200">which — things (defining and non-defining) and reasoning:</p>
         <KeyList
           items={[
-            <>where — places: &quot;The university <strong>where</strong> I study has a large library.&quot;</>,
-            <>when — times: &quot;The day <strong>when</strong> the exam results came out was stressful.&quot;</>,
-            <>why — reasons (formal): &quot;The reason <strong>why</strong> I applied was the scholarship.&quot;</>,
+            <>Defining: &quot;The laptop <strong>which</strong> I bought last year broke.&quot;</>,
+            <>Non-defining: &quot;My laptop, <strong>which</strong> I bought last year, broke.&quot;</>,
+            <>Reasoning: &quot;I missed the bus, <strong>which</strong> made me late.&quot;</>,
           ]}
         />
+        <p className="mb-2 mt-4 font-semibold text-slate-200">where — places:</p>
+        <WorkedExample><>&quot;The university <strong>where</strong> I study has a large library.&quot;</>
+        </WorkedExample>
+        <p className="mb-2 mt-4 font-semibold text-slate-200">when — times:</p>
+        <WorkedExample><>&quot;The day <strong>when</strong> the exam results came out was stressful.&quot;</>
+        </WorkedExample>
+        <p className="mb-2 mt-4 font-semibold text-slate-200">why — reasons (formal):</p>
+        <WorkedExample><>&quot;The reason <strong>why</strong> I applied was the scholarship.&quot;</>
+        </WorkedExample>
       </DefinitionCard>
 
       <SectionTitle number={5} title="IELTS tips and mini-practice" />

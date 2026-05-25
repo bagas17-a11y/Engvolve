@@ -1,5 +1,6 @@
 import {
   DefinitionCard,
+  ExaminerTip,
   SectionTitle,
   SubSectionTitle,
   KeyList,
@@ -11,7 +12,7 @@ import {
 export function TopicSubjectVerbAgreement() {
   return (
     <div className="space-y-6">
-      <SectionTitle number={1} title="Why SVA is important in IELTS" />
+      <SectionTitle number={1} title="What is Subject-Verb Agreement? (Definition + Function)" />
       <DefinitionCard>
         <p className="mb-3">
           Subject–verb agreement means the <strong className="text-white">subject</strong> and the <strong className="text-white">verb</strong> must match:
@@ -41,13 +42,28 @@ export function TopicSubjectVerbAgreement() {
         />
         <p className="text-sm font-semibold text-slate-300 mb-2 mt-4">Examples</p>
         <WorkedExample>
-          <>&quot;The <strong>government</strong> <em>plays</em> an important role.&quot;</>
+          <>
+            <p className="mb-1 font-semibold text-slate-300">Present simple:</p>
+            <p>&quot;The <strong>company</strong> <em>invests</em> heavily in renewable energy to reduce its environmental impact.&quot;</p>
+          </>
         </WorkedExample>
         <WorkedExample>
-          <>&quot;This <strong>chart</strong> <em>shows</em> changes in population.&quot;</>
+          <>
+            <p className="mb-1 font-semibold text-slate-300">Present perfect:</p>
+            <p>&quot;The <strong>government</strong> <em>has implemented</em> several policies to address the issue of unemployment.&quot;</p>
+          </>
         </WorkedExample>
         <WorkedExample>
-          <>&quot;He <em>works</em> part‑time while studying.&quot;</>
+          <>
+            <p className="mb-1 font-semibold text-slate-300">Verb &apos;to be&apos; Present (&apos;is&apos;):</p>
+            <p>&quot;The <strong>impact</strong> of climate change on coastal communities <em>is</em> becoming increasingly severe.&quot;</p>
+          </>
+        </WorkedExample>
+        <WorkedExample>
+          <>
+            <p className="mb-1 font-semibold text-slate-300">Verb &apos;to be&apos; Past (&apos;was&apos;):</p>
+            <p>&quot;The overall <strong>performance</strong> of the students in last year&apos;s examination <em>was</em> significantly better than expected.&quot;</p>
+          </>
         </WorkedExample>
         <p className="text-sm font-semibold text-slate-300 mb-2 mt-4">Common IELTS mistakes</p>
         <MistakeRow wrong="The government play an important role." correct="The government plays an important role." />
@@ -67,14 +83,35 @@ export function TopicSubjectVerbAgreement() {
         />
         <p className="text-sm font-semibold text-slate-300 mb-2 mt-4">Examples</p>
         <WorkedExample>
-          <>&quot;Many <strong>students</strong> <em>prefer</em> studying abroad.&quot;</>
+          <>
+            <p className="mb-1 font-semibold text-slate-300">Present simple:</p>
+            <p>&quot;The <strong>companies</strong> <em>invest</em> heavily in renewable energy to reduce their environmental impact.&quot;</p>
+          </>
         </WorkedExample>
         <WorkedExample>
-          <>&quot;Cars <em>cause</em> serious pollution in big cities.&quot;</>
+          <>
+            <p className="mb-1 font-semibold text-slate-300">Present perfect:</p>
+            <p>&quot;The <strong>governments</strong> <em>have implemented</em> several policies to address the issue of unemployment.&quot;</p>
+          </>
+        </WorkedExample>
+        <WorkedExample>
+          <>
+            <p className="mb-1 font-semibold text-slate-300">Verb &apos;to be&apos; Present (&apos;are&apos;):</p>
+            <p>&quot;The <strong>impacts</strong> of climate change on coastal communities <em>are</em> becoming increasingly severe.&quot;</p>
+          </>
+        </WorkedExample>
+        <WorkedExample>
+          <>
+            <p className="mb-1 font-semibold text-slate-300">Verb &apos;to be&apos; Past (&apos;were&apos;):</p>
+            <p>&quot;The overall <strong>performances</strong> of the students in last year&apos;s examinations <em>were</em> significantly better than expected.&quot;</p>
+          </>
         </WorkedExample>
         <p className="text-sm font-semibold text-slate-300 mb-2 mt-4">Common IELTS mistakes</p>
         <MistakeRow wrong="Many students prefers to study abroad." correct="Many students prefer to study abroad." />
       </DefinitionCard>
+      <ExaminerTip>
+        For the present simple, a good trick is to &quot;balance out the s&quot;. If the subject already ends with an &quot;s&quot;, the verb shouldn&apos;t, and vice versa. Plural subjects usually end in &quot;s&quot;, so the verb shouldn&apos;t. The opposite is true for singular subjects.
+      </ExaminerTip>
 
       <SectionTitle number={4} title="Special patterns" />
       <SubSectionTitle title="4.1 Subjects joined by &quot;and&quot;" />
@@ -84,17 +121,7 @@ export function TopicSubjectVerbAgreement() {
           <>&quot;The internet <strong>and</strong> mobile phones <em>have</em> changed communication.&quot;</>
         </WorkedExample>
       </DefinitionCard>
-      <SubSectionTitle title="4.2 Subjects joined by &quot;or / nor&quot;" />
-      <DefinitionCard>
-        <p className="mb-2">Verb agrees with the <strong className="text-white">closest</strong> subject.</p>
-        <WorkedExample>
-          <>&quot;Either the <strong>teacher</strong> or the <strong>students</strong> <em>are</em> responsible.&quot;</>
-        </WorkedExample>
-        <WorkedExample>
-          <>&quot;Either the <strong>students</strong> or the <strong>teacher</strong> <em>is</em> responsible.&quot;</>
-        </WorkedExample>
-      </DefinitionCard>
-      <SubSectionTitle title="4.3 There is / There are" />
+      <SubSectionTitle title="4.2 There is / There are" />
       <DefinitionCard>
         <p className="mb-2">Singular noun → &quot;There <strong>is</strong> one main reason for this problem.&quot;</p>
         <p>Plural noun → &quot;There <strong>are</strong> several reasons for this problem.&quot;</p>

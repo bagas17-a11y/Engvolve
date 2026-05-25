@@ -24,137 +24,221 @@ export function TopicVerbTenses() {
       <SubSectionTitle title="V1/V2/V3 Legend" />
       <KeyList
         items={[
-          <><strong className="text-white">V1</strong> = base form (work, go, increase)</>,
-          <><strong className="text-white">V2</strong> = past simple (worked, went, increased)</>,
-          <><strong className="text-white">V3</strong> = past participle (worked, gone, increased)</>,
+          <><strong className="text-white">V1 (Base Form/Present)</strong>: The root form of the verb, used in the present tense, future tense, and with modals.</>,
+          <><strong className="text-white">V2 (Past Simple)</strong>: Used for actions that were completed in the past.</>,
+          <><strong className="text-white">V3 (Past Participle)</strong>: Used in perfect tenses (with &apos;have/has/had&apos;) and the passive voice.</>,
+          <>Regular verbs: form V2 and V3 by adding -ed or -d to V1</>,
+          <>Irregular verbs: do not follow the regular rule, often changing spelling of V2/V3 completely from V1</>,
         ]}
       />
       <RevisionTable
-        headers={["Tense", "Form (using V1/V2/V3)", "Basic use"]}
+        headers={["Type", "V1 (Base)", "V2 (Past Simple)", "V3 (Past Participle)"]}
         rows={[
-          ["Past simple", "V2", "Finished actions at a specific past time"],
-          ["Present simple", "V1 / V1+s", "Facts, habits, general truths"],
-          ["Future with will", "will + V1", "Predictions, decisions at moment of speaking"],
+          ["Regular", "walk", "walked", "walked"],
+          ["Regular", "increase", "increased", "increased"],
+          ["Regular", "study", "studied", "studied"],
+          ["Irregular", "go", "went", "gone"],
+          ["Irregular", "rise", "rose", "risen"],
+          ["Irregular", "write", "wrote", "written"],
+          ["Irregular", "fall", "fell", "fallen"],
+          ["Irregular", "begin", "began", "begun"],
         ]}
       />
 
       <SectionTitle number={2} title="Past Tenses" />
-      <SubSectionTitle title="2.1 Past simple" />
+      <SubSectionTitle title="2.1 Past Simple" />
       <DefinitionCard>
-        <p className="mb-2"><strong>Form:</strong> V2 (increased, fell, rose, was/were)</p>
-        <p className="mb-2"><strong>Use:</strong> Completed actions or changes in the past.</p>
+        <p className="mb-2"><strong>Definition:</strong> Describes actions completed in the past.</p>
+        <p className="mb-2 text-sm text-slate-300">Uses <strong className="text-white">was</strong> for singular subject / <strong className="text-white">were</strong> for plural subject</p>
+        <p className="mb-2 font-semibold text-slate-200 mt-3">Structures:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Positive:</strong> Subject + V2 + object + modifiers — E.g. &quot;Car ownership increased significantly between 1990 and 2000.&quot;</>,
+            <><strong className="text-white">Negative:</strong> Subject + did not + V1 + object + modifiers — E.g. &quot;In the past, people did not rely on technology.&quot;</>,
+            <><strong className="text-white">Question:</strong> Did + subject + V1 + object + modifiers? — E.g. &quot;Did the education system improve in the last 20 years?&quot;</>,
+          ]}
+        />
       </DefinitionCard>
-      <WorkedExample>
-        <>IELTS Writing Task 1: &quot;Car ownership <strong>increased</strong> significantly between 1990 and 2000.&quot; — Why: the chart shows a past period that is finished.</>
-      </WorkedExample>
-      <WorkedExample>
-        <>IELTS Writing Task 2: &quot;In the past, people <strong>relied</strong> more on local communities.&quot;</>
-      </WorkedExample>
-      <WorkedExample>
-        <>Speaking: &quot;I <strong>studied</strong> English at school.&quot;</>
-      </WorkedExample>
 
-      <SubSectionTitle title="2.2 Past continuous" />
+      <SubSectionTitle title="2.2 Past Continuous" />
       <DefinitionCard>
-        <p className="mb-2"><strong>Form:</strong> was/were + V‑ing</p>
-        <p className="mb-2"><strong>Use:</strong> Action in progress at a specific time in the past.</p>
+        <p className="mb-2"><strong>Definition:</strong> Describes actions that were in progress at a specific time in the past.</p>
+        <p className="mb-2 font-semibold text-slate-200 mt-3">Structures:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Positive:</strong> Subject + was/were + V1-ing + object + modifiers — &quot;I was conducting research on climate change when the data became available.&quot;</>,
+            <><strong className="text-white">Negative:</strong> Subject + was/were + not + V1-ing — &quot;They were not considering alternative solutions during the discussion.&quot;</>,
+            <><strong className="text-white">Question:</strong> Was/Were + subject + V1-ing? — &quot;Were they negotiating the contract when the market was unstable?&quot;</>,
+          ]}
+        />
       </DefinitionCard>
-      <WorkedExample>
-        <>&quot;While internet use <strong>was rising</strong>, newspaper readership <strong>was falling</strong>.&quot; — Why: describes two actions happening at the same time in a past period.</>
-      </WorkedExample>
 
-      <SubSectionTitle title="2.3 Past perfect" />
+      <SubSectionTitle title="2.3 Past Perfect" />
       <DefinitionCard>
-        <p className="mb-2"><strong>Form:</strong> had + V3</p>
-        <p className="mb-2"><strong>Use:</strong> Earlier past before another past point.</p>
+        <p className="mb-2"><strong>Definition:</strong> Describes actions that happened before another past event.</p>
+        <p className="mb-2 font-semibold text-slate-200 mt-3">Structures:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Positive:</strong> Subject + had + V3 — &quot;She had studied English for years before she moved to Canada.&quot;</>,
+            <><strong className="text-white">Negative:</strong> Subject + had not + V3 — &quot;I had not anticipated such a significant increase in demand before the policy changed.&quot;</>,
+            <><strong className="text-white">Question:</strong> Had + subject + V3? — &quot;Had the organization considered alternative solutions before making the final decision?&quot;</>,
+          ]}
+        />
       </DefinitionCard>
-      <WorkedExample>
-        <>IELTS Writing Task 1: &quot;By 2010, the population <strong>had doubled</strong>.&quot; — Why: &quot;doubling&quot; happened before 2010, which is another past reference point.</>
-      </WorkedExample>
 
-      <SubSectionTitle title="2.4 Past perfect continuous" />
+      <SubSectionTitle title="2.4 Past Perfect Continuous" />
       <DefinitionCard>
-        <p className="mb-2"><strong>Form:</strong> had been + V‑ing</p>
-        <p className="mb-2"><strong>Use:</strong> To stress <strong>duration</strong> before another past event.</p>
+        <p className="mb-2"><strong>Definition:</strong> Describes actions that started in the past, was ongoing, then stopped before another past action.</p>
+        <p className="mb-2 font-semibold text-slate-200 mt-3">Structures:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Positive:</strong> Subject + had + been + V1-ing — &quot;The team had been preparing for the competition before it was postponed.&quot;</>,
+            <><strong className="text-white">Negative:</strong> Subject + had not + been + V1-ing — &quot;They had not been living in that city for long before they decided to move.&quot;</>,
+            <><strong className="text-white">Question:</strong> Had + subject + been + V1-ing? — &quot;Had the students been preparing for the exam before the syllabus changed?&quot;</>,
+          ]}
+        />
       </DefinitionCard>
-      <WorkedExample>
-        <>&quot;Unemployment <strong>had been increasing</strong> steadily before the reforms were introduced.&quot;</>
-      </WorkedExample>
 
       <SectionTitle number={3} title="Present Tenses" />
-      <SubSectionTitle title="3.1 Present simple" />
+      <SubSectionTitle title="3.1 Present Simple" />
       <DefinitionCard>
-        <p className="mb-2"><strong>Form:</strong> V1 / V1+s</p>
-        <p className="mb-2"><strong>Use:</strong> Facts, general truths, descriptions of charts with no clear past/future, and opinions.</p>
+        <p className="mb-2"><strong>Definition:</strong> Describes habits, general truths, and permanent situations.</p>
+        <p className="mb-2 text-sm text-slate-300">Uses <strong className="text-white">s/es</strong> for singular noun or third-person singular (he/she/it) / DO NOT use s/es for: I, you, plural nouns</p>
+        <p className="mb-2 font-semibold text-slate-200 mt-3">Structures:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Positive:</strong> Subject + V1 (+s/es) + object + modifiers — &quot;Global demand for renewable energy increases steadily as governments adopt stricter environmental policies.&quot;</>,
+            <><strong className="text-white">Negative:</strong> Subject + do/does not + V1 — &quot;Certain regions do not implement sustainable practices despite clear environmental concerns.&quot;</>,
+            <><strong className="text-white">Question:</strong> Do/Does + subject + V1? — &quot;Does technological advancement always lead to improved living standards?&quot;</>,
+          ]}
+        />
       </DefinitionCard>
-      <WorkedExample>
-        <>IELTS Writing Task 1: &quot;The chart <strong>shows</strong> the proportion of energy sources.&quot; — Why: the chart exists now; description is factual.</>
-      </WorkedExample>
-      <WorkedExample>
-        <>IELTS Writing Task 2: &quot;Education <strong>plays</strong> a vital role in economic development.&quot;</>
-      </WorkedExample>
-      <WorkedExample>
-        <>Speaking: &quot;I <strong>live</strong> in Jakarta.&quot;</>
-      </WorkedExample>
 
-      <SubSectionTitle title="3.2 Present continuous" />
+      <SubSectionTitle title="3.2 Present Continuous" />
       <DefinitionCard>
-        <p className="mb-2"><strong>Form:</strong> am/is/are + V‑ing</p>
-        <p className="mb-2"><strong>Use:</strong> Temporary actions and current trends.</p>
+        <p className="mb-2"><strong>Definition:</strong> Describes actions happening at the moment or temporary situations.</p>
+        <p className="mb-2 text-sm text-slate-300">Uses: <strong className="text-white">am</strong> for I; <strong className="text-white">is</strong> for he/she/it; <strong className="text-white">are</strong> for you/we/they</p>
+        <p className="mb-2 font-semibold text-slate-200 mt-3">Structures:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Positive:</strong> Subject + am/is/are + V1-ing — &quot;Governments are implementing comprehensive reforms to address economic instability.&quot;</>,
+            <><strong className="text-white">Negative:</strong> Subject + am/is/are + not + V1-ing — &quot;Many organizations are not prioritizing long-term sustainability at present.&quot;</>,
+            <><strong className="text-white">Question:</strong> Am/Is/Are + subject + V1-ing? — &quot;Are policymakers adopting effective measures to combat inflation?&quot;</>,
+          ]}
+        />
       </DefinitionCard>
-      <WorkedExample>
-        <>&quot;Many cities <strong>are experiencing</strong> rapid urbanisation.&quot; — Why: emphasises change happening around now; useful in IELTS Writing Task 2 and Speaking.</>
-      </WorkedExample>
 
-      <SubSectionTitle title="3.3 Present perfect" />
+      <SubSectionTitle title="3.3 Present Perfect" />
       <DefinitionCard>
-        <p className="mb-2"><strong>Form:</strong> have/has + V3</p>
-        <p className="mb-2"><strong>Use:</strong> Past action with result now / life experience / change up to now.</p>
+        <p className="mb-2"><strong>Definition:</strong> Describes actions that happened in the past but are relevant to the present.</p>
+        <p className="mb-2 text-sm text-slate-300">Uses: <strong className="text-white">HAS</strong> for singular/he/she/it; <strong className="text-white">HAVE</strong> for plural/I/you/we/they</p>
+        <p className="mb-2 font-semibold text-slate-200 mt-3">Structures:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Positive:</strong> Subject + have/has + V3 — &quot;The government has introduced several policies aimed at reducing carbon emissions.&quot;</>,
+            <><strong className="text-white">Negative:</strong> Subject + have/has not + V3 — &quot;Many developing countries have not achieved adequate healthcare standards.&quot;</>,
+            <><strong className="text-white">Question:</strong> Have/Has + subject + V3? — &quot;Have recent technological advancements improved global communication?&quot;</>,
+          ]}
+        />
       </DefinitionCard>
-      <WorkedExample>
-        <>IELTS Writing Task 2: &quot;Technology <strong>has transformed</strong> the way people communicate.&quot;</>
-      </WorkedExample>
-      <WorkedExample>
-        <>Speaking: &quot;I <strong>have lived</strong> here for ten years.&quot; — Why: action started in the past and continues to now.</>
-      </WorkedExample>
 
-      <SubSectionTitle title="3.4 Present perfect continuous" />
+      <SubSectionTitle title="3.4 Present Perfect Continuous" />
       <DefinitionCard>
-        <p className="mb-2"><strong>Form:</strong> have/has been + V‑ing</p>
-        <p className="mb-2"><strong>Use:</strong> Emphasise ongoing activity from past until now.</p>
+        <p className="mb-2"><strong>Definition:</strong> Describes actions that started in the past and are still continuing, or have recently stopped with a focus on duration.</p>
+        <p className="mb-2 font-semibold text-slate-200 mt-3">Structures:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Positive:</strong> Subject + have/has + been + V1-ing — &quot;Economists have been analyzing market fluctuations to understand long-term trends.&quot;</>,
+            <><strong className="text-white">Negative:</strong> Subject + have/has not + been + V1-ing — &quot;Experts have not been observing significant progress in this sector.&quot;</>,
+            <><strong className="text-white">Question:</strong> Have/Has + subject + been + V1-ing? — &quot;Has the population been experiencing steady growth in recent decades?&quot;</>,
+          ]}
+        />
       </DefinitionCard>
-      <WorkedExample>
-        <>&quot;Governments <strong>have been investing</strong> heavily in renewable energy.&quot;</>
-      </WorkedExample>
 
-      <SectionTitle number={4} title="Future Forms" />
-      <SubSectionTitle title="4.1 Will + V1" />
+      <SectionTitle number={4} title="Future Tenses" />
+      <SubSectionTitle title="4.1 Future Simple (will)" />
       <DefinitionCard>
-        <p className="mb-2"><strong>Form:</strong> will + V1</p>
-        <p className="mb-2"><strong>Use:</strong> Predictions and future projections (especially when chart includes future data).</p>
+        <p className="mb-2"><strong>Definition:</strong> Describes spontaneous decisions, predictions, and promises.</p>
+        <p className="mb-2 font-semibold text-slate-200 mt-3">Structures:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Positive:</strong> Subject + will + V1 — &quot;Governments will introduce stricter regulations to combat environmental degradation.&quot;</>,
+            <><strong className="text-white">Negative:</strong> Subject + will not (won&apos;t) + V1 — &quot;The policy will not resolve the issue entirely without further intervention.&quot;</>,
+            <><strong className="text-white">Question:</strong> Will + subject + V1? — &quot;Will these reforms improve social equality in the long term?&quot;</>,
+          ]}
+        />
       </DefinitionCard>
-      <WorkedExample>
-        <>IELTS Writing Task 1: &quot;The number of car users <strong>will continue</strong> to rise after 2020.&quot; — Why: describes prediction shown in the chart.</>
-      </WorkedExample>
 
-      <SubSectionTitle title="4.2 Be going to + V1" />
+      <SubSectionTitle title="4.2 Future Continuous" />
       <DefinitionCard>
-        <p className="mb-2"><strong>Use:</strong> Plans/intentions or predictions with strong present evidence.</p>
+        <p className="mb-2"><strong>Definition:</strong> Describes actions that will be in progress at a specific time in the future.</p>
+        <p className="mb-2 font-semibold text-slate-200 mt-3">Structures:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Positive:</strong> Subject + will be + V1-ing — &quot;Next year, researchers will be examining the long-term effects of climate change.&quot;</>,
+            <><strong className="text-white">Negative:</strong> Subject + will not be + V1-ing — &quot;The organizations will not be implementing major changes during the upcoming quarter.&quot;</>,
+            <><strong className="text-white">Question:</strong> Will + subject + be + V1-ing? — &quot;Will policymakers be addressing this issue during the next summit?&quot;</>,
+          ]}
+        />
       </DefinitionCard>
-      <WorkedExample>
-        <>&quot;The population <strong>is going to reach</strong> a peak before 2050.&quot;</>
-      </WorkedExample>
 
-      <SubSectionTitle title="4.3 Future perfect" />
+      <SubSectionTitle title="4.3 Future Perfect" />
       <DefinitionCard>
-        <p className="mb-2"><strong>Form:</strong> will have + V3</p>
-        <p className="mb-2"><strong>Use:</strong> Action completed before a specific future time.</p>
+        <p className="mb-2"><strong>Definition:</strong> Describes actions that will be completed before a specific time in the future.</p>
+        <p className="mb-2 font-semibold text-slate-200 mt-3">Structures:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Positive:</strong> Subject + will have + V3 — &quot;By the end of the decade, many countries will have achieved significant reductions in carbon emissions.&quot;</>,
+            <><strong className="text-white">Negative:</strong> Subject + will not have + V3 — &quot;The company will not have resolved the issue by the proposed deadline.&quot;</>,
+            <><strong className="text-white">Question:</strong> Will + subject + have + V3? — &quot;Will they have finalized the agreement by next month?&quot;</>,
+          ]}
+        />
       </DefinitionCard>
-      <WorkedExample>
-        <>&quot;By 2030, emissions <strong>will have fallen</strong> by half.&quot; — Why: used when the graph shows a future point and an earlier future change.</>
-      </WorkedExample>
 
-      <SectionTitle number={5} title="Which Tense for IELTS Writing Task 1 vs Task 2 vs Speaking?" />
+      <SubSectionTitle title="4.4 Future Perfect Continuous" />
+      <DefinitionCard>
+        <p className="mb-2"><strong>Definition:</strong> Describes actions that will have been happening for a duration up to a specific point in the future.</p>
+        <p className="mb-2 font-semibold text-slate-200 mt-3">Structures:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Positive:</strong> Subject + will have been + V1-ing — &quot;By 2030, the team will have been working on this initiative for over a decade.&quot;</>,
+            <><strong className="text-white">Negative:</strong> Subject + will not have been + V1-ing — &quot;They will not have been waiting very long by the time the government passes the bill.&quot;</>,
+            <><strong className="text-white">Question:</strong> Will + subject + have been + V1-ing? — &quot;Will the company have been investing in this technology for many years by 2030?&quot;</>,
+          ]}
+        />
+      </DefinitionCard>
+
+      <SectionTitle number={5} title="Active and Passive Voice" />
+      <DefinitionCard>
+        <p className="mb-3">
+          <strong className="text-white">Active voice:</strong> The subject does the action. Sentence structure uses normal tense formulas.
+        </p>
+        <p className="mb-3">
+          <strong className="text-white">Passive voice:</strong> The subject receives the action. Structure: Object + form of &apos;to be&apos; + V3 + (by + subject)
+        </p>
+        <p className="mb-2 font-semibold text-slate-200">Form of &apos;to be&apos; depends on tense:</p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Present simple:</strong> am/is/are + V3</>,
+            <><strong className="text-white">Past simple:</strong> was/were + V3</>,
+            <><strong className="text-white">Future simple:</strong> will be + V3</>,
+            <><strong className="text-white">Present continuous:</strong> am/is/are + being + V3</>,
+            <><strong className="text-white">Present perfect:</strong> has/have + been + V3</>,
+            <><strong className="text-white">Past perfect:</strong> had + been + V3</>,
+            <><strong className="text-white">Future perfect:</strong> will have been + V3</>,
+          ]}
+        />
+      </DefinitionCard>
+      <RevisionTable
+        headers={["Tense", "Active", "Passive"]}
+        rows={[
+          ["Past", "The committee approved the new regulations last year.", "The new regulations were approved by the committee last year."],
+          ["Present", "Governments implement new environmental policies to reduce carbon emissions.", "New environmental policies are implemented by governments to reduce carbon emissions."],
+          ["Future", "The government will introduce stricter laws next year.", "Stricter laws will be introduced by the government next year."],
+        ]}
+      />
+
+      <SectionTitle number={6} title="Which Tense for IELTS Writing Task 1 vs Task 2 vs Speaking?" />
       <RevisionTable
         headers={["Situation", "Best tense(s)", "Example"]}
         rows={[
@@ -171,7 +255,7 @@ export function TopicVerbTenses() {
         Mixing past and present for the same chart (&quot;was increased&quot; / &quot;is decreasing&quot;) is a common Band 5–6 error. Stick to one logical tense based on the time in the question.
       </ExaminerTip>
 
-      <SectionTitle number={6} title="Mini Practice with Answer Explanations" />
+      <SectionTitle number={7} title="Mini Practice with Answer Explanations" />
       <div className="space-y-6">
         <MiniPractice
           title="Q1 – Task 1 (past chart)"

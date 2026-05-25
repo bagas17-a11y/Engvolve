@@ -6,6 +6,7 @@ import {
   SubSectionTitle,
   KeyList,
   MiniPractice,
+  RevisionTable,
 } from "./RevisionNoteContent";
 
 export function TopicPartsOfSpeech() {
@@ -25,7 +26,10 @@ export function TopicPartsOfSpeech() {
       <SubSectionTitle title="2.1 What it is (Definition + Function)" />
       <DefinitionCard>
         <p className="mb-3">
-          The subject is the noun or pronoun that performs the action or is described in the sentence.
+          The subject is the noun or pronoun that performs the action; i.e. the &apos;thing&apos; described in the sentence.
+        </p>
+        <p className="mb-3">
+          Every clause has its own subject. Since complex sentences can have multiple clauses, one sentence can have more than one subject. It is important to always identify what you are being asked in the exam.
         </p>
         <p>
           In IELTS Writing, subjects often refer to trends, groups of people, or abstract ideas rather than just &quot;I&quot; or &quot;people&quot;.
@@ -34,9 +38,9 @@ export function TopicPartsOfSpeech() {
       <p className="text-sm font-semibold text-slate-300 mb-2">Typical IELTS subjects</p>
       <KeyList
         items={[
-          <>Abstract nouns: &quot;globalisation&quot;, &quot;climate change&quot;, &quot;urbanisation&quot;</>,
-          <>Noun phrases: &quot;the proportion of elderly citizens&quot;, &quot;the number of cars on the road&quot;</>,
-          <>Dummy subject &quot;It&quot;: &quot;It is widely believed that…&quot;</>,
+          <><strong className="text-white">Abstract noun:</strong> describes an idea, state, or quality instead of a concrete object — E.g. globalisation, urbanisation</>,
+          <><strong className="text-white">Noun phrases:</strong> a main noun complemented by modifiers that specify it — E.g. &quot;the proportion of elderly citizens&quot;</>,
+          <><strong className="text-white">Dummy subject:</strong> used to fill in the subject role in a sentence without adding meaning — E.g. &quot;It is widely believed that&quot;</>,
         ]}
       />
       <SubSectionTitle title="2.2 Worked Examples" />
@@ -73,32 +77,46 @@ export function TopicPartsOfSpeech() {
         <p className="mb-3">
           A verb expresses an action, state, or change.
         </p>
-        <p>
+        <p className="mb-3">
           For IELTS, verbs are crucial for choosing the correct tense and for accurately describing trends, opinions, and possibilities.
         </p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Lexical (main verb):</strong> Tells you the main action. E.g. run, cook, rise, etc. Important in IELTS to know synonyms of common verbs.</>,
+            <><strong className="text-white">Auxiliary (helping verb):</strong> Works with a lexical verb to show: Tense (past/present/future), Ask questions, Add emphasis, Express possibility/ability/permission. Important in IELTS to form more complex sentence structures.</>,
+          ]}
+        />
       </DefinitionCard>
       <SubSectionTitle title="3.2 Worked Examples" />
-      <KeyList
-        items={[
-          <><strong className="text-white">Lexical verbs</strong>: carry main meaning (increase, rise, argue, suggest).</>,
-          <><strong className="text-white">Auxiliary verbs</strong>: help build tenses and passive forms (be, have, do, will, can, may).</>,
-        ]}
-      />
       <WorkedExample>
-        <>&quot;The figure <strong>rose</strong> sharply in 2015.&quot; (lexical)</>
+        <>
+          <p className="mb-1 font-semibold text-slate-200">Lexical verb:</p>
+          <p>&quot;The figure <strong>rose</strong> sharply in 2015.&quot; — &apos;Rose&apos; is the main verb telling us the action.</p>
+        </>
       </WorkedExample>
       <WorkedExample>
-        <>&quot;The population <strong>was projected to reach</strong> 10 million by 2030.&quot; (auxiliary + passive)</>
+        <>
+          <p className="mb-2 font-semibold text-slate-200">Auxiliary verb — Tense:</p>
+          <p className="mb-2">&quot;The population <strong>was projected</strong> to reach 10 million by 2030.&quot;</p>
+          <p className="mb-2 font-semibold text-slate-200">Auxiliary verb — Questions:</p>
+          <p className="mb-2">&quot;<strong>Has</strong> the government introduced new policies?&quot;</p>
+          <p className="mb-2 font-semibold text-slate-200">Auxiliary verb — Emphasis:</p>
+          <p className="mb-2">&quot;The results <strong>do</strong> suggest a significant change.&quot;</p>
+          <p className="mb-2 font-semibold text-slate-200">Auxiliary verb — Possibility:</p>
+          <p>&quot;Urbanisation <strong>could</strong> lead to increased inequality.&quot;</p>
+        </>
       </WorkedExample>
       <ExaminerTip>
         Band 7+ answers use a range of verbs: reporting verbs (&quot;illustrates&quot;, &quot;demonstrates&quot;), opinion verbs (&quot;contend&quot;, &quot;maintain&quot;), and modals (&quot;could lead to&quot;, &quot;may result in&quot;).
       </ExaminerTip>
       <SubSectionTitle title="3.3 Mini Practice" />
       <MiniPractice
-        title="Choose the verb"
-        prompt={<>Replace &quot;went up&quot; with a more academic verb in: &quot;Sales went up between 2010 and 2015.&quot;</>}
-        modelLabel="Possible example"
-        model={<>Sales <strong>increased</strong> between 2010 and 2015. (or rose, grew)</>}
+        title="Verbs practice"
+        prompt={
+          <>
+            Some people believe that technology has made learning easier, while others think it has created more problems. Discuss both views and give your own opinion. In your answer, use different tenses, lexical, and auxiliary verbs.
+          </>
+        }
       />
 
       <SectionTitle number={4} title="Pronouns" />
@@ -107,103 +125,137 @@ export function TopicPartsOfSpeech() {
         <p className="mb-3">
           Pronouns replace nouns to avoid repetition and maintain cohesion.
         </p>
-        <p>
+        <p className="mb-3">
           Misusing pronouns (especially it / they / this / these) can cause ambiguity and reduce coherence.
         </p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Personal:</strong> refer to people or things — E.g. I, we, they, it (use &quot;I&quot; mainly in Speaking and sometimes in IELTS Writing Task 2 when asked for your opinion)</>,
+            <><strong className="text-white">Demonstrative:</strong> point to specific things — This (singular near), That (singular far), These (plural near), Those (plural far)</>,
+            <><strong className="text-white">Relative:</strong> introduce extra information about a noun — Who (people), Which (things), That (people/things), Where (place), When (time)</>,
+          ]}
+        />
       </DefinitionCard>
       <SubSectionTitle title="4.2 Worked Examples" />
-      <KeyList
-        items={[
-          <><strong className="text-white">Personal</strong>: I, we, they, it (use &quot;I&quot; mainly in Speaking and sometimes in IELTS Writing Task 2 when asked for your opinion).</>,
-          <><strong className="text-white">Demonstrative</strong>: this, that, these, those (refer clearly to the previous idea).</>,
-          <><strong className="text-white">Relative</strong>: who, which, that, where (build complex sentences).</>,
-        ]}
-      />
       <WorkedExample>
-        <>&quot;<strong>This trend</strong> is likely to continue.&quot; — The <strong className="text-white">pronoun</strong> is &quot;This&quot;; the <strong className="text-white">noun</strong> it refers to is &quot;trend&quot;. &quot;Trend&quot; is a noun; &quot;this&quot; is a demonstrative pronoun. In later sentences, you can use &quot;this&quot; + noun to refer back clearly.</>
+        <>
+          <p className="mb-1 font-semibold text-slate-200">Demonstrative:</p>
+          <p className="mb-2">&quot;In recent years, the use of A.I. companionships to alleviate loneliness has seen a staggering 45% increase. <strong>This trend</strong> is likely to continue growing over the next 10 years.&quot;</p>
+          <p className="text-slate-300 text-sm">The &apos;trend&apos; being described is the increasing use of A.I. companionships. Instead of repeating the phrase, the demonstrative pronoun &apos;this&apos; is used to refer to it.</p>
+        </>
       </WorkedExample>
       <WorkedExample>
-        <>&quot;Individuals <strong>who</strong> live in cities often face higher living costs.&quot;</>
+        <>
+          <p className="mb-1 font-semibold text-slate-200">Relative:</p>
+          <p className="mb-2">&quot;Individuals <strong>who</strong> live in cities often face higher living costs.&quot;</p>
+          <p className="text-slate-300 text-sm">The relative pronoun &apos;who&apos; specifies the type of individuals we are learning about; in this case, those who live in cities.</p>
+        </>
       </WorkedExample>
       <ExaminerTip>
-        Avoid starting <strong>many</strong> sentences with vague &quot;this&quot; + verb (e.g. &quot;This leads to…&quot;, &quot;This causes…&quot;) when the reference is unclear. It is fine to use &quot;This + noun&quot; when the noun is explicit (e.g. &quot;This trend is likely to continue.&quot;). Make sure the reader always knows exactly what &quot;this&quot; refers to.
+        Avoid starting <strong>many</strong> sentences with vague &quot;this&quot; + verb (e.g. &quot;This leads to…&quot;, &quot;This causes…&quot;) when the reference is unclear. It is fine to use &quot;This + noun&quot; when the noun is explicit (e.g. &quot;This trend is likely to continue.&quot;). Make sure the reader always knows exactly what &quot;this&quot; refers to. If it feels unclear, repeat the full noun phrase (e.g. &quot;this trend in online study…&quot;).
       </ExaminerTip>
-      <p className="text-sm font-semibold text-amber-200 mt-2 mb-1">Warning</p>
-      <p className="text-sm text-slate-300">
-        Make sure &quot;this&quot; clearly refers to the previous idea. If it feels unclear, repeat the full noun phrase (e.g. &quot;this trend in online study…&quot;).
-      </p>
       <SubSectionTitle title="4.3 Mini Practice" />
       <MiniPractice
-        title="Improve pronoun use"
-        prompt={<>Rewrite to make the reference clear: &quot;This is bad for the environment.&quot; (referring to car use)</>}
-        modelLabel="Possible example"
-        model={<>&quot;<strong>This increase in car use</strong> is harmful to the environment.&quot;</>}
+        title="Pronoun practice"
+        prompt={
+          <>
+            Rewrite the sentences using better pronouns to improve coherence and grammar: (1) Technology is important. Technology helps students learn faster. (2) Many people live in cities. Many people face pollution problems. (3) Some solutions are ineffective. The solutions should be avoided.
+          </>
+        }
       />
 
       <SectionTitle number={5} title="Adjectives" />
       <SubSectionTitle title="5.1 What it is (Definition + Function)" />
       <DefinitionCard>
         <p className="mb-3">
-          Adjectives describe or quantify nouns.
+          Answers the questions what kind, which one, and how many.
         </p>
         <p>
           In IELTS, they help you sound more precise and academic, especially when describing data or giving opinions.
         </p>
       </DefinitionCard>
       <SubSectionTitle title="5.2 Worked Examples" />
-      <KeyList
-        items={[
-          <>Trend strength: slight, moderate, significant, dramatic</>,
-          <>Evaluation: beneficial, detrimental, effective, inefficient</>,
-          <>Degree: considerable, marginal, minimal, substantial</>,
-        ]}
-      />
       <WorkedExample>
-        <>&quot;There was a <strong>significant</strong> increase in internet usage.&quot;</>
+        <>
+          <p className="mb-1 font-semibold text-slate-200">Trend strength:</p>
+          <p>&quot;There was a <strong>significant</strong> increase in internet usage.&quot;</p>
+        </>
       </WorkedExample>
       <WorkedExample>
-        <>&quot;Fast food has a <strong>detrimental</strong> impact on public health.&quot;</>
+        <>
+          <p className="mb-1 font-semibold text-slate-200">Evaluation:</p>
+          <p>&quot;Fast food has a <strong>detrimental</strong> impact on public health.&quot;</p>
+        </>
+      </WorkedExample>
+      <WorkedExample>
+        <>
+          <p className="mb-1 font-semibold text-slate-200">Degree:</p>
+          <p>&quot;The company made <strong>considerable</strong> progress this year.&quot;</p>
+        </>
       </WorkedExample>
       <SubSectionTitle title="5.3 Mini Practice" />
       <MiniPractice
-        title="Replace informal adjectives"
-        prompt={<>Replace &quot;very bad&quot; with an academic adjective in: &quot;Smoking has a very bad effect.&quot;</>}
-        modelLabel="Possible example"
-        model={<>Smoking has a <strong>detrimental</strong> effect. (or harmful, adverse)</>}
+        title="Adjective practice"
+        prompt={
+          <>
+            Write 3-5 sentences describing the chart below. In your answer, try to include as many precise adjectives as possible, avoiding the use of common descriptors.
+          </>
+        }
       />
 
       <SectionTitle number={6} title="Adverbs" />
       <SubSectionTitle title="6.1 What it is (Definition + Function)" />
       <DefinitionCard>
         <p className="mb-3">
-          Adverbs modify verbs, adjectives, or other adverbs and often show manner, frequency, degree, or attitude.
+          Answer the questions how, when, where, and to what extent?
         </p>
         <p>
           IELTS candidates frequently use time and frequency adverbs when describing trends and behaviours.
         </p>
+        <KeyList
+          items={[
+            <><strong className="text-white">Modifying verbs:</strong> adverbs are used to describe how an action is done — Manner adverbs: steadily, gradually, dramatically, sharply</>,
+            <><strong className="text-white">Modifying adjectives and/or other adverbs:</strong> adverbs are used to describe the degree or extent of adjectives and adverbs — Degree adverbs: very, quite, highly, significantly, extremely</>,
+            <><strong className="text-white">Sentence adverbs:</strong> show speakers&apos; attitudes, opinions, or viewpoint — Starting adverbs: honestly, personally, obviously, etc.</>,
+          ]}
+        />
       </DefinitionCard>
       <SubSectionTitle title="6.2 Worked Examples" />
-      <KeyList
-        items={[
-          <>Manner: steadily, gradually, sharply, dramatically</>,
-          <>Attitude (sentence adverbs): consequently, nevertheless, moreover, notably</>,
-        ]}
-      />
       <WorkedExample>
-        <>&quot;The rate <strong>gradually</strong> increased over the period.&quot;</>
+        <>
+          <p className="mb-1 font-semibold text-slate-200">Modifying Verbs:</p>
+          <p>&quot;The rate <strong>gradually</strong> increased over the period.&quot;</p>
+        </>
       </WorkedExample>
       <WorkedExample>
-        <>&quot;Consequently, governments <strong>are increasingly</strong> investing in renewable energy.&quot;</>
+        <>
+          <p className="mb-1 font-semibold text-slate-200">Modifying Adjectives:</p>
+          <p>&quot;The policy was <strong>highly</strong> effective in reducing emissions.&quot;</p>
+        </>
+      </WorkedExample>
+      <WorkedExample>
+        <>
+          <p className="mb-1 font-semibold text-slate-200">Modifying Other Adverbs:</p>
+          <p>&quot;The population grew <strong>extremely</strong> rapidly in the last decade.&quot;</p>
+        </>
+      </WorkedExample>
+      <WorkedExample>
+        <>
+          <p className="mb-1 font-semibold text-slate-200">Sentence Adverbs:</p>
+          <p>&quot;<strong>Obviously</strong>, governments must take action to address climate change.&quot;</p>
+        </>
       </WorkedExample>
       <ExaminerTip>
         Overusing adverbs like &quot;very&quot; and &quot;really&quot; sounds informal. Replace them with stronger adjectives or academic adverbs (e.g. &quot;highly effective&quot;, &quot;extremely harmful&quot;).
       </ExaminerTip>
       <SubSectionTitle title="6.3 Mini Practice" />
       <MiniPractice
-        title="Replace informal adverbs"
-        prompt={<>Replace &quot;really went up&quot; with academic phrasing.</>}
-        modelLabel="Possible example"
-        model={<>increased <strong>significantly</strong> / <strong>rose dramatically</strong></>}
+        title="Adverb practice"
+        prompt={
+          <>
+            In many countries, governments provide public housing to help people who cannot afford private housing. To what extent do you think public housing is an effective solution to housing problems? What are the main advantages and disadvantages? In your answer, try to include at least one of each type of adverb described above.
+          </>
+        }
       />
 
       <SectionTitle number={7} title="Imperatives" />
@@ -212,45 +264,46 @@ export function TopicPartsOfSpeech() {
         <p className="mb-3">
           Imperatives give commands or directions (&quot;Consider the long‑term effects&quot;).
         </p>
-        <p>
+        <p className="mb-3">
           They are natural in Speaking (giving advice) and in instructions, but in <strong className="text-white">formal IELTS Writing Task 2 (essay)</strong> we usually prefer a declarative sentence instead of a direct imperative.
         </p>
+        <p className="mb-3">
+          While imperatives are an important part of speech, they can sound condescending if used too frequently. Techniques to make them sound more friendly and natural:
+        </p>
+        <KeyList
+          items={[
+            <>Add softeners: try to, please, modal questions (would you mind, could you), maybe, etc.</>,
+            <>Use inclusive language like &apos;Let&apos;s&apos;</>,
+            <>Add context or reason for the command</>,
+          ]}
+        />
       </DefinitionCard>
       <SubSectionTitle title="7.2 Worked Examples" />
-      <p className="text-sm font-semibold text-slate-300 mb-2">Imperative (more speaking / informal writing)</p>
       <WorkedExample>
-        <>&quot;Consider banning private cars in city centres.&quot;</>
-      </WorkedExample>
-      <p className="text-sm font-semibold text-slate-300 mb-2 mt-4">Better Academic Writing alternative (declarative clause)</p>
-      <WorkedExample>
-        <>&quot;Governments <strong>should consider banning</strong> private cars in city centres to reduce congestion.&quot;</>
+        <>
+          <p className="mb-2 font-semibold text-slate-200">Imperative vs Declarative</p>
+          <p className="mb-1 font-semibold text-slate-300">Adding softeners:</p>
+          <p className="mb-2">&quot;Try to study every day.&quot;</p>
+          <p className="mb-1 font-semibold text-slate-300">Using inclusive language:</p>
+          <p className="mb-2">&quot;Let&apos;s look at this example.&quot;</p>
+          <p className="mb-1 font-semibold text-slate-300">Adding context:</p>
+          <p>&quot;Focus on pronunciation so you can easily be understood.&quot;</p>
+        </>
       </WorkedExample>
       <ExaminerTip>
         We teach imperatives because they appear in instructions and Speaking, but in Academic Writing you normally change them into a declarative sentence with a subject + modal (&quot;governments should…&quot;).
       </ExaminerTip>
       <SubSectionTitle title="7.3 Mini Practice" />
       <MiniPractice
-        title="Convert imperative to academic"
-        prompt={<>Convert &quot;Think about the long-term consequences&quot; into an academic-style sentence.</>}
-        modelLabel="Possible example"
-        model={<>&quot;Policy makers <strong>should consider</strong> the long-term consequences.&quot;</>}
+        title="Imperative practice"
+        prompt={
+          <>
+            Imagine that a friend wants to improve their English speaking skills. Give advice on what they should do. In your monologue, try to use the techniques discussed to make your instructions sound more friendly and natural.
+          </>
+        }
       />
 
       <SectionTitle number={8} title="Mini Practice (Parts of Speech)" />
-      <MiniPractice
-        title="Rewrite with advanced parts of speech"
-        prompt={
-          <>
-            <p className="mb-2">Rewrite the sentence using more advanced parts of speech:</p>
-            <p className="text-slate-400 italic">&quot;People use cars a lot and this is bad.&quot;</p>
-          </>
-        }
-        modelLabel="Improved sentence (possible example)"
-        model={
-          <>&quot;The <strong>widespread use</strong> of private vehicles <strong>significantly contributes</strong> to air pollution.&quot;</>
-        }
-      />
-
       <SubSectionTitle title="8.1 Identify Parts of Speech in a Passage" />
       <MiniPractice
         title="Mini Practice – Identify Parts of Speech in a Passage"
@@ -271,6 +324,14 @@ export function TopicPartsOfSpeech() {
           <>Adverb: &quot;<strong className="text-cyan-300">carefully</strong> manage their time&quot;</>,
           <>Imperative: none in this passage</>,
         ]}
+      />
+      <MiniPractice
+        title="Mini Practice – Extended Writing"
+        prompt={
+          <>
+            Some people believe that studying abroad is the best way to learn a language. To what extent do you agree? Answer in 5-6 sentences, including at least 1 of each of the parts of speech discussed in this section.
+          </>
+        }
       />
     </div>
   );
