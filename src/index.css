@@ -90,6 +90,68 @@
     --input: 215 30% 20%;
     --ring: 200 80% 70%;
   }
+
+  /* ── Light Theme ─────────────────────────────────────────── */
+  .light {
+    --background: 220 30% 97%;
+    --foreground: 220 50% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 50% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 50% 10%;
+
+    --primary: 220 50% 15%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 20% 92%;
+    --secondary-foreground: 220 40% 18%;
+
+    --muted: 220 15% 90%;
+    --muted-foreground: 220 18% 42%;
+
+    --accent: 200 72% 40%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 80% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 20% 86%;
+    --input: 220 20% 86%;
+    --ring: 200 72% 40%;
+
+    /* Custom tokens */
+    --navy-deep: 220 50% 10%;
+    --navy: 220 40% 18%;
+    --slate: 220 20% 55%;
+    --slate-light: 220 15% 68%;
+    --pearl: 220 50% 10%;
+    --pearl-muted: 220 20% 35%;
+    --glow-accent: 200 72% 40%;
+    --glow-warm: 25 80% 48%;
+    --elite-gold: 38 82% 42%;
+
+    /* Glassmorphism — white cards */
+    --glass-bg: 0 0% 100% / 0.85;
+    --glass-border: 220 20% 82% / 0.8;
+    --glass-blur: 20px;
+
+    /* Shadows */
+    --shadow-neumorphic: 0 4px 24px -4px hsl(220 30% 70% / 0.35), 0 1px 6px -1px hsl(220 30% 60% / 0.15);
+    --shadow-glow: 0 0 24px hsl(200 72% 40% / 0.18);
+    --shadow-glow-warm: 0 0 32px hsl(25 80% 48% / 0.15);
+
+    /* Sidebar */
+    --sidebar-background: 220 25% 98%;
+    --sidebar-foreground: 220 50% 10%;
+    --sidebar-primary: 200 72% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 93%;
+    --sidebar-accent-foreground: 220 50% 10%;
+    --sidebar-border: 220 20% 88%;
+    --sidebar-ring: 200 72% 40%;
+  }
 }
 
 @layer base {
@@ -134,6 +196,27 @@
       transparent 50%
     );
     pointer-events: none;
+  }
+
+  .light .glass-card {
+    box-shadow: var(--shadow-neumorphic);
+  }
+
+  .light .glass-card::before {
+    display: none;
+  }
+
+  /* Atmospheric background — light version */
+  .light .bg-atmospheric {
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 40%, hsl(210 60% 92% / 0.6) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 80% 60%, hsl(200 50% 90% / 0.4) 0%, transparent 50%),
+      hsl(var(--background));
+  }
+
+  /* Header blur — light version */
+  .light .header-blur {
+    background: hsl(220 30% 97% / 0.85);
   }
 
   /* Neumorphic Button */

@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { 
-  BookOpen, 
-  Headphones, 
-  PenTool, 
-  Mic, 
-  Users, 
+import {
+  BookOpen,
+  Headphones,
+  PenTool,
+  Mic,
+  Users,
   LayoutDashboard,
   LogOut,
   Crown,
   Lock,
   Shield,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ const navItems = [
   { icon: PenTool, label: "Writing", path: "/dashboard/writing", tier: "pro" },
   { icon: Mic, label: "Speaking", path: "/dashboard/speaking", tier: "pro" },
   { icon: Users, label: "Consultation", path: "/dashboard/consultation", tier: "elite" },
+  { icon: Settings, label: "Settings", path: "/dashboard/settings", tier: "free" },
 ];
 
 const tierOrder = { free: 0, pro: 1, elite: 2 };
