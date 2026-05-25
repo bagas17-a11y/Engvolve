@@ -179,8 +179,6 @@ export default function SpeakingModule() {
   const { canAccess, refreshCounts, isLoading: isGatingLoading } = useFeatureGating();
   const [speakingDuration, setSpeakingDuration] = useState<number | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [activeComparison, setActiveComparison] = useState<'enhanced' | null>(null);
-  const [showDiffs, setShowDiffs] = useState<{ naturalness: boolean; enhanced: boolean }>({ naturalness: false, enhanced: false });
   const [tooltipWord, setTooltipWord] = useState<{ word: string; feedback: string } | null>(null);
   const recordingStartRef = useRef<number | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -240,7 +238,6 @@ export default function SpeakingModule() {
       generationStore.clearEntry('speaking-analysis');
       if (isMountedRef.current) {
         setFeedback(feedbackData);
-        setActiveComparison('enhanced');
       }
     } else if (analysisEntry.error) {
       generationStore.clearEntry('speaking-analysis');
@@ -513,7 +510,6 @@ export default function SpeakingModule() {
       if (isMountedRef.current) {
         generationStore.clearEntry('speaking-analysis');
         setFeedback(unwrappedData);
-        setActiveComparison('enhanced');
       } else {
         // Component unmounted — store result for remount to apply
         generationStore.finishGen('speaking-analysis', { feedbackData: unwrappedData });
@@ -584,14 +580,6 @@ export default function SpeakingModule() {
   };
 
   // ── Utility: Word diff ────────────────────────────────────────────────────
-  const computeDiff = (original: string, improved: string): Array<{ word: string; isNew: boolean }> => {
-    const origSet = new Set(original.toLowerCase().split(/\s+/).map(w => w.replace(/[^a-z]/g, '')));
-    return improved.split(/\s+/).filter(Boolean).map(word => ({
-      word,
-      isNew: !origSet.has(word.toLowerCase().replace(/[^a-z]/g, '')),
-    }));
-  };
-
   // ── Utility: Export result ────────────────────────────────────────────────
   const exportResult = () => {
     if (!feedback) return;
@@ -618,10 +606,7 @@ export default function SpeakingModule() {
       '--- POLISHED TRANSCRIPT ---',
       feedback.polishedTranscript ?? '',
       '',
-      '--- IMPROVED NATURALNESS ---',
-      feedback.improvedNaturalness ?? '',
-      '',
-      '--- ENHANCED SPEECH ---',
+      '--- HOW YOU COULD SAY IT ---',
       feedback.enhancedSpeech ?? '',
       '',
       '--- IMPROVEMENTS TO FOCUS ON ---',
@@ -675,73 +660,6 @@ export default function SpeakingModule() {
   };
 
   // ── Inline component: Comparison Panel ───────────────────────────────────
-  const ComparisonPanel = ({
-    title, improvedLabel, original, improved, showDiff, onToggleDiff,
-  }: {
-    title: string; improvedLabel: string;
-    original: string; improved: string;
-    showDiff: boolean; onToggleDiff: () => void;
-  }) => {
-    const diffWords = computeDiff(original, improved);
-    const origCount = original.trim().split(/\s+/).filter(Boolean).length;
-    const imprCount = improved.trim().split(/\s+/).filter(Boolean).length;
-    return (
-      <div className="mt-6">
-        <h4 className="text-sm font-semibold mb-3">{title}</h4>
-        <button
-          onClick={onToggleDiff}
-          className={`mb-4 px-4 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-            showDiff ? 'bg-teal-600/20 border-teal-500 text-teal-400' : 'border-border text-muted-foreground hover:border-teal-500 hover:text-teal-400'
-          }`}
-        >
-          Highlight Important Differences
-        </button>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-4 rounded-xl bg-secondary/20 border border-border">
-            <div className="flex items-center justify-between mb-2 flex-wrap gap-1">
-              <span className="text-xs font-medium text-muted-foreground">Original Speech</span>
-              <div className="flex gap-2">
-                <button onClick={() => speakText(original, 'male')} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
-                  <Volume2 className="w-3 h-3" /> Male
-                </button>
-                <button onClick={() => speakText(original, 'female')} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
-                  <Volume2 className="w-3 h-3" /> Female
-                </button>
-              </div>
-            </div>
-            <p className="text-sm text-foreground/80 leading-relaxed">{original}</p>
-            <p className="text-xs text-muted-foreground mt-2">Word Count: {origCount}</p>
-          </div>
-          <div className="p-4 rounded-xl bg-secondary/20 border border-border">
-            <div className="flex items-center justify-between mb-2 flex-wrap gap-1">
-              <span className="text-xs font-medium text-muted-foreground">{improvedLabel}</span>
-              <div className="flex gap-2">
-                <button onClick={() => speakText(improved, 'male')} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
-                  <Volume2 className="w-3 h-3" /> Male
-                </button>
-                <button onClick={() => speakText(improved, 'female')} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
-                  <Volume2 className="w-3 h-3" /> Female
-                </button>
-              </div>
-            </div>
-            <p className="text-sm text-foreground/80 leading-relaxed">
-              {showDiff
-                ? diffWords.map((dw, i) => (
-                    <span key={i} className={dw.isNew ? 'bg-yellow-500/25 text-yellow-300 rounded px-0.5' : ''}>
-                      {dw.word}{' '}
-                    </span>
-                  ))
-                : improved}
-            </p>
-            {showDiff && diffWords.every(dw => !dw.isNew) && (
-              <p className="text-xs text-muted-foreground italic mt-2">No significant word differences found — the AI rewrote structure and phrasing rather than swapping individual words.</p>
-            )}
-            <p className="text-xs text-muted-foreground mt-2">Word Count: {imprCount}</p>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <DashboardLayout>
@@ -1099,28 +1017,30 @@ export default function SpeakingModule() {
               </div>
             )}
 
-            {/* ── 6. Audio Playback + Naturalness / Enhanced Comparison */}
-            <div className="glass-card p-6">
-              {audioUrl && (
-                <div className="mb-4">
-                  <p className="text-xs text-muted-foreground mb-2">Your recording:</p>
-                  <audio src={audioUrl} controls className="w-full h-10" />
-                </div>
-              )}
-              {speakingDuration && (
-                <p className="text-sm text-muted-foreground mb-4">Speaking Time: {speakingDuration}s</p>
-              )}
-              {feedback.enhancedSpeech && (
-                <ComparisonPanel
-                  title="7.5+ Improved Transcript"
-                  improvedLabel="7.5+ Version"
-                  original={transcript}
-                  improved={feedback.enhancedSpeech}
-                  showDiff={showDiffs.enhanced}
-                  onToggleDiff={() => setShowDiffs(prev => ({ ...prev, enhanced: !prev.enhanced }))}
-                />
-              )}
-            </div>
+            {/* ── 6. Audio Playback */}
+            {(audioUrl || speakingDuration) && (
+              <div className="glass-card p-6">
+                {audioUrl && (
+                  <div className="mb-2">
+                    <p className="text-xs text-muted-foreground mb-2">Your recording:</p>
+                    <audio src={audioUrl} controls className="w-full h-10" />
+                  </div>
+                )}
+                {speakingDuration && (
+                  <p className="text-sm text-muted-foreground">Speaking Time: {speakingDuration}s</p>
+                )}
+              </div>
+            )}
+
+            {/* ── 7. Improved version */}
+            {feedback.enhancedSpeech && (
+              <div className="glass-card p-6 border border-blue-500/20">
+                <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wide mb-3">
+                  How you could say it
+                </h3>
+                <p className="text-sm text-foreground/80 leading-relaxed">{feedback.enhancedSpeech}</p>
+              </div>
+            )}
 
           </div>
         )}
