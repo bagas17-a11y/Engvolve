@@ -126,6 +126,9 @@ export default function Auth() {
         if (needsEmailConfirmation) {
           toast({ title: "Check your email!", description: "We sent you a 6-digit verification code." });
           navigate(`/verify-email?email=${encodeURIComponent(email)}${planParam ? `&plan=${planParam}` : ""}`);
+        } else if (planParam === "free") {
+          toast({ title: "Account created!", description: "Welcome! Taking you to your dashboard." });
+          navigate("/dashboard");
         } else {
           toast({ title: "Account created!", description: "Setting up your plan..." });
           navigate(pricingDest);

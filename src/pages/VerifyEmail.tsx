@@ -9,6 +9,7 @@ import { ArrowLeft, Mail } from "lucide-react";
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
   const email = searchParams.get("email");
+  const planParam = searchParams.get("plan");
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -61,8 +62,12 @@ export default function VerifyEmail() {
       // Small delay to ensure session is fully established
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Redirect to pricing selection for new users
-      navigate("/pricing-selection");
+      // Free plan → dashboard directly; paid/no plan → pricing selection
+      if (planParam === "free") {
+        navigate("/dashboard");
+      } else {
+        navigate(planParam ? `/pricing-selection?plan=${planParam}` : "/pricing-selection");
+      }
     } catch (error: any) {
       console.error("Verification error:", error);
       toast({

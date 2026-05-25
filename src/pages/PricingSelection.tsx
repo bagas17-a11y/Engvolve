@@ -91,56 +91,59 @@ export default function PricingSelection() {
   };
 
   const handleSelectPlan = async (plan: DisplayPlan) => {
-    // Paid plan — open WhatsApp immediately regardless of auth state
-    if (plan.tier !== "free") {
-      setProcessingPlanKey(plan.planKey);
-      try {
-        if (user) {
-          await registerPaidPlanRequest(plan);
-        }
-
-        const waMessage = planSignupWhatsAppMessage({
-          email: user?.email ?? profile?.email ?? "—",
-          planName: plan.name,
-          displayPrice: plan.computedDisplayPrice,
-          fullName: profile?.full_name,
-          phoneNumber: profile?.phone_number,
-        });
-
-        window.open(buildWhatsAppLink(waMessage), "_blank", "noopener,noreferrer");
-
-        toast.success(
-          "Opening WhatsApp — send us your payment proof and we'll activate your account shortly!",
-          { duration: 8000 }
-        );
-
-        if (user) navigate("/waiting-room");
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : "Something went wrong";
-        console.error("Plan selection error:", error);
-        toast.error(message);
-      } finally {
-        setProcessingPlanKey(null);
-      }
-      return;
-    }
-
-    // Free plan — requires login
+    // All plans require a login so the admin can see the user in User Management
     if (!user) {
       navigate(`/auth?mode=signup&plan=${plan.planKey}`);
       return;
     }
 
     setProcessingPlanKey(plan.planKey);
+
     try {
-      const result = await selfServiceActivateFree(user.id);
-      if (!result.success) {
-        toast.error(result.errorMessage ?? "Could not activate your Free plan.");
+      if (plan.tier === "free") {
+        const result = await selfServiceActivateFree(user.id);
+        if (!result.success) {
+          toast.error(result.errorMessage ?? "Could not activate your Free plan.");
+          return;
+        }
+        await refreshProfile();
+        navigate("/dashboard");
+        toast.success("Welcome! You can start practising now.");
         return;
       }
+
+      // Paid plan: save payment request first
+      await registerPaidPlanRequest(plan);
+
+      // Wait up to 5 s for the DB trigger to create the profile row.
+      // Without this, WaitingRoom sees profile=null and signs the user out.
+      for (let i = 0; i < 5; i++) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (data) break;
+        await new Promise((r) => setTimeout(r, 1000));
+      }
       await refreshProfile();
-      navigate("/dashboard");
-      toast.success("Welcome! You can start practising now.");
+
+      const waMessage = planSignupWhatsAppMessage({
+        email: user.email ?? profile?.email ?? "—",
+        planName: plan.name,
+        displayPrice: plan.computedDisplayPrice,
+        fullName: profile?.full_name,
+        phoneNumber: profile?.phone_number,
+      });
+
+      window.open(buildWhatsAppLink(waMessage), "_blank", "noopener,noreferrer");
+
+      toast.success(
+        "Opening WhatsApp — send us your payment proof and we'll activate your account shortly!",
+        { duration: 8000 }
+      );
+
+      navigate("/waiting-room");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Something went wrong";
       console.error("Plan selection error:", error);
