@@ -862,7 +862,20 @@ ${content}
 5. Identify idiomatic expressions and complex grammar structures used
 6. Generate a polishedTranscript: fix grammar errors and remove filler words from the student's actual response. Keep their EXACT SAME TOPIC, ideas, and content — do NOT change the subject matter.
 7. Generate an improvedNaturalness version: rewrite the student's actual response with more idiomatic phrasing, smoother flow, and better vocabulary. Keep the SAME TOPIC and ideas — this must be a natural version OF THEIR SPECIFIC ANSWER, roughly 30-50% longer.
-8. Generate an enhancedSpeech version: take the student's EXACT response and rewrite it sentence by sentence as a Band 9 IELTS speaker would say it. Upgrade their specific words to precise academic vocabulary, fix all grammar errors, add complexity to their exact ideas, and use sophisticated linking devices — but preserve their personal story, examples, and structure entirely. Do NOT invent new content, do NOT change the topic, do NOT write a generic Band 9 answer. This must read as if the student themselves suddenly gained Band 9 ability and said the same thing with upgraded language.
+8. Generate an enhancedSpeech version. This is a COMPLETE REWRITE of the student's response at Band 9 level. STRICT RULES:
+   - Remove ALL [pause] markers — a Band 9 speaker has no long silences
+   - Remove ALL filler words (um, uh, like, sort of, you know, basically)
+   - Fix EVERY grammar error — do not carry over any errors from the original
+   - Replace weak/simple vocabulary with precise, sophisticated alternatives
+   - Restructure sentences to show grammatical range (relative clauses, conditionals, passive voice where natural, participle phrases)
+   - Keep the student's personal topic, story, and ideas — just say them the way a Band 9 speaker would
+   - The result should feel like the same person speaking, but fluently and eloquently
+
+   EXAMPLE of what this means:
+   Student said: "i think uh like people should probably go outside more because its good for them and also you know like nature is very nice"
+   Band 9 version: "I firmly believe that people ought to spend considerably more time outdoors, not only because of the well-documented physical and mental health benefits, but also because immersing oneself in natural environments fosters a deeper sense of perspective and wellbeing."
+
+   Apply this same level of transformation to the student's actual response.
 9. Assign per-word confidence scores (0-100) to each word in the student's transcription indicating how clearly/accurately each word was likely pronounced or heard
 
 Provide your response in this EXACT JSON format:
@@ -934,9 +947,9 @@ Provide your response in this JSON format:
 }`;
     }
 
-    // Writing needs Sonnet for rubric-heavy analysis; Speaking & Reading use Haiku for speed
-    const analysisModel = type === "writing" ? "claude-sonnet-4-6" : "claude-haiku-4-5-20251001";
-    const maxTokens = type === "writing" ? 3000 : type === "speaking" ? 3500 : 800;
+    // Writing & Speaking use Sonnet for quality; Reading uses Haiku for speed
+    const analysisModel = type === "reading" ? "claude-haiku-4-5-20251001" : "claude-sonnet-4-6";
+    const maxTokens = type === "writing" ? 3000 : type === "speaking" ? 4500 : 800;
 
     console.log("Calling Claude API with type:", type, "model:", analysisModel, "taskType:", taskType, "isRevision:", isRevision);
 
