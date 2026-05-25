@@ -1,553 +1,212 @@
 /**
- * Mock Reading Test Data
- * Returns realistic IELTS-style reading passages without using AI
+ * Mock Reading Test — fallback only. The primary source for tests is the
+ * reading_test_library table seeded by the 20260525000003 migration. This
+ * mock returns one tiny but structurally correct test so the UI can still
+ * render if the library is unreachable.
  */
 
-export interface MockReadingTest {
-  passage: {
-    title: string;
-    content: string;
-    topic: string;
-    wordCount: number;
-  };
-  difficulty: string;
-  questions: {
-    typeA: {
-      instruction: string;
-      items: Array<{
-        number: number;
-        statement: string;
-        answer: string;
-        evidence: string;
-        explanation: string;
-      }>;
-    };
-    typeB: {
-      instruction: string;
-      items: Array<{
-        number: number;
-        question: string;
-        options: {
-          A: string;
-          B: string;
-          C: string;
-          D: string;
-        };
-        answer: string;
-        evidence: string;
-        explanation: string;
-      }>;
-    };
-    typeC: {
-      instruction: string;
-      items: Array<{
-        number: number;
-        sentence: string;
-        answer: string;
-        evidence: string;
-        explanation: string;
-      }>;
-    };
-  };
-  metadata: {
-    estimatedTime: string;
-    skillsFocus: string[];
-  };
+interface QuestionItem {
+  number: number;
+  statement?: string;
+  question?: string;
+  sentence?: string;
+  options?: Record<string, string>;
+  paragraph?: string;
+  answer: string;
+  evidence: string;
+  explanation: string;
 }
 
-const mockTests: Record<string, MockReadingTest> = {
-  easy: {
-    passage: {
-      title: "The History of Coffee",
-      topic: "Food History",
-      wordCount: 750,
-      content: `Coffee is one of the world's most popular beverages, consumed by millions of people every day. The story of coffee begins in the ancient coffee forests of Ethiopia, where legend tells of a goat herder named Kaldi who discovered coffee beans around 850 AD.
+interface QuestionGroup {
+  type: string;
+  instruction: string;
+  question_range: [number, number];
+  headings_pool?: string[];
+  options_pool?: Record<string, string>;
+  word_bank?: string[];
+  summary?: string;
+  endings_pool?: Record<string, string>;
+  note?: string;
+  items: QuestionItem[];
+}
 
-According to the legend, Kaldi noticed that his goats became unusually energetic after eating berries from a particular tree. Curious about this effect, he tried the berries himself and experienced a similar boost in energy. He shared his discovery with local monks, who began using the berries to stay awake during long hours of prayer.
+interface Section {
+  section_number: number;
+  passage: { title: string; topic: string; wordCount: number; content: string };
+  question_groups: QuestionGroup[];
+}
 
-From Ethiopia, coffee cultivation spread to the Arabian Peninsula. By the 15th century, coffee was being grown in Yemen, and within a century, it had reached Persia, Egypt, Syria, and Turkey. Coffee houses, called "qahveh khaneh," became popular gathering places where people would meet, discuss news, listen to music, and play games.
+interface MockReadingTest {
+  title: string;
+  difficulty: string;
+  totalQuestions: number;
+  durationMinutes: number;
+  topicTags: string[];
+  sections: Section[];
+}
 
-European travelers to the Near East brought back tales of this unusual dark beverage. By the 17th century, coffee had reached Europe and was becoming popular across the continent. However, some people were suspicious of the new drink, calling it the "bitter invention of Satan." The controversy was so great that Pope Clement VIII was asked to intervene. Before making his decision, he tasted the beverage and found it so satisfying that he gave it papal approval.
-
-Coffee houses began to appear in major European cities. In England, these establishments became known as "penny universities" because for the price of a penny, one could purchase a cup of coffee and engage in stimulating conversation. Coffee houses became important centers for social activity and communication.
-
-The Dutch were among the first to begin cultivating coffee plants in their colonies. In the early 1700s, they established coffee plantations in Java, which became highly successful. The French, meanwhile, brought coffee cultivation to the Caribbean, and by the mid-1700s, coffee had reached the Americas.
-
-Today, coffee is grown in over 70 countries, primarily in the equatorial regions of the Americas, Southeast Asia, India, and Africa. Brazil is the world's largest coffee producer, followed by Vietnam and Colombia. The coffee industry employs millions of people worldwide and generates billions of dollars in revenue annually.
-
-Modern coffee culture has evolved significantly from its humble beginnings. Specialty coffee shops have become ubiquitous in urban centers, and coffee consumption continues to rise globally. The beverage that once energized Ethiopian goats has become an integral part of daily life for people around the world.`,
-    },
-    difficulty: "easy",
-    questions: {
-      typeA: {
-        instruction: "Do the following statements agree with the information in the passage? Write TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, NOT GIVEN if there is no information on this.",
-        items: [
+function buildMockTest(difficulty: string): MockReadingTest {
+  return {
+    title: `Sample Test (${difficulty}) — fallback`,
+    difficulty,
+    totalQuestions: 40,
+    durationMinutes: 60,
+    topicTags: ["Sample"],
+    sections: [
+      {
+        section_number: 1,
+        passage: {
+          title: "The History of Coffee",
+          topic: "Food History",
+          wordCount: 220,
+          content:
+            "A The story of coffee begins in the ancient forests of Ethiopia, where legend tells of a goat herder named Kaldi who noticed that his goats became unusually energetic after eating berries from a particular tree.\n\nB From Ethiopia, coffee cultivation spread to the Arabian Peninsula. By the 15th century, coffee was being grown in Yemen, and within a century it had reached Persia, Egypt, Syria and Turkey, where coffee houses became popular gathering places.\n\nC By the 17th century coffee had reached Europe. Some people called it the 'bitter invention of Satan'. Pope Clement VIII, asked to intervene, tasted the drink and gave it papal approval.\n\nD In England the new establishments became known as 'penny universities' because for the price of a penny one could buy a cup of coffee and engage in stimulating conversation.\n\nE The Dutch were among the first to cultivate coffee in their colonies, establishing plantations in Java in the early 1700s. Coffee reached the Americas by mid-century.\n\nF Today coffee is grown in over seventy countries. Brazil is the largest producer, followed by Vietnam and Colombia. Coffee is consumed by millions of people every day.",
+        },
+        question_groups: [
           {
-            number: 1,
-            statement: "Coffee was first discovered in Ethiopia by a goat herder named Kaldi.",
-            answer: "TRUE",
-            evidence: "The story of coffee begins in the ancient coffee forests of Ethiopia, where legend tells of a goat herder named Kaldi who discovered coffee beans around 850 AD.",
-            explanation: "The passage clearly states that according to legend, Kaldi discovered coffee in Ethiopia.",
+            type: "tfng",
+            instruction: "Write TRUE, FALSE or NOT GIVEN.",
+            question_range: [1, 6],
+            items: [
+              { number: 1, statement: "Coffee was first discovered in Ethiopia.", answer: "TRUE", evidence: "The story of coffee begins in the ancient forests of Ethiopia", explanation: "Paragraph A." },
+              { number: 2, statement: "Kaldi's goats became tired after eating the berries.", answer: "FALSE", evidence: "his goats became unusually energetic", explanation: "Paragraph A." },
+              { number: 3, statement: "Coffee was banned in Europe when it first arrived.", answer: "NOT GIVEN", evidence: "", explanation: "The passage mentions controversy but not a ban." },
+              { number: 4, statement: "Pope Clement VIII approved coffee after tasting it.", answer: "TRUE", evidence: "tasted the drink and gave it papal approval", explanation: "Paragraph C." },
+              { number: 5, statement: "English coffee houses were called 'penny universities'.", answer: "TRUE", evidence: "establishments became known as 'penny universities'", explanation: "Paragraph D." },
+              { number: 6, statement: "Vietnam is now the largest coffee producer.", answer: "FALSE", evidence: "Brazil is the largest producer, followed by Vietnam", explanation: "Paragraph F." },
+            ],
           },
           {
-            number: 2,
-            statement: "Kaldi's goats became tired after eating coffee berries.",
-            answer: "FALSE",
-            evidence: "Kaldi noticed that his goats became unusually energetic after eating berries from a particular tree.",
-            explanation: "The passage states the goats became energetic, not tired.",
-          },
-          {
-            number: 3,
-            statement: "Coffee was banned in Europe when it first arrived.",
-            answer: "NOT GIVEN",
-            evidence: "No specific information about a ban",
-            explanation: "While the passage mentions controversy and suspicion, it doesn't state that coffee was actually banned.",
-          },
-          {
-            number: 4,
-            statement: "Pope Clement VIII approved coffee after tasting it.",
-            answer: "TRUE",
-            evidence: "Before making his decision, he tasted the beverage and found it so satisfying that he gave it papal approval.",
-            explanation: "The passage explicitly states the Pope gave papal approval after tasting coffee.",
-          },
-          {
-            number: 5,
-            statement: "English coffee houses were called 'penny universities.'",
-            answer: "TRUE",
-            evidence: "In England, these establishments became known as 'penny universities' because for the price of a penny, one could purchase a cup of coffee and engage in stimulating conversation.",
-            explanation: "The passage directly states this fact about English coffee houses.",
+            type: "sentence_completion",
+            instruction: "Complete with NO MORE THAN TWO WORDS from the passage.",
+            question_range: [7, 13],
+            items: [
+              { number: 7, sentence: "A goat herder named ______ first noticed the effects.", answer: "Kaldi", evidence: "a goat herder named Kaldi", explanation: "Paragraph A." },
+              { number: 8, sentence: "By the 15th century, coffee was being grown in ______.", answer: "Yemen", evidence: "coffee was being grown in Yemen", explanation: "Paragraph B." },
+              { number: 9, sentence: "Coffee reached Europe by the ______ century.", answer: "17th", evidence: "By the 17th century coffee had reached Europe", explanation: "Paragraph C." },
+              { number: 10, sentence: "Coffee houses in England were called penny ______.", answer: "universities", evidence: "penny universities", explanation: "Paragraph D." },
+              { number: 11, sentence: "The Dutch established plantations in ______.", answer: "Java", evidence: "establishing plantations in Java", explanation: "Paragraph E." },
+              { number: 12, sentence: "Today coffee is grown in over ______ countries.", answer: "seventy", evidence: "grown in over seventy countries", explanation: "Paragraph F." },
+              { number: 13, sentence: "The largest coffee producer today is ______.", answer: "Brazil", evidence: "Brazil is the largest producer", explanation: "Paragraph F." },
+            ],
           },
         ],
       },
-      typeB: {
-        instruction: "Choose the correct letter, A, B, C or D.",
-        items: [
+      {
+        section_number: 2,
+        passage: {
+          title: "The Lasting Marvel of Roman Concrete",
+          topic: "Technology History",
+          wordCount: 220,
+          content:
+            "A Anyone who has stood inside the Pantheon in Rome will have noticed the great unreinforced concrete dome above their head. Constructed under the emperor Hadrian almost two thousand years ago, it remains the largest dome of its kind in the world.\n\nB Modern Portland cement, invented in the 19th century, is made by burning limestone and clay at very high temperatures. In marine environments, modern concrete typically degrades within fifty years unless heavily reinforced with steel.\n\nC Roman concrete, by contrast, was made by mixing volcanic ash from the Bay of Naples with lime and seawater. The volcanic ash, known as pozzolana, reacts with lime in the presence of seawater to form an exceptionally stable compound called aluminium tobermorite.\n\nD Marie Jackson and her colleagues at the University of Utah found that mineral crystals continue to grow inside the Roman concrete even today, sealing tiny cracks before they can spread.\n\nE Cement production currently accounts for approximately eight per cent of global emissions. If new mixtures inspired by Roman techniques can be made at lower temperatures and last several times longer, both the energy used and the frequency of replacement could be sharply reduced.",
+        },
+        question_groups: [
           {
-            number: 6,
-            question: "What did Kaldi do after discovering the effects of coffee berries?",
-            options: {
-              A: "He sold them to merchants",
-              B: "He shared his discovery with monks",
-              C: "He planted more coffee trees",
-              D: "He kept it a secret",
-            },
-            answer: "B",
-            evidence: "He shared his discovery with local monks, who began using the berries to stay awake during long hours of prayer.",
-            explanation: "The passage states Kaldi shared his discovery with monks.",
+            type: "matching_headings",
+            instruction: "Choose the correct heading for paragraphs B-E.",
+            question_range: [14, 17],
+            headings_pool: [
+              "i. A material vulnerable to its surroundings",
+              "ii. A self-healing mechanism revealed",
+              "iii. The chemistry of the Roman recipe",
+              "iv. Hopes for reducing construction emissions",
+              "v. Famous Roman buildings",
+              "vi. New cement factories in Asia",
+            ],
+            items: [
+              { number: 14, paragraph: "B", answer: "i", evidence: "modern concrete typically degrades within fifty years", explanation: "Paragraph B." },
+              { number: 15, paragraph: "C", answer: "iii", evidence: "volcanic ash, known as pozzolana, reacts with lime", explanation: "Paragraph C." },
+              { number: 16, paragraph: "D", answer: "ii", evidence: "mineral crystals continue to grow inside the Roman concrete", explanation: "Paragraph D." },
+              { number: 17, paragraph: "E", answer: "iv", evidence: "Cement production currently accounts for approximately eight per cent of global emissions", explanation: "Paragraph E." },
+            ],
           },
           {
-            number: 7,
-            question: "By the 15th century, coffee cultivation had reached:",
-            options: {
-              A: "Europe",
-              B: "The Americas",
-              C: "Yemen",
-              D: "Brazil",
-            },
-            answer: "C",
-            evidence: "By the 15th century, coffee was being grown in Yemen",
-            explanation: "The passage specifically mentions Yemen in the 15th century context.",
+            type: "multiple_choice",
+            instruction: "Choose the correct letter A, B, C or D.",
+            question_range: [18, 22],
+            items: [
+              { number: 18, question: "What is the Pantheon dome described as?", options: { A: "The oldest dome in Rome", B: "The largest unreinforced concrete dome", C: "The smallest concrete dome", D: "A modern restoration" }, answer: "B", evidence: "the largest dome of its kind in the world", explanation: "Paragraph A." },
+              { number: 19, question: "What is the special volcanic ash called?", options: { A: "Aluminium", B: "Pozzolana", C: "Portland", D: "Clay" }, answer: "B", evidence: "volcanic ash, known as pozzolana", explanation: "Paragraph C." },
+              { number: 20, question: "What happens inside Roman concrete over time?", options: { A: "It dissolves completely", B: "It expels water", C: "Crystals seal small cracks", D: "It produces electricity" }, answer: "C", evidence: "mineral crystals continue to grow inside the Roman concrete... sealing tiny cracks", explanation: "Paragraph D." },
+              { number: 21, question: "What share of global emissions comes from cement?", options: { A: "About 1%", B: "About 4%", C: "About 8%", D: "About 20%" }, answer: "C", evidence: "approximately eight per cent of global emissions", explanation: "Paragraph E." },
+              { number: 22, question: "Marie Jackson works at:", options: { A: "Oxford", B: "Cambridge", C: "University of Utah", D: "MIT" }, answer: "C", evidence: "Marie Jackson and her colleagues at the University of Utah", explanation: "Paragraph D." },
+            ],
           },
           {
-            number: 8,
-            question: "Which country is currently the world's largest coffee producer?",
-            options: {
-              A: "Vietnam",
-              B: "Colombia",
-              C: "Brazil",
-              D: "Ethiopia",
-            },
-            answer: "C",
-            evidence: "Brazil is the world's largest coffee producer, followed by Vietnam and Colombia.",
-            explanation: "The passage clearly identifies Brazil as the largest producer.",
-          },
-          {
-            number: 9,
-            question: "What was the main purpose of early coffee houses?",
-            options: {
-              A: "Religious ceremonies",
-              B: "Social gathering and communication",
-              C: "Coffee production",
-              D: "Government meetings",
-            },
-            answer: "B",
-            evidence: "Coffee houses became important centers for social activity and communication.",
-            explanation: "The passage emphasizes the social and communicative function of coffee houses.",
+            type: "sentence_completion",
+            instruction: "Complete the sentences with NO MORE THAN TWO WORDS.",
+            question_range: [23, 26],
+            items: [
+              { number: 23, sentence: "Modern Portland cement was invented in the ______ century.", answer: "19th", evidence: "Modern Portland cement, invented in the 19th century", explanation: "Paragraph B." },
+              { number: 24, sentence: "Volcanic ash combines with lime and ______ in the Roman recipe.", answer: "seawater", evidence: "mixing volcanic ash from the Bay of Naples with lime and seawater", explanation: "Paragraph C." },
+              { number: 25, sentence: "The stable compound formed is called aluminium ______.", answer: "tobermorite", evidence: "aluminium tobermorite", explanation: "Paragraph C." },
+              { number: 26, sentence: "The Pantheon was built under emperor ______.", answer: "Hadrian", evidence: "Constructed under the emperor Hadrian", explanation: "Paragraph A." },
+            ],
           },
         ],
       },
-      typeC: {
-        instruction: "Complete the sentences below. Choose NO MORE THAN TWO WORDS from the passage for each answer.",
-        items: [
+      {
+        section_number: 3,
+        passage: {
+          title: "Naming the Anthropocene",
+          topic: "Climate Science",
+          wordCount: 220,
+          content:
+            "A Geologists divide the long history of the Earth into eras, periods and epochs. For the past eleven and a half thousand years, scientists have agreed that we have lived in the Holocene.\n\nB The term Anthropocene was popularised in 2000 by the atmospheric chemist Paul Crutzen, who pointed out that humans had become the dominant geological force on Earth.\n\nC To be accepted formally, a new geological epoch needs a 'golden spike', a precise reference point in a specific rock layer. The Anthropocene Working Group recommended sediments from Crawford Lake in Canada, where plutonium isotopes from 1950s atomic tests appear clearly.\n\nD In 2024, the International Commission on Stratigraphy voted against ratifying the proposal, arguing that a geological epoch should be defined over thousands of years.\n\nE Supporters note that the Anthropocene is more than a stratigraphic curiosity. It captures a shift in how Earth-systems scientists frame their work.\n\nF Whether or not the Anthropocene becomes a formal epoch, its informal use will probably grow. Schools and museums already use the term.",
+        },
+        question_groups: [
           {
-            number: 10,
-            sentence: "Coffee houses in the Arabian Peninsula were called ___.",
-            answer: "qahveh khaneh",
-            evidence: "Coffee houses, called 'qahveh khaneh,' became popular gathering places",
-            explanation: "The passage provides this specific term for Arabian coffee houses.",
+            type: "matching_information",
+            "instruction": "Which paragraph contains the following information?",
+            question_range: [27, 32],
+            items: [
+              { number: 27, statement: "the researcher who popularised the term Anthropocene", answer: "B", evidence: "popularised in 2000 by the atmospheric chemist Paul Crutzen", explanation: "Paragraph B." },
+              { number: 28, statement: "a description of how a geological epoch is formally defined", answer: "C", evidence: "needs a 'golden spike'", explanation: "Paragraph C." },
+              { number: 29, statement: "a vote by an international commission", answer: "D", evidence: "voted against ratifying the proposal", explanation: "Paragraph D." },
+              { number: 30, statement: "a comment on the shift in scientific framing", answer: "E", evidence: "shift in how Earth-systems scientists frame their work", explanation: "Paragraph E." },
+              { number: 31, statement: "the growth of informal use of the term", answer: "F", evidence: "its informal use will probably grow", explanation: "Paragraph F." },
+              { number: 32, statement: "the name of the lake used as a proposed reference", answer: "C", evidence: "Crawford Lake in Canada", explanation: "Paragraph C." },
+            ],
           },
           {
-            number: 11,
-            sentence: "The ___ were among the first Europeans to cultivate coffee in their colonies.",
-            answer: "Dutch",
-            evidence: "The Dutch were among the first to begin cultivating coffee plants in their colonies.",
-            explanation: "The passage identifies the Dutch as early colonial coffee cultivators.",
+            type: "ynng",
+            instruction: "Write YES, NO or NOT GIVEN.",
+            question_range: [33, 36],
+            items: [
+              { number: 33, statement: "Schools have already started using the word Anthropocene.", answer: "YES", evidence: "Schools and museums already use the term", explanation: "Paragraph F." },
+              { number: 34, statement: "All geologists agreed to ratify the Anthropocene in 2024.", answer: "NO", evidence: "voted against ratifying the proposal", explanation: "Paragraph D." },
+              { number: 35, statement: "The Anthropocene is widely covered in primary school history books.", answer: "NOT GIVEN", evidence: "", explanation: "The passage doesn't specify primary school history books." },
+              { number: 36, statement: "Paul Crutzen was an atmospheric chemist.", answer: "YES", evidence: "atmospheric chemist Paul Crutzen", explanation: "Paragraph B." },
+            ],
           },
           {
-            number: 12,
-            sentence: "Coffee is grown in over ___ countries today.",
-            answer: "70",
-            evidence: "Today, coffee is grown in over 70 countries",
-            explanation: "The passage states the specific number of countries.",
-          },
-          {
-            number: 13,
-            sentence: "Modern ___ coffee shops have become common in urban centers.",
-            answer: "specialty",
-            evidence: "Specialty coffee shops have become ubiquitous in urban centers",
-            explanation: "The passage uses the term 'specialty' to describe modern coffee shops.",
+            type: "matching_sentence_endings",
+            instruction: "Complete each sentence with the correct ending A-F.",
+            question_range: [37, 40],
+            endings_pool: {
+              A: "are recognised by sediment markers worldwide.",
+              B: "must be defined over thousands of years according to critics.",
+              C: "have been adopted by all primary school textbooks.",
+              D: "were proposed by the Anthropocene Working Group.",
+              E: "appear at Crawford Lake from nuclear tests.",
+              F: "have been ruled out by 2024.",
+            },
+            items: [
+              { number: 37, sentence_start: "Plutonium isotopes from atomic tests", answer: "E", evidence: "plutonium isotopes from 1950s atomic tests appear clearly", explanation: "Paragraph C." },
+              { number: 38, sentence_start: "Sediments from Crawford Lake", answer: "D", evidence: "The Anthropocene Working Group recommended sediments from Crawford Lake", explanation: "Paragraph C." },
+              { number: 39, sentence_start: "Geological epochs", answer: "B", evidence: "should be defined over thousands of years", explanation: "Paragraph D." },
+              { number: 40, sentence_start: "Schools and museums have NOT", answer: "C", evidence: "Schools and museums already use the term", explanation: "Paragraph F — they use it informally, not via adopted textbooks." },
+            ],
           },
         ],
       },
-    },
-    metadata: {
-      estimatedTime: "20 minutes",
-      skillsFocus: ["Skimming", "Scanning", "Fact identification"],
-    },
-  },
-
-  medium: {
-    passage: {
-      title: "The Impact of Urbanization on Biodiversity",
-      topic: "Urban Planning",
-      wordCount: 820,
-      content: `The rapid expansion of urban areas has become one of the defining characteristics of the 21st century, with more than half of the world's population now residing in cities. This unprecedented urbanization has profound implications for biodiversity, creating both challenges and unexpected opportunities for wildlife conservation.
-
-Traditional ecological theory suggested that urbanization invariably leads to biodiversity loss. Cities were viewed as ecological dead zones, hostile environments where only the most adaptable species could survive. However, recent research has challenged this simplistic view, revealing a more nuanced relationship between urban development and biological diversity.
-
-Studies conducted in cities across multiple continents have documented surprisingly high levels of species richness in urban environments. Some cities harbor more bird species than nearby rural areas, while urban gardens and parks can support diverse communities of insects and plants. This phenomenon, termed the "urban biodiversity paradox," suggests that certain characteristics of cities can actually promote diversity.
-
-One factor contributing to urban biodiversity is habitat heterogeneity. Cities contain a mosaic of different environments—parks, gardens, vacant lots, green roofs, and water features—creating varied microhabitats that can support different species. This spatial diversity can exceed that found in some natural landscapes, particularly in regions where agriculture has homogenized the countryside.
-
-Additionally, urban areas often function as refugia for species that have declined in intensively farmed rural regions. The absence of pesticides in many urban gardens, combined with year-round food sources provided by ornamental plants and intentional feeding, can make cities unexpectedly suitable for certain wildlife. Native bees, for instance, have been found to be more abundant in some urban areas than in surrounding agricultural landscapes.
-
-However, the relationship between urbanization and biodiversity is far from uniformly positive. Urban areas create significant environmental pressures that many species cannot withstand. Habitat fragmentation isolates populations, preventing genetic exchange and making local extinctions more likely. Light and noise pollution disrupt the behavior of nocturnal species and migratory birds. The urban heat island effect alters local microclimates, favoring heat-tolerant species while disadvantaging others.
-
-Furthermore, cities often become dominated by a relatively small set of cosmopolitan species—rats, pigeons, and certain invasive plants—that thrive in human-modified environments. This can lead to biotic homogenization, where cities around the world come to harbor similar assemblages of species, reducing global biodiversity even if local species richness appears high.
-
-The challenge for urban planners and conservationists is to maximize the biodiversity benefits of cities while minimizing the negative impacts. This requires moving beyond simply preserving isolated green spaces to creating connected networks of habitats that allow species movement throughout urban landscapes. Green corridors, such as vegetated railway embankments and river margins, can link parks and gardens, enabling wildlife to move between habitat patches.
-
-Building design also plays a crucial role. Green roofs and walls can provide additional habitat, particularly for insects and birds. Reducing light pollution through careful lighting design and using native plants in landscaping can make urban environments more hospitable to local species. Even small interventions, such as creating bee hotels or maintaining wildflower meadows in parks, can have measurable positive effects.
-
-Ultimately, reconciling urbanization with biodiversity conservation requires recognizing that cities are not separate from nature but are ecosystems in their own right. By designing urban environments with ecological considerations in mind, it may be possible to create cities that support both human well-being and biological diversity, transforming them from biodiversity deserts into thriving, multi-species communities.`,
-    },
-    difficulty: "medium",
-    questions: {
-      typeA: {
-        instruction: "Do the following statements agree with the information in the passage? Write TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, NOT GIVEN if there is no information on this.",
-        items: [
-          {
-            number: 1,
-            statement: "More than 50% of the global population currently lives in urban areas.",
-            answer: "TRUE",
-            evidence: "more than half of the world's population now residing in cities",
-            explanation: "The passage explicitly states more than half the world lives in cities.",
-          },
-          {
-            number: 2,
-            statement: "All ecological studies previously concluded that cities reduce biodiversity.",
-            answer: "FALSE",
-            evidence: "Traditional ecological theory suggested that urbanization invariably leads to biodiversity loss... However, recent research has challenged this simplistic view",
-            explanation: "The passage indicates recent research challenges the traditional view, not all studies.",
-          },
-          {
-            number: 3,
-            statement: "Urban gardens never use pesticides.",
-            answer: "NOT GIVEN",
-            evidence: "The absence of pesticides in many urban gardens",
-            explanation: "The passage says 'many' gardens lack pesticides, not that they 'never' use them.",
-          },
-          {
-            number: 4,
-            statement: "Some cities have more bird species than surrounding rural areas.",
-            answer: "TRUE",
-            evidence: "Some cities harbor more bird species than nearby rural areas",
-            explanation: "This is directly stated in the passage.",
-          },
-          {
-            number: 5,
-            statement: "Light pollution affects the behavior of nocturnal animals.",
-            answer: "TRUE",
-            evidence: "Light and noise pollution disrupt the behavior of nocturnal species",
-            explanation: "The passage explicitly mentions this impact.",
-          },
-        ],
-      },
-      typeB: {
-        instruction: "Choose the correct letter, A, B, C or D.",
-        items: [
-          {
-            number: 6,
-            question: "What is the 'urban biodiversity paradox'?",
-            options: {
-              A: "Cities have less biodiversity than expected",
-              B: "Urban areas can support more species than anticipated",
-              C: "Rural areas have more diversity than cities",
-              D: "Biodiversity decreases with city size",
-            },
-            answer: "B",
-            evidence: "Some cities harbor more bird species than nearby rural areas... This phenomenon, termed the 'urban biodiversity paradox'",
-            explanation: "The paradox refers to unexpectedly high diversity in cities.",
-          },
-          {
-            number: 7,
-            question: "According to the passage, what contributes to habitat heterogeneity in cities?",
-            options: {
-              A: "Agricultural fields",
-              B: "Natural forests",
-              C: "A variety of urban environments like parks and gardens",
-              D: "Industrial zones",
-            },
-            answer: "C",
-            evidence: "Cities contain a mosaic of different environments—parks, gardens, vacant lots, green roofs, and water features",
-            explanation: "The passage lists various urban features creating habitat diversity.",
-          },
-          {
-            number: 8,
-            question: "What is biotic homogenization?",
-            options: {
-              A: "Increasing species diversity in cities",
-              B: "Different cities having similar species",
-              C: "Natural ecosystem development",
-              D: "Genetic diversity within populations",
-            },
-            answer: "B",
-            evidence: "This can lead to biotic homogenization, where cities around the world come to harbor similar assemblages of species",
-            explanation: "Biotic homogenization means cities worldwide have similar species.",
-          },
-          {
-            number: 9,
-            question: "What does the author suggest is necessary for effective urban conservation?",
-            options: {
-              A: "Removing all non-native species",
-              B: "Creating isolated protected areas",
-              C: "Establishing connected habitat networks",
-              D: "Limiting human access to green spaces",
-            },
-            answer: "C",
-            evidence: "This requires moving beyond simply preserving isolated green spaces to creating connected networks of habitats",
-            explanation: "The passage emphasizes the importance of connected habitats.",
-          },
-        ],
-      },
-      typeC: {
-        instruction: "Complete the sentences below. Choose NO MORE THAN TWO WORDS from the passage for each answer.",
-        items: [
-          {
-            number: 10,
-            sentence: "Habitat fragmentation makes ___ more likely to occur.",
-            answer: "local extinctions",
-            evidence: "Habitat fragmentation isolates populations... making local extinctions more likely",
-            explanation: "The passage directly links fragmentation to local extinctions.",
-          },
-          {
-            number: 11,
-            sentence: "The ___ effect causes changes to local climate conditions in urban areas.",
-            answer: "heat island",
-            evidence: "The urban heat island effect alters local microclimates",
-            explanation: "The passage uses this specific term for urban temperature effects.",
-          },
-          {
-            number: 12,
-            sentence: "Green corridors such as vegetated ___ can connect different habitats.",
-            answer: "railway embankments",
-            evidence: "Green corridors, such as vegetated railway embankments and river margins",
-            explanation: "Railway embankments are given as an example of green corridors.",
-          },
-          {
-            number: 13,
-            sentence: "Small actions like creating ___ can positively impact biodiversity.",
-            answer: "bee hotels",
-            evidence: "Even small interventions, such as creating bee hotels or maintaining wildflower meadows",
-            explanation: "Bee hotels are mentioned as an example of small helpful interventions.",
-          },
-        ],
-      },
-    },
-    metadata: {
-      estimatedTime: "20 minutes",
-      skillsFocus: ["Inference", "Detailed reading", "Vocabulary in context"],
-    },
-  },
-
-  hard: {
-    passage: {
-      title: "Quantum Computing and Cryptographic Security",
-      topic: "Technology",
-      wordCount: 880,
-      content: `The emergence of quantum computing represents a paradigm shift in computational capability that simultaneously promises revolutionary advances and poses existential threats to current cryptographic infrastructure. Unlike classical computers, which process information as binary bits, quantum computers leverage quantum mechanical phenomena—superposition and entanglement—to perform calculations that would be intractable for conventional machines.
-
-The implications for cryptography are profound. Modern digital security relies heavily on mathematical problems that are computationally expensive for classical computers to solve. RSA encryption, for instance, depends on the difficulty of factoring large numbers into their prime components. While a classical computer might require millennia to factor a 2048-bit number, theoretical models suggest a sufficiently powerful quantum computer could accomplish this in hours or even minutes using Shor's algorithm.
-
-This vulnerability extends beyond RSA to elliptic curve cryptography and other widely deployed security protocols. The confidentiality of virtually all internet communications, financial transactions, and classified government information rests on cryptographic systems that quantum computers could potentially compromise. Security experts refer to this anticipated capability as "Q-day"—the point at which quantum computers become powerful enough to break current encryption standards.
-
-However, the threat timeline remains uncertain. Building a quantum computer capable of breaking real-world encryption requires overcoming formidable technical challenges. Quantum states are extraordinarily fragile, easily disrupted by environmental factors in a phenomenon called decoherence. Current quantum computers operate with dozens or hundreds of qubits (quantum bits), but cryptographically relevant calculations would require millions of stable, error-corrected qubits—a goal that may take decades to achieve.
-
-Nevertheless, the potential consequences demand preemptive action. Intelligence agencies and criminal organizations could be harvesting encrypted data now, anticipating the future ability to decrypt it once quantum computers become available. This "harvest now, decrypt later" strategy means that information encrypted today may not remain secure indefinitely, even if current quantum technology cannot yet break it.
-
-In response, cryptographers have developed "post-quantum" or "quantum-resistant" algorithms designed to be secure against both classical and quantum attacks. These algorithms rely on mathematical problems that appear difficult for quantum computers to solve, such as lattice-based cryptography, which involves finding short vectors in high-dimensional lattices. Unlike factoring, for which efficient quantum algorithms exist, no known quantum algorithm provides substantial advantages for these problems.
-
-The transition to post-quantum cryptography presents its own challenges. Implementing new cryptographic standards across the global digital infrastructure is an enormously complex undertaking. Every encrypted communication system, from email servers to banking applications, must be updated. Legacy systems that cannot be upgraded pose persistent vulnerabilities, creating potential entry points for adversaries.
-
-Moreover, standardization efforts must proceed carefully. The algorithms selected must withstand rigorous analysis from the cryptographic community to ensure they contain no subtle flaws. History provides cautionary examples: several initially promising post-quantum algorithms have been broken after deeper examination, sometimes using classical rather than quantum techniques.
-
-International coordination adds another layer of complexity. Different countries may adopt different post-quantum standards, creating interoperability issues. There are also geopolitical considerations; nations may be reluctant to adopt cryptographic standards developed elsewhere, fearing backdoors or other security compromises. This fragmentation could balkanize the internet, with different regions using incompatible security protocols.
-
-The quantum threat has also catalyzed exploration of quantum cryptographic solutions. Quantum key distribution (QKD) uses quantum mechanical properties to detect eavesdropping attempts, offering theoretically perfect security for key exchange. However, QKD requires specialized hardware and is limited to relatively short distances without quantum repeaters—technology still in early development stages.
-
-Ultimately, addressing the quantum cryptographic challenge requires a multi-pronged approach: developing and deploying quantum-resistant algorithms, investing in quantum computing research to better understand both capabilities and limitations, and potentially integrating quantum cryptographic techniques where practical. The race between quantum computing development and cryptographic adaptation will likely define digital security for decades to come, with implications extending far beyond technology into geopolitics, economics, and personal privacy.`,
-    },
-    difficulty: "hard",
-    questions: {
-      typeA: {
-        instruction: "Do the following statements agree with the information in the passage? Write TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, NOT GIVEN if there is no information on this.",
-        items: [
-          {
-            number: 1,
-            statement: "Quantum computers use binary bits like classical computers.",
-            answer: "FALSE",
-            evidence: "Unlike classical computers, which process information as binary bits, quantum computers leverage quantum mechanical phenomena",
-            explanation: "The passage contrasts quantum computers with classical binary systems.",
-          },
-          {
-            number: 2,
-            statement: "A quantum computer could factor a 2048-bit number faster than a classical computer.",
-            answer: "TRUE",
-            evidence: "While a classical computer might require millennia to factor a 2048-bit number, theoretical models suggest a sufficiently powerful quantum computer could accomplish this in hours",
-            explanation: "The passage explicitly compares the timeframes.",
-          },
-          {
-            number: 3,
-            statement: "All post-quantum algorithms have proven completely secure.",
-            answer: "FALSE",
-            evidence: "several initially promising post-quantum algorithms have been broken after deeper examination",
-            explanation: "The passage states some algorithms have been broken.",
-          },
-          {
-            number: 4,
-            statement: "Quantum key distribution has been successfully implemented globally.",
-            answer: "NOT GIVEN",
-            evidence: "QKD requires specialized hardware and is limited to relatively short distances",
-            explanation: "While limitations are mentioned, global implementation status is not specified.",
-          },
-          {
-            number: 5,
-            statement: "Decoherence makes quantum computers unstable.",
-            answer: "TRUE",
-            evidence: "Quantum states are extraordinarily fragile, easily disrupted by environmental factors in a phenomenon called decoherence",
-            explanation: "The passage directly links decoherence to quantum state fragility.",
-          },
-        ],
-      },
-      typeB: {
-        instruction: "Choose the correct letter, A, B, C or D.",
-        items: [
-          {
-            number: 6,
-            question: "What is 'Q-day' according to the passage?",
-            options: {
-              A: "The invention of quantum computers",
-              B: "When quantum computers can break current encryption",
-              C: "The standardization of quantum algorithms",
-              D: "The discovery of quantum mechanics",
-            },
-            answer: "B",
-            evidence: "Security experts refer to this anticipated capability as 'Q-day'—the point at which quantum computers become powerful enough to break current encryption standards",
-            explanation: "Q-day is defined as the point when quantum computers can break encryption.",
-          },
-          {
-            number: 7,
-            question: "What is the 'harvest now, decrypt later' strategy?",
-            options: {
-              A: "Collecting data to decrypt in the future",
-              B: "Farming quantum computers",
-              C: "Delaying encryption implementation",
-              D: "Storing quantum keys",
-            },
-            answer: "A",
-            evidence: "Intelligence agencies and criminal organizations could be harvesting encrypted data now, anticipating the future ability to decrypt it",
-            explanation: "The strategy involves collecting data for future decryption.",
-          },
-          {
-            number: 8,
-            question: "According to the passage, why is transitioning to post-quantum cryptography difficult?",
-            options: {
-              A: "The algorithms are too complex to understand",
-              B: "Quantum computers are already too powerful",
-              C: "It requires updating all encrypted systems globally",
-              D: "There are no viable post-quantum algorithms",
-            },
-            answer: "C",
-            evidence: "Implementing new cryptographic standards across the global digital infrastructure is an enormously complex undertaking",
-            explanation: "The passage emphasizes the global scale of implementation.",
-          },
-          {
-            number: 9,
-            question: "What advantage does quantum key distribution (QKD) offer?",
-            options: {
-              A: "It works over unlimited distances",
-              B: "It can detect eavesdropping attempts",
-              C: "It requires no special equipment",
-              D: "It is cheaper than traditional methods",
-            },
-            answer: "B",
-            evidence: "Quantum key distribution (QKD) uses quantum mechanical properties to detect eavesdropping attempts",
-            explanation: "The passage states QKD can detect eavesdropping.",
-          },
-        ],
-      },
-      typeC: {
-        instruction: "Complete the sentences below. Choose NO MORE THAN TWO WORDS from the passage for each answer.",
-        items: [
-          {
-            number: 10,
-            sentence: "Quantum computers use ___ and entanglement to perform calculations.",
-            answer: "superposition",
-            evidence: "quantum computers leverage quantum mechanical phenomena—superposition and entanglement",
-            explanation: "Superposition is listed alongside entanglement as a key quantum phenomenon.",
-          },
-          {
-            number: 11,
-            sentence: "___ cryptography is one type of post-quantum algorithm being developed.",
-            answer: "Lattice-based",
-            evidence: "such as lattice-based cryptography, which involves finding short vectors in high-dimensional lattices",
-            explanation: "Lattice-based cryptography is given as an example.",
-          },
-          {
-            number: 12,
-            sentence: "Current quantum computers operate with hundreds of ___, not the millions needed.",
-            answer: "qubits",
-            evidence: "Current quantum computers operate with dozens or hundreds of qubits",
-            explanation: "Qubits are mentioned as the unit of quantum computing power.",
-          },
-          {
-            number: 13,
-            sentence: "Different national standards could lead to internet ___.",
-            answer: "fragmentation/balkanization",
-            evidence: "This fragmentation could balkanize the internet",
-            explanation: "The passage uses both terms to describe the potential splitting of the internet.",
-          },
-        ],
-      },
-    },
-    metadata: {
-      estimatedTime: "20 minutes",
-      skillsFocus: ["Complex argumentation", "Technical vocabulary", "Abstract concepts"],
-    },
-  },
-};
+    ],
+  };
+}
 
 export function getMockReadingTest(difficulty: string): MockReadingTest {
-  const normalizedDifficulty = difficulty.toLowerCase();
-  return mockTests[normalizedDifficulty] || mockTests.medium;
+  return buildMockTest(difficulty);
 }
+
+export type { MockReadingTest };
