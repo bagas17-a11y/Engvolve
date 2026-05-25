@@ -988,20 +988,22 @@ Provide your response in this JSON format:
 STUDENT'S SPOKEN RESPONSE:
 ${content}
 
-Rewrite this as a Band 9 IELTS spoken response. Rules:
-- Remove every [pause] marker — no long silences in Band 9 speech
+Rewrite this as a Band 7.5 IELTS spoken response — clear, natural, and well-expressed, but NOT overly academic or advanced. Rules:
+- Remove every [pause] marker — smoother delivery, no long silences
 - Remove every filler word: um, uh, like, you know, sort of, basically, right
-- Fix every grammar error (articles, verb tense, prepositions, subject-verb agreement)
-- Replace simple or imprecise vocabulary with natural, sophisticated alternatives
-- Restructure sentences to show grammatical range: relative clauses, participle phrases, conditionals
+- Fix grammar errors (articles, verb tense, prepositions, subject-verb agreement) — use everyday correct English, not textbook English
+- Swap out weak or imprecise words for better but still conversational alternatives (e.g. "good" → "enjoyable", "big" → "significant", NOT "propitious" or "magnanimous")
+- Improve sentence flow and linking (use "because", "which means", "what I mean is", "so", "as a result") — natural spoken connectors, not essay connectors
 - Keep the student's EXACT topic, personal story, and ideas — do not invent new content
+- The result should sound like a confident, fluent native-level speaker in a conversation — NOT like a written essay being read aloud
 - Match approximately the same length as the original
 
 CRITICAL — DO NOT do any of these:
-- Do NOT start with "From an analytical standpoint" or any generic phrase
-- Do NOT end with "This perspective reflects a nuanced understanding" or any generic closing
+- Do NOT use overly academic vocabulary (no "furthermore", "moreover", "paradigm", "nuanced", "discourse")
+- Do NOT start with "From an analytical standpoint" or any stiff opener
+- Do NOT add a generic closing sentence about "broader contextual awareness" or similar
 - Do NOT add ideas the student never mentioned
-- Do NOT write a model IELTS answer — rewrite THIS student's specific words
+- Do NOT write a model IELTS answer — improve THIS student's specific words
 
 Output ONLY the rewritten response. No labels, no explanations, no JSON.`;
 
@@ -1016,7 +1018,7 @@ Output ONLY the rewritten response. No labels, no explanations, no JSON.`;
             model: "claude-sonnet-4-6",
             max_tokens: 1000,
             temperature: 0.4,
-            system: "You are an expert IELTS Band 9 speaking coach. Your only job is to take a student's spoken response and rewrite it exactly as a Band 9 speaker would say it — same topic, same ideas, but with perfect grammar, sophisticated vocabulary, and natural fluency. Never add generic IELTS phrases. Never change the subject matter.",
+            system: "You are an IELTS speaking coach helping students reach Band 7.5. Your only job is to take a student's spoken response and rewrite it as a confident, fluent Band 7.5 speaker would say it — same topic, same ideas, but with better flow, cleaner grammar, and more precise but still natural vocabulary. The result must sound like real spoken English, not a written essay. Never add generic IELTS phrases. Never change the subject matter.",
             messages: [{ role: "user", content: band9UserPrompt }],
           }),
         });

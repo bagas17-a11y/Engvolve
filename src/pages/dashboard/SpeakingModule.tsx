@@ -1112,8 +1112,8 @@ export default function SpeakingModule() {
               )}
               {feedback.enhancedSpeech && (
                 <ComparisonPanel
-                  title="Band 9 Transcript"
-                  improvedLabel="Band 9 Version"
+                  title="7.5+ Improved Transcript"
+                  improvedLabel="7.5+ Version"
                   original={transcript}
                   improved={feedback.enhancedSpeech}
                   showDiff={showDiffs.enhanced}
