@@ -179,12 +179,12 @@ export default function FlashcardsPage() {
 
   return (
     <DashboardLayout>
-      <div className="-m-6 flex h-[calc(100vh-3rem)] min-h-0 bg-[#0f172a]">
+      <div className="-m-6 flex h-[calc(100vh-3rem)] min-h-0 bg-background">
         {/* Floating glass sidebar - resizable */}
         <aside
           className={cn(
             "flex flex-col z-10 shrink-0",
-            "backdrop-blur-[12px] bg-[#0f172a]/80 border-r border-[#334155]",
+            "backdrop-blur-[12px] bg-background/90 border-r border-border",
             "hidden md:flex",
             sidebarCollapsed && "transition-[width] duration-200",
             mobileMenuOpen && "!flex !absolute inset-y-0 left-0 z-50"
@@ -197,14 +197,14 @@ export default function FlashcardsPage() {
                 : { width: sidebarWidth, minWidth: sidebarWidth, transition: isResizing ? "none" : "width 0.2s" }
           }
         >
-          <div className="flex h-12 items-center justify-between border-b border-[#334155] px-3 shrink-0">
+          <div className="flex h-12 items-center justify-between border-b border-border px-3 shrink-0">
             {!sidebarCollapsed && (
-              <h2 className="text-sm font-semibold text-white">Flashcards</h2>
+              <h2 className="text-sm font-semibold text-foreground">Flashcards</h2>
             )}
             <Button
               variant="ghost"
               size="icon"
-              className="text-slate-400 hover:text-white hover:bg-white/10"
+              className="text-muted-foreground hover:text-foreground hover:bg-secondary/80"
               onClick={() => setSidebarCollapsed((c) => !c)}
               aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
@@ -220,7 +220,7 @@ export default function FlashcardsPage() {
               {!sidebarCollapsed && (
                 <button
                   onClick={setViewAll}
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+                  className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-foreground/80 hover:bg-secondary/80 hover:text-foreground transition-colors"
                 >
                   View all topics
                   <ChevronRight className="h-4 w-4 ml-auto" />
@@ -246,20 +246,20 @@ export default function FlashcardsPage() {
                         <div className="absolute left-0 flex items-center justify-center">
                           {isActive ? (
                             <div
-                              className="h-3 w-3 rounded-full shrink-0 ring-2 ring-[#3b82f6] ring-offset-2 ring-offset-[#0f172a]"
+                              className="h-3 w-3 rounded-full shrink-0 ring-2 ring-[#3b82f6] ring-offset-2 ring-offset-background"
                               style={{
                                 backgroundColor: PRIMARY_GLOW,
                                 boxShadow: "0 0 10px rgba(59, 130, 246, 0.8)",
                               }}
                             />
                           ) : (
-                            <Circle className="h-4 w-4 shrink-0 text-slate-500" />
+                            <Circle className="h-4 w-4 shrink-0 text-muted-foreground/60" />
                           )}
                         </div>
                         <div className="flex flex-1 items-center gap-1 pl-6">
                           <button
                             onClick={() => toggleSection(section.id)}
-                            className="p-0.5 rounded text-slate-400 hover:text-white"
+                            className="p-0.5 rounded text-muted-foreground hover:text-foreground"
                             aria-label={isExpanded ? "Collapse" : "Expand"}
                           >
                             {isExpanded ? (
@@ -273,8 +273,8 @@ export default function FlashcardsPage() {
                             className={cn(
                               "flex flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-left transition-all",
                               isActive
-                                ? "bg-[#3b82f6]/20 text-white border border-[#3b82f6]/50"
-                                : "text-slate-300 hover:bg-white/10 hover:text-white border border-transparent"
+                                ? "bg-[#3b82f6]/20 text-foreground border border-[#3b82f6]/50"
+                                : "text-foreground/80 hover:bg-secondary/80 hover:text-foreground border border-transparent"
                             )}
                             style={
                               isActive
@@ -293,7 +293,7 @@ export default function FlashcardsPage() {
                                 <span className="flex-1 min-w-0 font-medium break-words">
                                   {sectionNum}. {section.title}
                                 </span>
-                                <span className="text-xs text-slate-500 shrink-0 ml-1">
+                                <span className="text-xs text-muted-foreground/60 shrink-0 ml-1">
                                   {totalCards}
                                 </span>
                               </>
@@ -309,10 +309,10 @@ export default function FlashcardsPage() {
                               <button
                                 key={sub.id}
                                 onClick={() => setTopic(section.id, sub.id)}
-                                className="flex w-full items-center justify-between gap-2 text-xs text-slate-400 hover:text-white hover:bg-white/5 rounded px-2 py-1 text-left"
+                                className="flex w-full items-center justify-between gap-2 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/40 rounded px-2 py-1 text-left"
                               >
                                 <span className="min-w-0 flex-1 break-words">{sub.title}</span>
-                                <span className="text-slate-600 shrink-0">{cardCount}</span>
+                                <span className="text-muted-foreground/50 shrink-0">{cardCount}</span>
                               </button>
                             );
                           })}
@@ -351,19 +351,19 @@ export default function FlashcardsPage() {
           />
         )}
 
-        <div className="flex flex-1 flex-col min-w-0 bg-[#0f172a]">
-          <div className="flex h-12 items-center gap-2 border-b border-[#334155] px-4 shrink-0">
+        <div className="flex flex-1 flex-col min-w-0 bg-background">
+          <div className="flex h-12 items-center gap-2 border-b border-border px-4 shrink-0">
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden text-slate-400 hover:text-white"
+              className="md:hidden text-muted-foreground hover:text-foreground"
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
             </Button>
             {!showTopicList && topicParam && (
-              <h1 className="text-lg font-semibold text-white truncate">
+              <h1 className="text-lg font-semibold text-foreground truncate">
                 {getTopicTitle(topicParam, FLASHCARD_TOPICS)}: Flashcards
               </h1>
             )}
@@ -373,17 +373,17 @@ export default function FlashcardsPage() {
             <div className="p-6 max-w-4xl">
               {showTopicList ? (
                 <>
-                  <h1 className="text-2xl font-bold text-white mb-2">
+                  <h1 className="text-2xl font-bold text-foreground mb-2">
                     IELTS Grammar: Flashcards
                   </h1>
-                  <p className="text-slate-300 mb-6 leading-relaxed">
+                  <p className="text-foreground/80 mb-6 leading-relaxed">
                     Practice grammar rules with interactive flashcards. Test your
                     understanding of Parts of Speech, Apostrophes, Verb Tenses,
                     Subject–Verb Agreement, Punctuation, and Sentence Structure.
                   </p>
-                  <p className="text-slate-400 text-sm mb-8">
-                    Total: <strong className="text-white">{totalFlashcards}</strong> flashcards
-                    across <strong className="text-white">{FLASHCARD_TOPICS.length}</strong> topics.
+                  <p className="text-muted-foreground text-sm mb-8">
+                    Total: <strong className="text-foreground">{totalFlashcards}</strong> flashcards
+                    across <strong className="text-foreground">{FLASHCARD_TOPICS.length}</strong> topics.
                     Select a topic below to start studying.
                   </p>
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -395,7 +395,7 @@ export default function FlashcardsPage() {
                       return (
                         <div
                           key={section.id}
-                          className="rounded-xl border border-[#334155] bg-[#1e293b]/80 overflow-hidden"
+                          className="rounded-xl border border-border bg-card/80 overflow-hidden"
                         >
                           <Accordion
                             type="single"
@@ -403,17 +403,17 @@ export default function FlashcardsPage() {
                             defaultValue={i === 0 ? section.id : undefined}
                           >
                             <AccordionItem value={section.id} className="border-none">
-                              <AccordionTrigger className="px-4 py-3 text-left text-white hover:no-underline hover:bg-white/5">
+                              <AccordionTrigger className="px-4 py-3 text-left text-foreground hover:no-underline hover:bg-secondary/40">
                                 <div className="flex items-center justify-between w-full pr-4">
                                   <span>
                                     {i + 1}. {section.title}
                                   </span>
-                                  <span className="text-sm text-slate-400">
+                                  <span className="text-sm text-muted-foreground">
                                     {totalCards} cards
                                   </span>
                                 </div>
                               </AccordionTrigger>
-                              <AccordionContent className="px-4 pb-3 text-slate-400 text-sm">
+                              <AccordionContent className="px-4 pb-3 text-muted-foreground text-sm">
                                 <ul className="space-y-1 mb-3">
                                   {section.subtopics.map((sub) => (
                                     <li key={sub.id}>
@@ -444,12 +444,12 @@ export default function FlashcardsPage() {
                     style={{ perspective: "1200px" }}
                   >
                     {totalInline === 0 ? (
-                      <p className="text-slate-400 text-center py-8">
+                      <p className="text-muted-foreground text-center py-8">
                         No flashcards in this subtopic yet.
                       </p>
                     ) : (
                       <>
-                        <p className="text-slate-400 text-sm mb-4 text-center">
+                        <p className="text-muted-foreground text-sm mb-4 text-center">
                           {effectiveTopic.title} → {effectiveSubtopic.title} ({cardIndex + 1} / {totalInline})
                         </p>
                         <div className="relative">
@@ -475,7 +475,7 @@ export default function FlashcardsPage() {
                           >
                             <div
                               className={cn(
-                                "rounded-xl border border-[#334155] bg-[#1e293b] p-6 min-h-[240px] flex flex-col",
+                                "rounded-xl border border-border bg-card p-6 min-h-[240px] flex flex-col",
                                 !isFlipped ? "z-10" : "z-0"
                               )}
                               style={{
@@ -487,11 +487,11 @@ export default function FlashcardsPage() {
                               }}
                             >
                               <span className="text-xs font-semibold text-blue-400 uppercase tracking-wide mb-2">Question</span>
-                              <p className="text-base text-white leading-relaxed flex-1 flex flex-col justify-center">Q: {currentInlineCard?.question}</p>
+                              <p className="text-base text-foreground leading-relaxed flex-1 flex flex-col justify-center">Q: {currentInlineCard?.question}</p>
                             </div>
                             <div
                               className={cn(
-                                "absolute inset-0 rounded-xl border border-emerald-500/20 bg-[#1e293b] p-6 min-h-[240px] flex flex-col",
+                                "absolute inset-0 rounded-xl border border-emerald-500/20 bg-card p-6 min-h-[240px] flex flex-col",
                                 isFlipped ? "z-10" : "z-0"
                               )}
                               style={{
@@ -503,16 +503,16 @@ export default function FlashcardsPage() {
                               }}
                             >
                               <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wide mb-2">Answer</span>
-                              <p className="text-base text-slate-200 leading-relaxed flex-1 flex flex-col justify-center">A: {currentInlineCard?.answer}</p>
+                              <p className="text-base text-foreground/90 leading-relaxed flex-1 flex flex-col justify-center">A: {currentInlineCard?.answer}</p>
                             </div>
                           </motion.div>
                         </div>
-                        <p className="text-slate-500 text-xs mt-2 text-center">Click or press Space to flip</p>
+                        <p className="text-muted-foreground/60 text-xs mt-2 text-center">Click or press Space to flip</p>
                         <div className="flex items-center justify-center gap-2 mt-4">
                           <Button
                             variant="outline"
                             size="icon"
-                            className="border-[#334155] text-slate-300 hover:bg-white/5"
+                            className="border-border text-foreground/80 hover:bg-secondary/40"
                             disabled={isFirstInline}
                             onClick={() => {
                               setCardIndex((i) => Math.max(0, i - 1));
@@ -521,13 +521,13 @@ export default function FlashcardsPage() {
                           >
                             <ChevronLeft className="h-4 w-4" />
                           </Button>
-                          <span className="text-slate-400 text-sm min-w-[4rem] text-center">
+                          <span className="text-muted-foreground text-sm min-w-[4rem] text-center">
                             {cardIndex + 1} / {totalInline}
                           </span>
                           <Button
                             variant="outline"
                             size="icon"
-                            className="border-[#334155] text-slate-300 hover:bg-white/5"
+                            className="border-border text-foreground/80 hover:bg-secondary/40"
                             disabled={isLastInline}
                             onClick={() => {
                               setCardIndex((i) => Math.min(totalInline - 1, i + 1));
@@ -554,7 +554,7 @@ export default function FlashcardsPage() {
                 </div>
               ) : (
                 <div className="py-12 text-center">
-                  <p className="text-slate-400">Loading…</p>
+                  <p className="text-muted-foreground">Loading…</p>
                 </div>
               )}
             </div>

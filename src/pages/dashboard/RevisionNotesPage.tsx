@@ -205,27 +205,27 @@ export default function RevisionNotesPage() {
 
   return (
     <DashboardLayout>
-      <div className="-m-6 flex h-[calc(100vh-3rem)] min-h-0 bg-[#0f172a]">
+      <div className="-m-6 flex h-[calc(100vh-3rem)] min-h-0 bg-background">
         {/* Floating glass sidebar */}
         <aside
           className={cn(
             "flex flex-col transition-[width] duration-200 z-10",
-            "backdrop-blur-[12px] bg-[#0f172a]/80 border-r border-[#334155]",
+            "backdrop-blur-[12px] bg-background/90 border-r border-border",
             sidebarCollapsed ? "w-14" : "w-[260px]",
             "hidden md:flex",
             mobileMenuOpen && "!flex !absolute inset-y-0 left-0 z-50 w-[260px]"
           )}
         >
-          <div className="flex h-12 items-center justify-between border-b border-[#334155] px-3 shrink-0">
+          <div className="flex h-12 items-center justify-between border-b border-border px-3 shrink-0">
             {!sidebarCollapsed && (
-              <h2 className="text-sm font-semibold text-white">
+              <h2 className="text-sm font-semibold text-foreground">
                 Revision Notes
               </h2>
             )}
             <Button
               variant="ghost"
               size="icon"
-              className="text-slate-400 hover:text-white hover:bg-white/10"
+              className="text-muted-foreground hover:text-foreground hover:bg-secondary/80"
               onClick={() => setSidebarCollapsed((c) => !c)}
               aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
@@ -241,7 +241,7 @@ export default function RevisionNotesPage() {
               {!sidebarCollapsed && (
                 <button
                   onClick={setViewAll}
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+                  className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-foreground/80 hover:bg-secondary/80 hover:text-foreground transition-colors"
                 >
                   View all topics
                   <ChevronRight className="h-4 w-4 ml-auto" />
@@ -262,7 +262,7 @@ export default function RevisionNotesPage() {
                         onClick={() => toggleSection(category.id)}
                         className={cn(
                           "flex w-full items-center gap-2 py-1.5 text-left text-xs font-semibold uppercase tracking-wider",
-                          catExpanded ? "text-slate-300" : "text-slate-500"
+                          catExpanded ? "text-foreground/80" : "text-muted-foreground/60"
                         )}
                       >
                         {catExpanded ? (
@@ -284,7 +284,7 @@ export default function RevisionNotesPage() {
                                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
                                   ) : progress === "in_progress" ? (
                                     <div
-                                      className="h-2.5 w-2.5 rounded-full ring-2 ring-[#3b82f6] ring-offset-2 ring-offset-[#0f172a]"
+                                      className="h-2.5 w-2.5 rounded-full ring-2 ring-[#3b82f6] ring-offset-2 ring-offset-background"
                                       style={{ backgroundColor: PRIMARY_GLOW }}
                                     />
                                   ) : (
@@ -296,8 +296,8 @@ export default function RevisionNotesPage() {
                                   className={cn(
                                     "flex-1 rounded px-2 py-1 text-sm text-left transition-all truncate",
                                     isActive
-                                      ? "bg-[#3b82f6]/20 text-white border border-[#3b82f6]/50"
-                                      : "text-slate-400 hover:bg-white/5 hover:text-slate-300 border border-transparent"
+                                      ? "bg-[#3b82f6]/20 text-foreground border border-[#3b82f6]/50"
+                                      : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground/80 border border-transparent"
                                   )}
                                 >
                                   {section.title}
@@ -311,14 +311,14 @@ export default function RevisionNotesPage() {
                   );
                 })}
                 {/* Test Formats section */}
-                <div className="pt-2 border-t border-slate-600/80">
+                <div className="pt-2 border-t border-border">
                   <button
                     onClick={() => toggleSection("test-formats")}
                     className={cn(
                       "flex w-full items-center gap-2 py-1.5 text-left text-xs font-semibold uppercase tracking-wider",
                       expandedSections.includes("test-formats")
-                        ? "text-slate-300"
-                        : "text-slate-500"
+                        ? "text-foreground/80"
+                        : "text-muted-foreground/60"
                     )}
                   >
                     {expandedSections.includes("test-formats") ? (
@@ -329,7 +329,7 @@ export default function RevisionNotesPage() {
                     Test formats
                   </button>
                   {expandedSections.includes("test-formats") && (
-                    <div className="ml-4 mt-1 space-y-0.5 border-l border-slate-600/80 pl-3">
+                    <div className="ml-4 mt-1 space-y-0.5 border-l border-border pl-3">
                       {REVISION_NOTE_FORMAT_IDS.map((fmt) => {
                         const isActive = showFormatsView && currentFormat === fmt;
                         return (
@@ -339,8 +339,8 @@ export default function RevisionNotesPage() {
                             className={cn(
                               "flex w-full rounded px-2 py-1 text-sm text-left capitalize transition-all",
                               isActive
-                                ? "bg-[#3b82f6]/20 text-white border border-[#3b82f6]/50"
-                                : "text-slate-400 hover:bg-white/5 hover:text-slate-300"
+                                ? "bg-[#3b82f6]/20 text-foreground border border-[#3b82f6]/50"
+                                : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground/80"
                             )}
                           >
                             {fmt}
@@ -363,20 +363,20 @@ export default function RevisionNotesPage() {
           />
         )}
 
-        <div className="flex flex-1 flex-col min-w-0 bg-[#0f172a]">
-          <div className="shrink-0 border-b border-[#334155]">
+        <div className="flex flex-1 flex-col min-w-0 bg-background">
+          <div className="shrink-0 border-b border-border">
             <div className="flex h-12 items-center gap-2 px-4">
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden text-slate-400 hover:text-white"
+                className="md:hidden text-muted-foreground hover:text-foreground"
                 onClick={() => setMobileMenuOpen(true)}
                 aria-label="Open menu"
               >
                 <Menu className="h-5 w-5" />
               </Button>
               {!showTopicList && (
-                <h1 className="text-lg font-semibold text-white truncate">
+                <h1 className="text-lg font-semibold text-foreground truncate">
                   {showFormatsView
                     ? `IELTS Test Formats – ${currentFormat.charAt(0).toUpperCase() + currentFormat.slice(1)}`
                     : `${getTopicTitle(currentTopic)} (IELTSInAja Grammar): Revision Note`}
@@ -385,7 +385,7 @@ export default function RevisionNotesPage() {
             </div>
             {/* Progress bar: completed topics / total */}
             <div
-              className="h-1 w-full bg-[#1e293b]"
+              className="h-1 w-full bg-secondary"
               role="progressbar"
               aria-valuenow={completedTopics.size}
               aria-valuemin={0}
@@ -405,23 +405,23 @@ export default function RevisionNotesPage() {
             ref={mainScrollRef}
             className="flex-1 overflow-y-auto overflow-x-hidden"
           >
-            <div className="p-6 max-w-4xl min-h-[400px] rounded-lg" style={{ backgroundColor: "rgba(15, 23, 42, 0.6)" }}>
+            <div className="p-6 max-w-4xl min-h-[400px] rounded-lg bg-background/60">
               {showTopicList ? (
                 <>
-                  <h1 className="text-2xl font-bold text-white mb-2">
+                  <h1 className="text-2xl font-bold text-foreground mb-2">
                     IELTS Writing & Grammar: Revision Notes
                   </h1>
-                  <p className="text-slate-300 mb-6 leading-relaxed">
+                  <p className="text-foreground/80 mb-6 leading-relaxed">
                     Revise effectively with notes aligned to the IELTS syllabus.
                     Clear explanations, examiner insights, and structured
                     content to support exam success.
                   </p>
-                  <p className="text-slate-400 text-sm mb-4">
+                  <p className="text-muted-foreground text-sm mb-4">
                     Topics cover grammar (parts of speech, apostrophes, verb
                     tenses). Select a topic below to open the full revision note.
                   </p>
-                  <div className="rounded-lg border border-[#334155] bg-[#1e293b]/60 px-4 py-3 mb-8 text-sm text-slate-300">
-                    <strong className="text-slate-200">Key terms:</strong> Task 1 = IELTS Writing visual report (150+ words, describe data); Task 2 = IELTS Writing essay (250+ words, present argument/opinion).
+                  <div className="rounded-lg border border-border bg-secondary/60 px-4 py-3 mb-8 text-sm text-foreground/80">
+                    <strong className="text-foreground/90">Key terms:</strong> Task 1 = IELTS Writing visual report (150+ words, describe data); Task 2 = IELTS Writing essay (250+ words, present argument/opinion).
                   </div>
                   <div className="space-y-8">
                     {REVISION_NOTE_CATEGORIES.map((cat) => {
@@ -429,21 +429,21 @@ export default function RevisionNotesPage() {
                       if (topics.length === 0) return null;
                       return (
                         <div key={cat.id}>
-                          <h2 className="text-base font-semibold text-slate-200 uppercase tracking-wider mb-3 pb-2 border-b border-[#334155]">
+                          <h2 className="text-base font-semibold text-foreground/90 uppercase tracking-wider mb-3 pb-2 border-b border-border">
                             {cat.label}
                           </h2>
                           <div className="grid gap-3 sm:grid-cols-2">
                             {topics.map((section) => (
                               <div
                                 key={section.id}
-                                className="rounded-xl border border-[#334155] bg-[#1e293b]/80 overflow-hidden"
+                                className="rounded-xl border border-border bg-secondary/60 overflow-hidden"
                               >
                                 <Accordion type="single" collapsible>
                                   <AccordionItem value={section.id} className="border-none">
-                                    <AccordionTrigger className="px-4 py-3 text-left text-white hover:no-underline hover:bg-white/5 text-sm">
+                                    <AccordionTrigger className="px-4 py-3 text-left text-foreground hover:no-underline hover:bg-secondary/40 text-sm">
                                       {section.title}
                                     </AccordionTrigger>
-                                    <AccordionContent className="px-4 pb-3 text-slate-400 text-sm">
+                                    <AccordionContent className="px-4 pb-3 text-muted-foreground text-sm">
                                       <ul className="space-y-1">
                                         {section.subItems.map((sub) => (
                                           <li key={sub.id}>{sub.label}</li>
@@ -469,7 +469,7 @@ export default function RevisionNotesPage() {
                   </div>
                 </>
               ) : showFormatsView ? (
-                <div className="prose prose-invert max-w-none border-l-2 border-[#334155]/50 pl-6">
+                <div className="prose prose-invert max-w-none border-l-2 border-border/50 pl-6">
                   <TestFormatsView activeFormat={currentFormat} />
                 </div>
               ) : (
@@ -481,7 +481,7 @@ export default function RevisionNotesPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.2 }}
-                      className="prose prose-invert max-w-none border-l-2 border-[#334155]/50 pl-6"
+                      className="prose prose-invert max-w-none border-l-2 border-border/50 pl-6"
                     >
                       <TopicContent />
                       {/* Sentinel: when this is in view, mark topic complete */}
@@ -489,11 +489,11 @@ export default function RevisionNotesPage() {
                     </motion.div>
                   </AnimatePresence>
 
-                  <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-[#334155]">
+                  <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-border">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-slate-400 hover:text-white w-fit"
+                      className="text-muted-foreground hover:text-foreground w-fit"
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download notes on {getTopicTitle(currentTopic)}
@@ -503,7 +503,7 @@ export default function RevisionNotesPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-[#334155] text-slate-300 hover:bg-white/10"
+                          className="border-border text-foreground/80 hover:bg-secondary/80"
                           onClick={() => setTopic(prevId)}
                         >
                           ← Previous Topic
@@ -514,7 +514,7 @@ export default function RevisionNotesPage() {
                       {nextId ? (
                         <Button
                           size="sm"
-                          className="bg-[#3b82f6] hover:bg-[#3b82f6]/90 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+                          className="bg-[#3b82f6] hover:bg-[#3b82f6]/90 text-foreground shadow-[0_0_20px_rgba(59,130,246,0.3)]"
                           onClick={() => setTopic(nextId)}
                         >
                           Next Topic →
@@ -535,12 +535,12 @@ export default function RevisionNotesPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.2 }}
-                className="fixed bottom-0 left-0 right-0 z-30 border-t border-[#334155] bg-[#0f172a]/95 backdrop-blur-md px-4 py-3 flex items-center justify-between"
+                className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur-md px-4 py-3 flex items-center justify-between"
               >
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-slate-300 hover:text-white"
+                  className="text-foreground/80 hover:text-foreground"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Download notes on {getTopicTitle(currentTopic)}
@@ -550,7 +550,7 @@ export default function RevisionNotesPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-[#334155] text-slate-300"
+                      className="border-border text-foreground/80"
                       onClick={() => setTopic(prevId)}
                     >
                       ← Previous
@@ -559,7 +559,7 @@ export default function RevisionNotesPage() {
                   {nextId && (
                     <Button
                       size="sm"
-                      className="bg-[#3b82f6] hover:bg-[#3b82f6]/90 text-white"
+                      className="bg-[#3b82f6] hover:bg-[#3b82f6]/90 text-foreground"
                       onClick={() => setTopic(nextId)}
                     >
                       Next →

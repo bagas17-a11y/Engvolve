@@ -51,9 +51,9 @@ const BAND_PILL_BASE =
   "rounded-full font-medium border";
 
 const BAND_PILL_COLOR: Record<BandLevel, string> = {
-  "5to6": "bg-teal-900/40 text-teal-300 border-teal-700/40",
-  "6to65": "bg-blue-900/40 text-blue-300 border-blue-700/40",
-  "65to7plus": "bg-purple-900/40 text-purple-300 border-purple-700/40",
+  "5to6": "bg-teal-500/15 text-teal-700 border-teal-500/30",
+  "6to65": "bg-blue-500/15 text-blue-700 border-blue-500/30",
+  "65to7plus": "bg-purple-500/15 text-purple-700 border-purple-500/30",
 };
 
 const TIP_BORDER: Record<MasteryTip["type"], string> = {
@@ -113,7 +113,7 @@ function parseBold(line: string): ReactNode {
     <>
       {parts.map((part, i) =>
         /^\*\*[^*]+\*\*$/.test(part) ? (
-          <strong key={i} className="font-semibold text-white">
+          <strong key={i} className="font-semibold text-foreground">
             {part.slice(2, -2)}
           </strong>
         ) : (
@@ -137,7 +137,7 @@ function renderBody(text: string): ReactNode {
     nodes.push(
       <ul
         key={`ul-${k++}`}
-        className="list-disc pl-4 space-y-1 text-slate-300 text-sm mt-1 mb-1"
+        className="list-disc pl-4 space-y-1 text-foreground/80 text-sm mt-1 mb-1"
       >
         {listBuffer.map((item, i) => (
           <li key={i}>{parseBold(item.slice(2))}</li>
@@ -156,7 +156,7 @@ function renderBody(text: string): ReactNode {
         nodes.push(<div key={`sp-${k++}`} className="h-2" />);
       } else {
         nodes.push(
-          <p key={`p-${k++}`} className="text-slate-300 text-sm leading-relaxed mb-1">
+          <p key={`p-${k++}`} className="text-foreground/80 text-sm leading-relaxed mb-1">
             {parseBold(line)}
           </p>
         );
@@ -188,42 +188,42 @@ function TipCard({ tip }: { tip: MasteryTip }) {
         {/* Header */}
         <div className="flex items-center gap-2 mb-2">
           <TipIcon type={tip.type} size={16} />
-          <span className="text-white font-semibold text-sm">{heading}</span>
+          <span className="text-foreground font-semibold text-sm">{heading}</span>
         </div>
 
         {/* Body */}
-        <div className="text-slate-300 text-sm leading-relaxed">
+        <div className="text-foreground/80 text-sm leading-relaxed">
           {renderBody(tip.body)}
         </div>
 
         {/* Example */}
         {tip.example && (hasBeforeAfter || hasTextOnly) && (
-          <div className="bg-[#0f172a] rounded-lg p-3 mt-3 text-sm border border-[#334155]">
+          <div className="bg-background rounded-lg p-3 mt-3 text-sm border border-border">
             {hasBeforeAfter ? (
               <>
                 {tip.example.label && (
-                  <span className="text-slate-400 text-xs mb-2 block">
+                  <span className="text-muted-foreground text-xs mb-2 block">
                     {tip.example.label}
                   </span>
                 )}
                 <div className="flex items-start gap-2 mb-2">
-                  <span className="text-red-400 font-bold shrink-0">✗</span>
-                  <span className="text-red-200/80 text-xs">{tip.example.before}</span>
+                  <span className="text-red-500 font-bold shrink-0">✗</span>
+                  <span className="text-red-600 text-xs">{tip.example.before}</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-green-400 font-bold shrink-0">✓</span>
-                  <span className="text-green-200/80 text-xs">{tip.example.after}</span>
+                  <span className="text-green-500 font-bold shrink-0">✓</span>
+                  <span className="text-green-700 text-xs">{tip.example.after}</span>
                 </div>
               </>
             ) : (
               <>
                 {tip.example.label && (
-                  <span className="text-slate-400 text-xs mb-1 block">
+                  <span className="text-muted-foreground text-xs mb-1 block">
                     {tip.example.label}
                   </span>
                 )}
                 {tip.example.text && (
-                  <span className="text-slate-200 text-xs italic">{tip.example.text}</span>
+                  <span className="text-foreground/90 text-xs italic">{tip.example.text}</span>
                 )}
               </>
             )}
@@ -382,7 +382,7 @@ export default function MaterialsPage() {
             {/* Sidebar header */}
             <div className="px-4 py-3 mb-1">
               <p className="text-elite-gold font-semibold text-sm">{moduleTitle}</p>
-              <p className="text-slate-400 text-xs mt-0.5">
+              <p className="text-muted-foreground text-xs mt-0.5">
                 {currentModule.sections.length} section
                 {currentModule.sections.length !== 1 ? "s" : ""}
               </p>
@@ -400,7 +400,7 @@ export default function MaterialsPage() {
                       "w-full text-left px-4 py-3 rounded-r-lg transition-colors",
                       isActive
                         ? "bg-elite-gold/10 border-l-2 border-elite-gold text-elite-gold"
-                        : "hover:bg-[#1e293b]/60 text-slate-300 cursor-pointer border-l-2 border-transparent"
+                        : "hover:bg-secondary/60 text-foreground/70 cursor-pointer border-l-2 border-transparent"
                     )}
                   >
                     <p className="text-sm font-medium leading-snug">{section.title}</p>
@@ -423,7 +423,7 @@ export default function MaterialsPage() {
                 number={sectionIndex + 1}
                 title={currentSection.title}
               />
-              <p className="text-slate-300 text-sm mt-2 mb-3 leading-relaxed">
+              <p className="text-foreground/80 text-sm mt-2 mb-3 leading-relaxed">
                 {currentSection.summary}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -436,7 +436,7 @@ export default function MaterialsPage() {
             {/* 2. Revision links */}
             {currentSection.revisionLinks && currentSection.revisionLinks.length > 0 && (
               <div>
-                <p className="text-slate-500 text-xs mb-2">Refresh your basics</p>
+                <p className="text-muted-foreground/70 text-xs mb-2">Refresh your basics</p>
                 <div className="flex flex-wrap gap-2">
                   {currentSection.revisionLinks.map((link) => (
                     <button
@@ -444,7 +444,7 @@ export default function MaterialsPage() {
                       onClick={() =>
                         navigate(`/dashboard/revision-notes?topic=${link.topicId}`)
                       }
-                      className="flex items-center gap-1.5 border border-[#334155] bg-[#1e293b]/50 rounded-full px-3 py-1 text-xs text-slate-400 hover:border-blue-400/50 hover:text-blue-300 transition-colors"
+                      className="flex items-center gap-1.5 border border-border bg-secondary/50 rounded-full px-3 py-1 text-xs text-muted-foreground hover:border-blue-500/50 hover:text-blue-500 transition-colors"
                     >
                       <BookOpen size={12} className="shrink-0" />
                       {link.label}
