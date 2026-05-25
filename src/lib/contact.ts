@@ -53,12 +53,11 @@ export function planSignupWhatsAppMessage(opts: {
   fullName?: string | null;
   phoneNumber?: string | null;
 }): string {
-  const nameLine = opts.fullName ? `\nName: ${opts.fullName}` : "";
+  const name = opts.fullName ?? opts.email;
   const phoneLine = opts.phoneNumber ? `\nPhone: ${opts.phoneNumber}` : "";
   return (
-    `Hi IELTSinAja! I just signed up and want the *${opts.planName}* package.\n\n` +
-    `Email: ${opts.email}${nameLine}${phoneLine}\n` +
-    `Package: ${opts.planName} (${opts.displayPrice})\n\n` +
-    `Please activate my account after payment. Thank you!`
+    `Hi! My name is ${name} and I would like to buy the ${opts.planName} package.\n\n` +
+    `Email: ${opts.email}${phoneLine}\n\n` +
+    `Please let me know how to proceed with payment. Thank you!`
   );
 }
