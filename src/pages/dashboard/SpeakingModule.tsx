@@ -912,12 +912,24 @@ export default function SpeakingModule() {
             ].filter(c => c.data).map(criterion => (
               <div key={criterion.label} className="glass-card p-6 text-center">
                 <h3 className="text-base font-semibold mb-2">{criterion.label}</h3>
-                <p className={`text-4xl font-light mb-3 ${getScoreColor(criterion.data.score)}`}>
+                <p className={`text-4xl font-light mb-4 ${getScoreColor(criterion.data.score)}`}>
                   {criterion.data.score?.toFixed(1) ?? "—"}
                 </p>
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mx-auto">
-                  {criterion.data.feedback}
-                </p>
+                {/* Feedback: array → bullet list, string → paragraph (legacy cache) */}
+                {Array.isArray(criterion.data.feedback) ? (
+                  <ul className="text-sm text-muted-foreground text-left max-w-xl mx-auto space-y-1.5">
+                    {criterion.data.feedback.map((point: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-accent mt-0.5 shrink-0">•</span>
+                        <span className="leading-relaxed">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mx-auto">
+                    {criterion.data.feedback}
+                  </p>
+                )}
                 {/* Extra detail for specific criteria */}
                 {criterion.label === "Lexical Resource" && criterion.data.suggestions?.length > 0 && (
                   <div className="mt-3 flex flex-wrap justify-center gap-2">
@@ -972,13 +984,30 @@ export default function SpeakingModule() {
               </div>
             )}
 
-            {/* ── 7. Improved version */}
-            {feedback.enhancedSpeech && (
+            {/* ── 7. How you could say it — two versions */}
+            {(feedback.enhancedSpeechNextBand || feedback.enhancedSpeech) && (
               <div className="glass-card p-6 border border-blue-500/20">
-                <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wide mb-3">
-                  How you could say it
-                </h3>
-                <p className="text-sm text-foreground/80 leading-relaxed">{feedback.enhancedSpeech}</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-semibold text-blue-400 uppercase tracking-wide">How you could say it</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">
+                    +1 Band ({((feedback.overallBand ?? 6) + 1).toFixed(1)})
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">Same ideas — just smoother flow and better word choices</p>
+                <p className="text-sm text-foreground/80 leading-relaxed">
+                  {feedback.enhancedSpeechNextBand ?? feedback.enhancedSpeech}
+                </p>
+              </div>
+            )}
+
+            {feedback.enhancedSpeechBand9 && (
+              <div className="glass-card p-6 border border-elite-gold/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-semibold text-elite-gold uppercase tracking-wide">How you could say it</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-elite-gold/20 text-elite-gold">Band 9</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">Your topic and story — elevated to the highest level</p>
+                <p className="text-sm text-foreground/80 leading-relaxed">{feedback.enhancedSpeechBand9}</p>
               </div>
             )}
 

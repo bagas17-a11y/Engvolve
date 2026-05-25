@@ -321,7 +321,9 @@ Penalise: errors that change meaning, only short choppy sentences, over-reaching
 Infer from transcription: misspelled words may indicate pronunciation errors. Look for evidence of stress/intonation (punctuation patterns, emotional words). Part 1: clarity and natural pace. Part 3: downward intonation to sound authoritative.
 
 === GRADING PHILOSOPHY ===
-Be encouraging but honest. Count pauses and fillers explicitly. For each criterion give: score, specific evidence from the transcript, and one concrete action to improve.`;
+Be encouraging but honest. Count pauses and fillers explicitly. For each criterion give: score, specific evidence from the transcript, and one concrete action to improve.
+
+Speaking is a real-time task — do not penalise minor stumbles or self-corrections that do not impede communication. When a student demonstrates the key features of a band level, even partially, favour the higher band. Reserve the lower band only when the evidence clearly does not meet that level.`;
 
 const READING_TUTOR_PROMPT = `You are an IELTS Reading specialist. A student answered incorrectly. Diagnose the mistake and teach the fix.
 
@@ -371,19 +373,14 @@ function getMockResponse(type: string, content: string, speakingPart?: string, t
       accuracyScore: 72,
       isMock: true,
       polishedTranscript: content.replace(/\b(um|uh|like|you know|basically|actually|I mean|kind of|sort of)\b/gi, '').replace(/\s{2,}/g, ' ').trim(),
-      wordConfidences: words.slice(0, 20).map((word: string, i: number) => ({
-        word: word.replace(/[\[\]]/g, ''),
-        confidence: Math.min(100, Math.max(30, 85 - (i % 5) * 8 + Math.floor(Math.random() * 20))),
-        feedback: i % 4 === 0 ? "Clear and natural" : i % 4 === 1 ? "Good pronunciation" : i % 4 === 2 ? "Consider stress on this syllable" : "Natural liaison with surrounding words"
-      })),
-      improvedNaturalness: (() => {
+      enhancedSpeechNextBand: (() => {
         const clean = content
           .replace(/\[pause\]/gi, '')
           .replace(/\b(um|uh|like|you know|basically|actually|I mean|kind of|sort of|right|okay)\b/gi, '')
           .replace(/\s{2,}/g, ' ').trim();
         return clean.charAt(0).toUpperCase() + clean.slice(1);
       })(),
-      enhancedSpeech: (() => {
+      enhancedSpeechBand9: (() => {
         const clean = content
           .replace(/\[pause\]/gi, '')
           .replace(/\b(um|uh|like|you know|basically|actually|I mean|kind of|sort of|right|okay)\b/gi, '')
@@ -392,11 +389,11 @@ function getMockResponse(type: string, content: string, speakingPart?: string, t
       })(),
       taskResponse: {
         score: 6.5,
-        feedback: "The response addresses the question directly and provides relevant qualities. To further enhance the answer, consider elaborating on why these qualities matter personally and providing specific examples from your experience."
+        feedback: ["The response addresses the question directly with relevant content.", "Some personal detail was included which strengthened the answer.", "Elaborate further and add a specific example to boost task coverage."]
       },
       fluencyCoherence: {
         score: 6.5,
-        feedback: "You maintained a reasonable flow of speech with some hesitation. Try to develop your ideas more fully and use connecting phrases like 'furthermore', 'in addition', and 'on the other hand' to link your points smoothly."
+        feedback: ["Reasonable flow maintained throughout the response.", "Basic connectors were used to link ideas.", "Try 'furthermore', 'in addition', and 'on the other hand' for smoother linking."]
       },
       pauseAnalysis: {
         count: pauseCount,
@@ -406,7 +403,7 @@ function getMockResponse(type: string, content: string, speakingPart?: string, t
       },
       lexicalResource: {
         score: 6.5,
-        feedback: "You used adequate vocabulary for the topic. To improve, try incorporating more topic-specific vocabulary and idiomatic expressions.",
+        feedback: ["Adequate vocabulary was used for the topic.", "Some natural phrasing came through in the response.", "Incorporate more precise or topic-specific vocabulary to improve range."],
         idiomaticExpressions: ["Good attempt at natural speech patterns"],
         suggestions: [
           "Use 'from my perspective' instead of 'I think'",
@@ -416,13 +413,13 @@ function getMockResponse(type: string, content: string, speakingPart?: string, t
       },
       grammaticalRange: {
         score: 6.5,
-        feedback: "You used a mix of simple and some complex structures. Try incorporating more conditionals ('If I had the chance...'), perfect tenses ('I have been studying...'), and relative clauses ('which is something I really enjoy').",
+        feedback: ["A mix of simple and some complex structures was used.", "Sentence variety was present, which is positive.", "Try conditionals ('If I had the chance...') and relative clauses to extend range."],
         complexStructures: ["Basic sentence structures used effectively"],
         errorsFound: ["Consider varying sentence structures more", "Try using more complex tenses"]
       },
       pronunciation: {
         score: 6.5,
-        feedback: "Based on the transcription, pronunciation appears adequate. Focus on word stress patterns and intonation to sound more natural. Practice with shadowing exercises."
+        feedback: ["Pronunciation appears generally clear from the transcription.", "Word stress on key content words seems appropriate.", "Focus on intonation patterns to sound more natural and confident."]
       },
       fillerWords: {
         count: fillerWords.length,
@@ -864,7 +861,9 @@ ${content}
 3. If filler frequency > 1 per 10 seconds, cap Fluency at 5.5
 4. Identify idiomatic expressions and complex grammar structures used
 5. Generate a polishedTranscript: fix grammar errors and remove fillers. Keep the student's EXACT topic, ideas, and content.
-6. Generate an enhancedSpeech: rewrite the student's response so it flows better and uses stronger word choices — natural spoken English at around Band 7, not overly academic. Remove all [pause] markers and fillers. Fix all grammar errors. Replace weak words with better but still conversational alternatives. Keep every single one of the student's ideas and personal story — do not add or remove content. Sound like a confident fluent speaker, not an essay.
+6. Generate TWO enhanced speech versions using the student's overallBand score:
+   - enhancedSpeechNextBand: rewrite the response targeting exactly one full band above the student's overallBand (e.g., if Band 5 → write at Band 6 level). Keep every one of the student's ideas and personal story. Make incremental, realistic improvements: smoother connectors, slightly better vocabulary, fewer fillers. Sound like a real person improving, not a textbook.
+   - enhancedSpeechBand9: rewrite the response at a perfect Band 9 level. Remove all [pause] markers and fillers. Sophisticated but still conversational vocabulary. Complex sentence structures. Keep the student's core topic and personal story — do not invent new content. Sound like a highly fluent, confident speaker.
 
 Provide your response in this EXACT JSON format:
 {
@@ -872,14 +871,15 @@ Provide your response in this EXACT JSON format:
   "bandScoreRange": "+/- 0.5",
   "accuracyScore": 73,
   "polishedTranscript": "Grammar-fixed, filler-free version of student's actual words",
-  "enhancedSpeech": "Improved version with better flow and word choice — same ideas, natural spoken English",
+  "enhancedSpeechNextBand": "One-band-higher version — same ideas, incremental improvements in flow and word choice",
+  "enhancedSpeechBand9": "Perfect Band 9 version — same topic and personal story, fully fluent and sophisticated",
   "taskResponse": {
     "score": 7.0,
-    "feedback": "Specific analysis of how directly and fully the student addressed the question"
+    "feedback": ["Key observation about task coverage", "What was done well", "One specific thing to improve"]
   },
   "fluencyCoherence": {
     "score": 7.0,
-    "feedback": "Detailed analysis of flow, hesitation, coherence, and linking devices"
+    "feedback": ["Observation about flow and hesitation", "Linking device usage", "One specific improvement"]
   },
   "pauseAnalysis": {
     "count": 3,
@@ -887,19 +887,19 @@ Provide your response in this EXACT JSON format:
   },
   "lexicalResource": {
     "score": 7.0,
-    "feedback": "Analysis of vocabulary range, precision, and naturalness",
+    "feedback": ["Vocabulary range observation", "Strength in word choice", "One specific improvement"],
     "idiomaticExpressions": ["good expressions the student used"],
     "suggestions": ["specific vocabulary improvements to try next time"]
   },
   "grammaticalRange": {
     "score": 7.0,
-    "feedback": "Analysis of grammar variety and accuracy with specific examples",
+    "feedback": ["Grammar range observation", "Structures used well", "One specific error or gap to address"],
     "complexStructures": ["complex structures successfully used"],
     "errorsFound": ["specific grammar errors found"]
   },
   "pronunciation": {
     "score": 7.0,
-    "feedback": "Inferred pronunciation assessment based on transcription patterns"
+    "feedback": ["Pronunciation clarity observation", "Stress and intonation note", "One specific improvement"]
   },
   "fillerWords": {
     "count": 5,
@@ -932,7 +932,7 @@ Provide your response in this JSON format:
 
     // Writing & Speaking use Sonnet for quality; Reading uses Haiku for speed
     const analysisModel = type === "reading" ? "claude-haiku-4-5-20251001" : "claude-sonnet-4-6";
-    const maxTokens = type === "writing" ? 3000 : type === "speaking" ? 4500 : 800;
+    const maxTokens = type === "writing" ? 3000 : type === "speaking" ? 5500 : 800;
 
     console.log("Calling Claude API with type:", type, "model:", analysisModel, "taskType:", taskType, "isRevision:", isRevision);
 
