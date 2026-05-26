@@ -165,19 +165,22 @@ export const PricingMatrix = () => {
 
                   <h3 className="text-2xl font-light mb-2 text-foreground">{plan.name}</h3>
 
-                  <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-4xl md:text-5xl font-light text-foreground">
-                      {displayPrice}
-                    </span>
-                    {plan.period && (
-                      <span className="text-muted-foreground">{plan.period}</span>
+                  <div className={isElite ? "blur-sm select-none pointer-events-none" : ""}>
+                    {(plan.strikethroughDisplayPrice || originalDisplayPrice) && (
+                      <p className="text-sm text-muted-foreground line-through mb-0.5">
+                        {originalDisplayPrice ?? plan.strikethroughDisplayPrice}
+                      </p>
                     )}
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-4xl md:text-5xl font-light text-foreground">
+                        {displayPrice}
+                      </span>
+                      {plan.period && (
+                        <span className="text-muted-foreground">{plan.period}</span>
+                      )}
+                    </div>
+                    {!plan.strikethroughDisplayPrice && !originalDisplayPrice && <div className="mb-1" />}
                   </div>
-                  {originalDisplayPrice && (
-                    <p className="text-sm text-muted-foreground line-through mb-2">
-                      {originalDisplayPrice}
-                    </p>
-                  )}
 
                   <p className="text-foreground/60 mb-6">{plan.description}</p>
 
