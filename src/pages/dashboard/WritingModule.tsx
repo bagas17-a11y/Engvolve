@@ -1182,6 +1182,12 @@ export default function WritingModule() {
                                     {DIAGRAM_LABELS[q.visual_type] ?? q.visual_type}
                                   </span>
                                 )}
+                                {completedIds.has(q.id) && (
+                                  <span className="text-xs px-2 py-0.5 rounded flex items-center gap-1 bg-green-500/15 text-green-500">
+                                    <CheckCircle className="w-3 h-3" />
+                                    Done
+                                  </span>
+                                )}
                               </div>
                               <h3 className="font-medium text-foreground mb-2 group-hover:text-accent transition-colors">
                                 {q.title}
