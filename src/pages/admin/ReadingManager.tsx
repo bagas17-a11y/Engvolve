@@ -3,13 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import {
-  BookOpen, Loader2, ArrowLeft, Sparkles, Trash2,
+  BookOpen, Loader2, ArrowLeft, Trash2,
   RefreshCw, FileText, BarChart3,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -39,8 +38,6 @@ export default function ReadingManager() {
 
   const [tests, setTests] = useState<ReadingTest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
-  const [genDifficulty, setGenDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -64,44 +61,6 @@ export default function ReadingManager() {
       setTests((data ?? []) as ReadingTest[]);
     }
     setLoading(false);
-  };
-
-  const handleGenerate = async () => {
-    if (generating) return;
-    setGenerating(true);
-    toast({ title: "Generating test…", description: "Claude is writing 3 passages + 40 questions. This takes 30–60 seconds." });
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      if (!token) throw new Error("Not authenticated");
-
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-      const res = await fetch(`${supabaseUrl}/functions/v1/generate-reading-admin`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({ difficulty: genDifficulty }),
-      });
-
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error ?? "Generation failed");
-      }
-
-      toast({ title: "Test generated!", description: `"${json.test.title}" — ${json.test.total_questions} questions` });
-      fetchTests();
-    } catch (err) {
-      toast({
-        title: "Generation failed",
-        description: err instanceof Error ? err.message : String(err),
-        variant: "destructive",
-      });
-    } finally {
-      setGenerating(false);
-    }
   };
 
   const toggleActive = async (test: ReadingTest) => {
@@ -179,47 +138,6 @@ export default function ReadingManager() {
             </Card>
           ))}
         </div>
-
-        {/* AI Generate Panel */}
-        <Card className="glass-card border-accent/20 bg-accent/5">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-accent" />
-              Generate New Test with AI
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Claude will write 3 full academic passages (~750 words each) with 40 questions across various IELTS question types. Takes 30–60 seconds.
-            </p>
-            <div className="flex items-center gap-3">
-              <div>
-                <p className="text-xs text-muted-foreground mb-1.5">Difficulty</p>
-                <Select value={genDifficulty} onValueChange={(v) => setGenDifficulty(v as typeof genDifficulty)}>
-                  <SelectTrigger className="w-36">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="easy">Easy</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="hard">Hard</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                onClick={handleGenerate}
-                disabled={generating}
-                className="mt-5 gap-2"
-              >
-                {generating ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
-                ) : (
-                  <><Sparkles className="w-4 h-4" /> Generate Test</>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Tests List */}
         <Card className="glass-card border-border/50">

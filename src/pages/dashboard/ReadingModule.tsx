@@ -573,11 +573,11 @@ export default function ReadingModule() {
               size="sm"
             >
               {isGenerating ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</>
               ) : !canAccess("reading") ? (
-                <><Lock className="w-4 h-4 mr-2" />Upgrade to Generate</>
+                <><Lock className="w-4 h-4 mr-2" />Upgrade to Access</>
               ) : (
-                <><RefreshCw className="w-4 h-4 mr-2" />Generate Test</>
+                <><RefreshCw className="w-4 h-4 mr-2" />New Test</>
               )}
             </Button>
           </div>
@@ -666,9 +666,9 @@ export default function ReadingModule() {
                     <BookOpen className="w-10 h-10 text-accent" />
                   </div>
                 </div>
-                <h2 className="text-xl font-light mb-2">Loading Your Test...</h2>
+                <h2 className="text-xl font-light mb-2">Loading Test...</h2>
                 <p className="text-muted-foreground text-sm mb-6">
-                  Preparing a full IELTS Academic Reading test with 3 passages and 40 questions.
+                  Fetching your reading test — just a moment.
                 </p>
               </div>
             ) : !canAccess("reading") ? (
@@ -687,7 +687,7 @@ export default function ReadingModule() {
                 <BookOpen className="w-16 h-16 text-accent/30 mx-auto mb-4" />
                 <h2 className="text-xl font-light mb-2">Ready to Practice?</h2>
                 <p className="text-muted-foreground mb-6">
-                  Generate a full IELTS Academic Reading test — 3 passages, 40 questions, 60 minutes.
+                  Pick a difficulty and press <strong>New Test</strong> to start — 3 passages, 40 questions, 60 minutes.
                 </p>
               </div>
             )}
