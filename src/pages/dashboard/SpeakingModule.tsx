@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Loader2, Play, Square, Volume2, RefreshCw, ChevronRight, Download, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useWhisperTranscription } from "@/hooks/useWhisperTranscription";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import { useAuth } from "@/hooks/useAuth";
 import { useFeatureGating } from "@/hooks/useFeatureGating";
@@ -205,10 +205,7 @@ export default function SpeakingModule() {
   const { saveProgress } = useUserProgress();
   const { canAccess, refreshCounts, isLoading: isGatingLoading } = useFeatureGating();
   const [speakingDuration, setSpeakingDuration] = useState<number | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const recordingStartRef = useRef<number | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const recordedChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -323,14 +320,16 @@ export default function SpeakingModule() {
 
   const {
     isListening,
+    isTranscribing,
     transcript,
     interimTranscript,
     startListening,
     stopListening,
     resetTranscript,
     isSupported,
-    audioLevel
-  } = useSpeechRecognition();
+    audioLevel,
+    audioUrl,
+  } = useWhisperTranscription();
 
   const getCurrentQuestion = () => {
     switch (currentPart) {
@@ -352,7 +351,6 @@ export default function SpeakingModule() {
     resetTranscript();
     setFeedback(null);
     setSpeakingDuration(null);
-    setAudioUrl(null);
     setSelectedSpeakingQuestion(null);
     const bank = activeQuestions[currentPart];
     setCurrentQuestionIndex((prev) => (prev + 1) % bank.length);
@@ -362,7 +360,6 @@ export default function SpeakingModule() {
     resetTranscript();
     setFeedback(null);
     setSpeakingDuration(null);
-    setAudioUrl(null);
   };
 
   const handlePartChange = (part: SpeakingPart) => {
@@ -372,55 +369,30 @@ export default function SpeakingModule() {
     resetTranscript();
     setFeedback(null);
     setSpeakingDuration(null);
-    setAudioUrl(null);
   };
 
   const handleStartRecording = async () => {
     if (!isSupported) {
       toast({
-        title: "Browser not supported",
-        description: "Speech recognition is not supported in your browser. Please use Chrome or Edge.",
+        title: "Microphone not available",
+        description: "Please allow microphone access and use a modern browser (Chrome, Edge, Safari 14+, Firefox).",
         variant: "destructive",
       });
       return;
     }
     resetTranscript();
     setFeedback(null);
-    setAudioUrl(null);
     setSpeakingDuration(null);
     recordingStartRef.current = Date.now();
-    recordedChunksRef.current = [];
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg';
-      const recorder = new MediaRecorder(stream, { mimeType });
-      recorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunksRef.current.push(e.data); };
-      recorder.onstop = () => {
-        const blob = new Blob(recordedChunksRef.current, { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        setAudioUrl(url);
-        stream.getTracks().forEach(t => t.stop());
-      };
-      recorder.start();
-      mediaRecorderRef.current = recorder;
-    } catch {
-      // MediaRecorder not available — proceed without audio recording
-    }
-
-    startListening();
+    await startListening();
   };
 
   const handleStopRecording = () => {
-    stopListening();
     if (recordingStartRef.current) {
       setSpeakingDuration(Math.round((Date.now() - recordingStartRef.current) / 1000));
       recordingStartRef.current = null;
     }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current = null;
-    }
+    stopListening(); // triggers Whisper transcription in the hook
   };
 
   const analyzeTranscript = async () => {
@@ -563,10 +535,6 @@ export default function SpeakingModule() {
       }, 100);
     }
   }, [feedback]);
-
-  useEffect(() => {
-    return () => { if (audioUrl) URL.revokeObjectURL(audioUrl); };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Generate waveform bars based on audio level
   const waveformBars = Array.from({ length: 12 }, (_, i) => {
@@ -889,10 +857,12 @@ export default function SpeakingModule() {
           <div className="flex flex-col items-center">
             {/* Waveform Visualization */}
             <div className={`w-full max-w-md h-24 flex items-center justify-center gap-1 mb-6 rounded-xl transition-all duration-300 ${
-              isListening 
-                ? "bg-destructive/10" 
-                : transcript 
-                ? "bg-green-500/10" 
+              isListening
+                ? "bg-destructive/10"
+                : isTranscribing
+                ? "bg-accent/10"
+                : transcript
+                ? "bg-green-500/10"
                 : "bg-secondary/30"
             }`}>
               {isListening ? (
@@ -903,6 +873,11 @@ export default function SpeakingModule() {
                     style={{ height: `${height}px` }}
                   />
                 ))
+              ) : isTranscribing ? (
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="w-8 h-8 text-accent animate-spin" />
+                  <span className="text-xs text-muted-foreground">Transcribing with Whisper…</span>
+                </div>
               ) : transcript ? (
                 <Volume2 className="w-12 h-12 text-green-500" />
               ) : (
@@ -914,28 +889,21 @@ export default function SpeakingModule() {
             {!isSupported && (
               <div className="w-full max-w-md mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-foreground/80">
                 <p className="font-medium text-foreground mb-1">
-                  Your browser doesn't support live speech recognition
+                  Microphone access unavailable
                 </p>
-                <p className="text-xs mb-2">
-                  This is a Chrome/Edge limitation, not an IELTSinAja bug. For the best
-                  Speaking experience, open this page in Chrome on desktop or Android.
+                <p className="text-xs">
+                  Please allow microphone permissions in your browser settings and reload the page.
+                  Whisper transcription works on Chrome, Edge, Firefox, and Safari 14+.
                 </p>
-                <ul className="text-xs list-disc pl-5 space-y-1">
-                  <li>iPhone Safari users: switch to the iOS Chrome app and try again.</li>
-                  <li>
-                    Want a human reviewer? Send your recording to us on WhatsApp and we'll
-                    grade it manually.
-                  </li>
-                </ul>
               </div>
             )}
 
             {/* Controls */}
             <div className="flex items-center gap-4">
-              {!isListening && !transcript && (
-                <Button 
-                  variant="neumorphicPrimary" 
-                  size="lg" 
+              {!isListening && !isTranscribing && !transcript && (
+                <Button
+                  variant="neumorphicPrimary"
+                  size="lg"
                   onClick={handleStartRecording}
                   disabled={!isSupported}
                 >
@@ -943,7 +911,7 @@ export default function SpeakingModule() {
                   Start Speaking
                 </Button>
               )}
-              
+
               {isListening && (
                 <Button variant="destructive" size="lg" onClick={handleStopRecording}>
                   <Square className="w-5 h-5 mr-2" />
@@ -951,7 +919,14 @@ export default function SpeakingModule() {
                 </Button>
               )}
 
-              {transcript && !isListening && (
+              {isTranscribing && (
+                <Button variant="outline" size="lg" disabled>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Transcribing…
+                </Button>
+              )}
+
+              {transcript && !isListening && !isTranscribing && (
                 <>
                   <Button variant="glass" onClick={handleStartRecording}>
                     <Mic className="w-5 h-5 mr-2" />
@@ -980,30 +955,20 @@ export default function SpeakingModule() {
 
             {isListening && (
               <p className="text-sm text-destructive mt-4 animate-pulse">
-                🎤 Recording in progress... Speak naturally
+                🎤 Recording… speak naturally, then press Stop
               </p>
             )}
           </div>
         </div>
 
         {/* Live Transcription */}
-        {(transcript || interimTranscript) && (
+        {transcript && (
           <div className="glass-card p-6 mb-6">
             <h2 className="text-lg font-light mb-4 flex items-center gap-2">
               Transcription
-              {isListening && <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />}
+              <span className="text-xs text-muted-foreground font-normal ml-1">via Whisper</span>
             </h2>
-            <p className="text-foreground/80 leading-relaxed">
-              {transcript}
-              {interimTranscript && (
-                <span className="text-muted-foreground italic">{interimTranscript}</span>
-              )}
-            </p>
-            {transcript.includes('[pause]') && (
-              <p className="text-xs text-muted-foreground mt-3">
-                💡 <span className="text-elite-gold">[pause]</span> markers indicate silences longer than 1.5 seconds
-              </p>
-            )}
+            <p className="text-foreground/80 leading-relaxed">{transcript}</p>
           </div>
         )}
 
