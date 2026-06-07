@@ -29,6 +29,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ListeningCheatsheet } from "@/components/listening/ListeningCheatsheet";
 import { useSidebar } from "@/components/ui/sidebar";
 
+// Rendered inside DashboardLayout (inside SidebarProvider) — safe to call useSidebar here
+function SidebarFocusController({ testActive }: { testActive: boolean }) {
+  const { setOpen, isMobile } = useSidebar();
+  useEffect(() => {
+    if (!isMobile) setOpen(!testActive);
+  }, [testActive, isMobile, setOpen]);
+  return null;
+}
+
 const NUMBER_WORDS: Record<string, string> = {
   "0": "zero", "1": "one", "2": "two", "3": "three", "4": "four",
   "5": "five", "6": "six", "7": "seven", "8": "eight", "9": "nine",
@@ -284,7 +293,6 @@ const generatePartAudio = async (section: ListeningPart, signal: AbortSignal): P
 export default function ListeningModule() {
   const { user, profile } = useAuth();
   const isElite = profile?.subscription_tier === "elite";
-  const { setOpen: setSidebarOpen, isMobile } = useSidebar();
 
   const [tests, setTests] = useState<ListeningTest[]>([]);
   const [isLoadingTests, setIsLoadingTests] = useState(true);
@@ -389,7 +397,6 @@ export default function ListeningModule() {
       }
 
       setCachedState(parsed);
-      if (parsed.hasStarted && !isMobile) setSidebarOpen(false);
       if (!currentTest) {
         setCurrentTest(cachedTest);
         setAnswers(parsed.answers || {});
@@ -488,7 +495,6 @@ export default function ListeningModule() {
   }, [isSeeking, playingPart]);
 
   const startTest = async (test: ListeningTest) => {
-    if (!isMobile) setSidebarOpen(false);
     preloadAbortRef.current?.abort();
     Object.values(audioUrlsRef.current).forEach((u) => URL.revokeObjectURL(u));
     audioUrlsRef.current = {};
@@ -830,7 +836,6 @@ export default function ListeningModule() {
   };
 
   const resetTest = () => {
-    if (!isMobile) setSidebarOpen(true);
     preloadAbortRef.current?.abort();
     abortRef.current?.abort();
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
@@ -1394,6 +1399,7 @@ export default function ListeningModule() {
 
     return (
       <DashboardLayout>
+        <SidebarFocusController testActive={false} />
         <div className="max-w-4xl">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
@@ -1427,7 +1433,7 @@ export default function ListeningModule() {
     );
   }
 
-  // Test view
+  // Test view — sidebar collapses while a test is active
   const firstGroup = currentPart?.question_groups[0];
   const lastGroup = currentPart?.question_groups[currentPart.question_groups.length - 1];
   const partQStart = firstGroup?.question_range[0];
@@ -1437,6 +1443,7 @@ export default function ListeningModule() {
 
   return (
     <DashboardLayout>
+      <SidebarFocusController testActive={true} />
       <div className="h-[calc(100vh-100px)] flex flex-col gap-3">
         {/* Header */}
         <div className="flex-shrink-0 flex items-center justify-between">
