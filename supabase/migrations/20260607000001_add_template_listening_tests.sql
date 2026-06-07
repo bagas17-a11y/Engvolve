@@ -239,7 +239,7 @@ VALUES (
               "options": {"A": "They will run a survey for park visitors", "B": "They will speak to park staff and local residents", "C": "They will approach the council environmental officer"},
               "answer": "B",
               "transcript_quote": "Let us stick with park managers and residents for now",
-              "explanation": "They decide on interviews with park managers and local residents (B). A visitor survey (A) was Aisha's initial idea but was rejected as too time-consuming. The council environmental officer (C) was proposed by Tom but Aisha was unconvinced and they postponed that decision."
+              "explanation": "They decide on interviews with park managers and local residents (B). A visitor survey (A) was Aisha''s initial idea but was rejected as too time-consuming. The council environmental officer (C) was proposed by Tom but Aisha was unconvinced and they postponed that decision."
             },
             {
               "number": 29,
