@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 520" width="480" height="520" font-family="Arial, Helvetica, sans-serif">
+
+  <!-- Park background -->
+  <rect width="480" height="520" fill="#edf6e5"/>
+
+  <!-- Park boundary (dashed) -->
+  <rect x="12" y="12" width="456" height="496" fill="none" stroke="#444" stroke-width="2" stroke-dasharray="8,5"/>
+
+  <!-- Title -->
+  <text x="200" y="32" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">Greenfield City Park</text>
+
+  <!-- Compass rose (top right) -->
+  <g transform="translate(447,62)">
+    <circle cx="0" cy="0" r="19" fill="white" stroke="#555" stroke-width="1.2"/>
+    <text x="0" y="-6" text-anchor="middle" font-size="12" font-weight="bold" fill="#222">N</text>
+    <polygon points="0,-16 -3.5,-4 3.5,-4" fill="#222"/>
+    <line x1="0" y1="4" x2="0" y2="16" stroke="#999" stroke-width="1"/>
+    <line x1="-14" y1="0" x2="14" y2="0" stroke="#ccc" stroke-width="0.8"/>
+  </g>
+
+  <!-- ====== PATHS ====== -->
+  <!-- Left fork (west side, from entrance up) -->
+  <path d="M 238 490 Q 155 478 118 428 Q 92 382 100 318 Q 105 282 100 245 Q 98 212 116 176 Q 88 150 72 100"
+        fill="none" stroke="#d4b888" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Right fork (east side, from entrance up) -->
+  <path d="M 238 490 Q 320 478 398 452 L 400 396 L 400 280 Q 392 222 362 198"
+        fill="none" stroke="#d4b888" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Top connecting path (across north) -->
+  <path d="M 116 174 Q 160 154 200 152 Q 238 150 272 150 Q 308 152 362 196"
+        fill="none" stroke="#d4b888" stroke-width="9" stroke-linecap="round"/>
+  <!-- Central spur to Visitor Centre -->
+  <path d="M 238 232 L 238 192"
+        fill="none" stroke="#d4b888" stroke-width="9" stroke-linecap="round"/>
+
+  <!-- ====== LAKE ====== -->
+  <ellipse cx="252" cy="168" rx="82" ry="54" fill="#b5d8f2" stroke="#5090be" stroke-width="1.8"/>
+  <text x="252" y="172" text-anchor="middle" font-size="11" fill="#1a5080" font-style="italic" font-weight="bold">Lake</text>
+
+  <!-- ====== TREES ====== -->
+  <!-- NW corner -->
+  <circle cx="28" cy="72" r="9" fill="#72a848" opacity="0.9"/>
+  <circle cx="44" cy="56" r="8" fill="#72a848" opacity="0.9"/>
+  <circle cx="22" cy="98" r="8" fill="#72a848" opacity="0.9"/>
+  <circle cx="38" cy="118" r="7" fill="#72a848" opacity="0.85"/>
+  <!-- NE cluster -->
+  <circle cx="452" cy="55" r="9" fill="#72a848" opacity="0.9"/>
+  <circle cx="462" cy="78" r="8" fill="#72a848" opacity="0.85"/>
+  <circle cx="448" cy="118" r="8" fill="#72a848" opacity="0.85"/>
+  <!-- Around lake -->
+  <circle cx="192" cy="138" r="9" fill="#72a848" opacity="0.85"/>
+  <circle cx="175" cy="118" r="8" fill="#72a848" opacity="0.85"/>
+  <circle cx="318" cy="136" r="9" fill="#72a848" opacity="0.85"/>
+  <circle cx="335" cy="116" r="8" fill="#72a848" opacity="0.85"/>
+  <circle cx="252" cy="234" r="8" fill="#72a848" opacity="0.8"/>
+  <!-- South area -->
+  <circle cx="175" cy="340" r="8" fill="#72a848" opacity="0.8"/>
+  <circle cx="158" cy="362" r="7" fill="#72a848" opacity="0.8"/>
+  <circle cx="295" cy="334" r="8" fill="#72a848" opacity="0.8"/>
+  <circle cx="308" cy="358" r="7" fill="#72a848" opacity="0.8"/>
+  <!-- Far south -->
+  <circle cx="28" cy="455" r="9" fill="#72a848" opacity="0.8"/>
+  <circle cx="48" cy="478" r="8" fill="#72a848" opacity="0.8"/>
+  <circle cx="30" cy="392" r="8" fill="#72a848" opacity="0.8"/>
+
+  <!-- ====== BUILDINGS (unlabelled — students identify via A–H) ====== -->
+
+  <!-- A area: Café — NW corner, small rectangle -->
+  <rect x="40" y="70" width="54" height="34" rx="3" fill="#d8c882" stroke="#888" stroke-width="1.5"/>
+
+  <!-- B area: Rose Garden glasshouse — left path, dashed outline -->
+  <rect x="114" y="145" width="58" height="40" rx="3" fill="#cde8c0" stroke="#4e8040" stroke-width="1.5" stroke-dasharray="5,2.5"/>
+
+  <!-- C area: Exhibition Hall — NE corner, larger building with columns hint -->
+  <rect x="376" y="58" width="76" height="52" rx="2" fill="#d8c882" stroke="#888" stroke-width="1.5"/>
+  <line x1="390" y1="58" x2="390" y2="110" stroke="#999" stroke-width="1"/>
+  <line x1="404" y1="58" x2="404" y2="110" stroke="#999" stroke-width="1"/>
+  <line x1="418" y1="58" x2="418" y2="110" stroke="#999" stroke-width="1"/>
+  <line x1="432" y1="58" x2="432" y2="110" stroke="#999" stroke-width="1"/>
+
+  <!-- D area: Bandstand — circular pavilion on west path -->
+  <circle cx="102" cy="266" r="25" fill="#e5d5a8" stroke="#888" stroke-width="1.5"/>
+  <circle cx="102" cy="266" r="15" fill="#f5ead8" stroke="#aaa" stroke-width="1"/>
+  <!-- pavilion spokes -->
+  <line x1="102" y1="241" x2="102" y2="251" stroke="#bbb" stroke-width="1"/>
+  <line x1="102" y1="281" x2="102" y2="291" stroke="#bbb" stroke-width="1"/>
+  <line x1="77" y1="266" x2="87" y2="266" stroke="#bbb" stroke-width="1"/>
+  <line x1="117" y1="266" x2="127" y2="266" stroke="#bbb" stroke-width="1"/>
+
+  <!-- E area: Children's Play Area — fenced open area, east path -->
+  <rect x="376" y="236" width="72" height="56" rx="5" fill="#fce8a0" stroke="#c09028" stroke-width="1.5" stroke-dasharray="5,2"/>
+  <!-- play equipment hints -->
+  <line x1="392" y1="248" x2="392" y2="270" stroke="#c09028" stroke-width="2"/>
+  <line x1="386" y1="248" x2="398" y2="248" stroke="#c09028" stroke-width="2"/>
+  <circle cx="420" cy="258" r="7" fill="none" stroke="#c09028" stroke-width="1.5"/>
+
+  <!-- F area: First Aid Post — small building with red cross, east path -->
+  <rect x="380" y="342" width="46" height="36" rx="2" fill="#fcc8c0" stroke="#a02828" stroke-width="1.5"/>
+  <line x1="392" y1="346" x2="392" y2="374" stroke="#c02828" stroke-width="3"/>
+  <line x1="381" y1="360" x2="403" y2="360" stroke="#c02828" stroke-width="3"/>
+
+  <!-- G area: Car Park — paved rectangle with parking lines, SE -->
+  <rect x="380" y="412" width="72" height="56" rx="2" fill="#d0c8b0" stroke="#888" stroke-width="1.5"/>
+  <line x1="394" y1="412" x2="394" y2="468" stroke="#bbb" stroke-width="1"/>
+  <line x1="408" y1="412" x2="408" y2="468" stroke="#bbb" stroke-width="1"/>
+  <line x1="422" y1="412" x2="422" y2="468" stroke="#bbb" stroke-width="1"/>
+  <line x1="436" y1="412" x2="436" y2="468" stroke="#bbb" stroke-width="1"/>
+  <text x="416" y="444" text-anchor="middle" font-size="9" fill="#666" transform="rotate(-90,416,444)">P</text>
+
+  <!-- H area: Visitor Centre — modern, central near lake -->
+  <rect x="212" y="226" width="58" height="30" rx="2" fill="#c2ddf5" stroke="#3878b0" stroke-width="1.5"/>
+
+  <!-- ====== MAIN ENTRANCE ====== -->
+  <!-- Gate posts -->
+  <rect x="204" y="484" width="6" height="22" rx="1" fill="#555"/>
+  <rect x="272" y="484" width="6" height="22" rx="1" fill="#555"/>
+  <!-- Label -->
+  <rect x="210" y="487" width="64" height="17" fill="white" stroke="#555" stroke-width="1.2"/>
+  <text x="242" y="499" text-anchor="middle" font-size="8" font-weight="bold" fill="#333">MAIN ENTRANCE</text>
+
+  <!-- ====== LETTER CIRCLES (A–H) ====== -->
+
+  <!-- A: NW (Café) -->
+  <circle cx="80" cy="72" r="12" fill="white" stroke="#222" stroke-width="2.2"/>
+  <text x="80" y="77" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">A</text>
+
+  <!-- B: Rose Garden (left path, north) -->
+  <circle cx="116" cy="146" r="12" fill="white" stroke="#222" stroke-width="2.2"/>
+  <text x="116" y="151" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">B</text>
+
+  <!-- C: Exhibition Hall (NE) -->
+  <circle cx="378" cy="60" r="12" fill="white" stroke="#222" stroke-width="2.2"/>
+  <text x="378" y="65" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">C</text>
+
+  <!-- D: Bandstand (west, mid) -->
+  <circle cx="130" cy="250" r="12" fill="white" stroke="#222" stroke-width="2.2"/>
+  <text x="130" y="255" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">D</text>
+
+  <!-- E: Children's Play (east, mid-north) -->
+  <circle cx="378" cy="237" r="12" fill="white" stroke="#222" stroke-width="2.2"/>
+  <text x="378" y="242" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">E</text>
+
+  <!-- F: First Aid Post (east, lower) -->
+  <circle cx="381" cy="343" r="12" fill="white" stroke="#222" stroke-width="2.2"/>
+  <text x="381" y="348" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">F</text>
+
+  <!-- G: Car Park (east, near entrance) -->
+  <circle cx="381" cy="413" r="12" fill="white" stroke="#222" stroke-width="2.2"/>
+  <text x="381" y="418" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">G</text>
+
+  <!-- H: Visitor Centre (centre, below lake) -->
+  <circle cx="214" cy="227" r="12" fill="white" stroke="#222" stroke-width="2.2"/>
+  <text x="214" y="232" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">H</text>
+
+</svg>

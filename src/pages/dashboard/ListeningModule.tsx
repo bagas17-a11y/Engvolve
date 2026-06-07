@@ -69,6 +69,7 @@ interface QuestionGroup {
   options_pool?: Record<string, string>;
   template?: string;
   group_transcript?: string;
+  map_image_url?: string;
 }
 
 interface ListeningPart {
@@ -1006,6 +1007,90 @@ export default function ListeningModule() {
     );
   };
 
+  const MAP_LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"] as const;
+
+  const renderMapLabelling = (group: QuestionGroup) => {
+    const letters = group.options_pool ? Object.keys(group.options_pool).sort() : [...MAP_LETTERS];
+    return (
+      <div className="space-y-4">
+        {group.map_image_url && (
+          <div className="flex flex-col lg:flex-row gap-5">
+            <div className="lg:w-[52%] flex-shrink-0">
+              <img
+                src={group.map_image_url}
+                alt="Map — label each position"
+                className="w-full border border-border/50 rounded-xl shadow-sm"
+              />
+            </div>
+            <div className="lg:w-[48%] overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr>
+                    <th className="text-left py-2 pr-3 font-medium text-muted-foreground text-xs uppercase tracking-wide w-auto whitespace-nowrap">Location</th>
+                    {letters.map((l) => (
+                      <th key={l} className="text-center py-2 px-1 font-bold text-xs text-foreground w-7">{l}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {group.items.map((item) => {
+                    const result = results[item.number.toString()];
+                    const isCorrect = result?.correct;
+                    const userAnswer = answers[item.number.toString()] || "";
+                    return (
+                      <tr key={item.number} className={cn(
+                        "border-t border-border/30",
+                        isSubmitted ? isCorrect ? "bg-green-500/5" : "bg-red-500/5" : ""
+                      )}>
+                        <td className="py-2.5 pr-3 whitespace-nowrap">
+                          <span className={cn(
+                            "inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-semibold mr-2 flex-shrink-0",
+                            isSubmitted
+                              ? isCorrect ? "bg-green-500/20 text-green-700 dark:text-green-400" : "bg-red-500/20 text-red-700 dark:text-red-400"
+                              : "bg-accent/15 text-accent"
+                          )}>{item.number}</span>
+                          <span className="text-foreground">{item.label || item.statement}</span>
+                          {isSubmitted && !isCorrect && (
+                            <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">→ {result?.correctAnswer}</span>
+                          )}
+                        </td>
+                        {letters.map((l) => {
+                          const isSelected = userAnswer === l;
+                          const isCorrectLetter = result?.correctAnswer === l;
+                          return (
+                            <td key={l} className="text-center py-2.5 px-1">
+                              <input
+                                type="radio"
+                                name={`map-q-${item.number}`}
+                                value={l}
+                                checked={isSelected}
+                                onChange={() => handleAnswerChange(item.number.toString(), l)}
+                                disabled={isSubmitted}
+                                className={cn(
+                                  "w-4 h-4 cursor-pointer",
+                                  isSubmitted && isCorrectLetter ? "accent-green-500" : isSubmitted && isSelected && !isCorrectLetter ? "accent-red-500" : "accent-accent"
+                                )}
+                              />
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        {!group.map_image_url && (
+          <div className="space-y-3">
+            {group.items.map((item) => renderQuestion(item, "matching", null))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderQuestion = (
     question: QuestionItem,
     groupType: string,
@@ -1577,8 +1662,10 @@ export default function ListeningModule() {
                         </div>
                       )}
 
-                      {/* Questions: template-driven or card-based */}
-                      {group.template ? (
+                      {/* Questions: map labelling, template-driven, or card-based */}
+                      {group.type === "map_labelling" ? (
+                        renderMapLabelling(group)
+                      ) : group.template ? (
                         renderTemplate(group.template, group)
                       ) : (
                         <div className="space-y-3">

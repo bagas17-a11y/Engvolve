@@ -55,32 +55,100 @@ VALUES (
     },
     {
       "part_number": 2,
-      "context": "A tour guide giving visitors information about the city main attractions and practical tips",
-      "transcript": "Welcome to Green City, everyone. I am Sarah, your city guide. The city was founded in eighteen sixty-five, making it over one hundred and fifty years old. Our most visited attraction is the National Museum, which first opened in nineteen twenty and today houses more than fifty thousand exhibits. The museum is open seven days a week from ten in the morning until six in the evening. Adult admission is fifteen pounds, and children under twelve enter free of charge. A short walk away you will find the famous Botanical Gardens. Covering thirty hectares, the gardens feature plants from over one hundred countries and were established in nineteen ten. Another highlight is the historic Old Quarter, which gained UNESCO World Heritage Site status in two thousand and eight and contains over three hundred listed buildings. For getting around, our bus service runs every ten minutes during peak hours. A one-day travel card costs six pounds fifty and gives you unlimited access to all city buses and trams. The main railway station is a fifteen-minute walk from the city centre, or you can take bus number forty-two. Our tourist information centre on Bridge Street is open daily from nine until five and the staff will be happy to help with any further questions.",
+      "context": "A local guide welcomes visitors to Greenfield City Park and describes its layout and facilities",
+      "transcript": "Good morning, and welcome to Greenfield City Park. I am David, and I will be showing you around today. Let me start with a few practical details.\n\nThe park opens at eight o clock every morning, seven days a week. On weekdays — that is, Monday through Friday — we close at half past five in the afternoon. I am aware some of you may have seen our older leaflets stating six o clock, but the closing time was brought forward last spring. At weekends and public holidays, we do stay open until eight in the evening.\n\nNow, I have some exciting news about next month. The park will be turning one hundred years old in July, and to mark the centenary, we are running a free open-air concert series on the main lawn. The park committee had initially discussed hosting a horticultural exhibition, but following a public vote, the music festival idea won out instead. It will run every Saturday evening in July — no booking required, and no charge whatsoever.\n\nA quick word on current conditions. The southern meadow, which we had to close for drainage repairs over winter, has now fully reopened. However, the ornamental fountain on the west terrace is undergoing maintenance this week. The terrace itself is accessible and is actually a lovely resting spot — it is only the fountain that is temporarily out of action.\n\nRegarding the Exhibition Hall — I will point it out on the map shortly — there is an admission charge. Adults pay five pounds. I should mention that the previous price was three pounds fifty, but it was increased when the new interactive galleries opened last month. Visitors under sixteen get in for two pounds fifty, and there is a reduced rate of three pounds for full-time students and pensioners.\n\nMy advice for first-time visitors: go directly to the Visitor Centre when you arrive. The team there will give you a personal welcome and tailor their recommendations to your interests. We do run a forty-minute film about the history of the park, which is genuinely excellent — but given the time it takes, I would suggest saving that for a return visit and heading to the Visitor Centre first today.\n\nRight. Now let us look at the layout of the park itself.\n\nYou are standing at the main entrance, which faces south. The footpath ahead splits immediately into two forks. Let us take the left fork first.\n\nFollow the left-hand path northwards along the old stone wall. After about a minute you will spot a circular open-sided structure surrounded by low flower beds on all sides. That is the Bandstand, where we hold our summer evening concerts.\n\nCarrying on past the Bandstand, you will come to a large glasshouse on the right-hand side of the path. The glass panels make it quite unmistakable. That is the Rose Garden — temperature-controlled year-round and home to over two hundred varieties.\n\nNow, back at the entrance: if you take the right-hand fork and head east, the very first thing you will encounter is a large paved area immediately on your right. That is the Car Park. Just beyond it, perhaps ten metres further along, there is a compact red-brick building — rather small and square. That is the First Aid Post, staffed by trained volunteers every weekend.\n\nContinuing north along that same eastern path — past the Car Park and the First Aid Post — you will arrive at an open fenced area with climbing frames, a splash pad, and covered seating. That is the children''s play area, very popular with families.\n\nBefore you reach the lake at the northern end, on the left side of the central connecting path, there is a low modern building with large glass windows across the front. That is the Visitor Centre. If you pop in, the staff can help with anything.\n\nThe lake itself sits at the centre of the northern section — clearly marked on your map. It is a natural feature and home to several species of waterfowl. We do ask that visitors refrain from feeding the birds bread.\n\nTo the east of the lake — if you are standing at the water facing north and you turn right — you will see a grand Victorian building with a red-brick facade and tall arched windows. That is the Exhibition Hall. It really is worth a visit.\n\nAnd finally, in the northwest corner of the park, slightly elevated and with a wonderful view over the lake, you will find the Cafe. The views from there on a clear morning like today are quite spectacular.\n\nAny questions before we head off?",
       "question_groups": [
         {
           "type": "multiple_choice",
           "instruction": "Choose the correct letter, A, B or C.",
-          "question_range": [11, 14],
+          "question_range": [11, 15],
+          "group_transcript": "Good morning, and welcome to Greenfield City Park. I am David, and I will be showing you around today. Let me start with a few practical details.\n\nThe park opens at eight o clock every morning, seven days a week. On weekdays — that is, Monday through Friday — we close at half past five in the afternoon. I am aware some of you may have seen our older leaflets stating six o clock, but the closing time was brought forward last spring. At weekends and public holidays, we do stay open until eight in the evening.\n\nNow, I have some exciting news about next month. The park will be turning one hundred years old in July, and to mark the centenary, we are running a free open-air concert series on the main lawn. The park committee had initially discussed hosting a horticultural exhibition, but following a public vote, the music festival idea won out instead. It will run every Saturday evening in July — no booking required, and no charge whatsoever.\n\nA quick word on current conditions. The southern meadow, which we had to close for drainage repairs over winter, has now fully reopened. However, the ornamental fountain on the west terrace is undergoing maintenance this week. The terrace itself is accessible and is actually a lovely resting spot — it is only the fountain that is temporarily out of action.\n\nRegarding the Exhibition Hall — I will point it out on the map shortly — there is an admission charge. Adults pay five pounds. I should mention that the previous price was three pounds fifty, but it was increased when the new interactive galleries opened last month. Visitors under sixteen get in for two pounds fifty, and there is a reduced rate of three pounds for full-time students and pensioners.\n\nMy advice for first-time visitors: go directly to the Visitor Centre when you arrive. The team there will give you a personal welcome and tailor their recommendations to your interests. We do run a forty-minute film about the history of the park, which is genuinely excellent — but given the time it takes, I would suggest saving that for a return visit and heading to the Visitor Centre first today.",
           "items": [
-            {"number": 11, "question": "When was Green City founded?", "options": {"A": "1860", "B": "1865", "C": "1870"}, "answer": "B", "transcript_quote": "founded in eighteen sixty-five", "explanation": "The city was founded in 1865."},
-            {"number": 12, "question": "How much is adult admission to the National Museum?", "options": {"A": "Ten pounds", "B": "Twelve pounds", "C": "Fifteen pounds"}, "answer": "C", "transcript_quote": "Adult admission is fifteen pounds", "explanation": "Adult admission is fifteen pounds."},
-            {"number": 13, "question": "How large are the Botanical Gardens?", "options": {"A": "Twenty hectares", "B": "Thirty hectares", "C": "Forty hectares"}, "answer": "B", "transcript_quote": "Covering thirty hectares", "explanation": "The gardens cover thirty hectares."},
-            {"number": 14, "question": "Which bus goes to the main railway station?", "options": {"A": "Bus 32", "B": "Bus 42", "C": "Bus 52"}, "answer": "B", "transcript_quote": "take bus number forty-two", "explanation": "Bus 42 goes to the railway station."}
+            {
+              "number": 11,
+              "question": "What time does Greenfield City Park close on weekdays?",
+              "options": {"A": "5:30 pm", "B": "6:00 pm", "C": "8:00 pm"},
+              "answer": "A",
+              "transcript_quote": "we close at half past five in the afternoon",
+              "explanation": "On weekdays the park closes at half past five (5:30 pm). Six o clock is mentioned as the old time shown in outdated leaflets, and eight pm is for weekends only."
+            },
+            {
+              "number": 12,
+              "question": "What event is being planned to celebrate the park centenary next month?",
+              "options": {"A": "A horticultural exhibition", "B": "A free outdoor music festival", "C": "A historical photography display"},
+              "answer": "B",
+              "transcript_quote": "the music festival idea won out instead",
+              "explanation": "The centenary event is a free open-air concert series (music festival). A horticultural exhibition was the original plan but was rejected after a public vote."
+            },
+            {
+              "number": 13,
+              "question": "Which feature is currently closed for maintenance?",
+              "options": {"A": "The southern meadow", "B": "The ornamental fountain", "C": "The west terrace"},
+              "answer": "B",
+              "transcript_quote": "the ornamental fountain on the west terrace is undergoing maintenance",
+              "explanation": "The ornamental fountain is under maintenance. The southern meadow has already reopened, and the west terrace itself is accessible."
+            },
+            {
+              "number": 14,
+              "question": "How much does an adult pay to enter the Exhibition Hall?",
+              "options": {"A": "£2.50", "B": "£3.50", "C": "£5.00"},
+              "answer": "C",
+              "transcript_quote": "Adults pay five pounds",
+              "explanation": "Adults pay five pounds. £3.50 was the previous price before the new galleries opened, and £2.50 is the rate for visitors under sixteen."
+            },
+            {
+              "number": 15,
+              "question": "What does the guide recommend that first-time visitors do first?",
+              "options": {"A": "Watch the forty-minute historical film", "B": "Walk around the lake", "C": "Go to the Visitor Centre"},
+              "answer": "C",
+              "transcript_quote": "go directly to the Visitor Centre when you arrive",
+              "explanation": "The guide recommends going to the Visitor Centre first. The historical film is mentioned but is suggested for a return visit, not the first visit."
+            }
           ]
         },
         {
-          "type": "note_completion",
-          "title": "CITY VISITOR NOTES",
-          "instruction": "Complete the notes. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
-          "question_range": [15, 20],
+          "type": "map_labelling",
+          "instruction": "Label the map of Greenfield City Park. Write the correct letter, A–H, next to Questions 16–20.",
+          "question_range": [16, 20],
+          "map_image_url": "/maps/greenfield-park.svg",
+          "options_pool": {"A": "", "B": "", "C": "", "D": "", "E": "", "F": "", "G": "", "H": ""},
+          "group_transcript": "Right. Now let us look at the layout of the park itself.\n\nYou are standing at the main entrance, which faces south. The footpath ahead splits immediately into two forks. Let us take the left fork first.\n\nFollow the left-hand path northwards along the old stone wall. After about a minute you will spot a circular open-sided structure surrounded by low flower beds on all sides. That is the Bandstand, where we hold our summer evening concerts.\n\nCarrying on past the Bandstand, you will come to a large glasshouse on the right-hand side of the path. The glass panels make it quite unmistakable. That is the Rose Garden — temperature-controlled year-round and home to over two hundred varieties.\n\nNow, back at the entrance: if you take the right-hand fork and head east, the very first thing you will encounter is a large paved area immediately on your right. That is the Car Park. Just beyond it, perhaps ten metres further along, there is a compact red-brick building — rather small and square. That is the First Aid Post, staffed by trained volunteers every weekend.\n\nContinuing north along that same eastern path — past the Car Park and the First Aid Post — you will arrive at an open fenced area with climbing frames, a splash pad, and covered seating. That is the children''s play area, very popular with families.\n\nBefore you reach the lake at the northern end, on the left side of the central connecting path, there is a low modern building with large glass windows across the front. That is the Visitor Centre. If you pop in, the staff can help with anything.\n\nThe lake itself sits at the centre of the northern section — clearly marked on your map. It is a natural feature and home to several species of waterfowl.\n\nTo the east of the lake — if you are standing at the water facing north and you turn right — you will see a grand Victorian building with a red-brick facade and tall arched windows. That is the Exhibition Hall.\n\nAnd finally, in the northwest corner of the park, slightly elevated and with a wonderful view over the lake, you will find the Cafe.",
           "items": [
-            {"number": 15, "label": "Old Quarter heritage status", "answer": "UNESCO World Heritage Site", "transcript_quote": "gained UNESCO World Heritage Site status", "explanation": "The Old Quarter is a UNESCO World Heritage Site."},
-            {"number": 16, "label": "Number of listed buildings in Old Quarter", "answer": "300 / three hundred", "transcript_quote": "contains over three hundred listed buildings", "explanation": "There are over 300 listed buildings."},
-            {"number": 17, "label": "Bus frequency during peak hours", "answer": "10 minutes / ten minutes", "transcript_quote": "runs every ten minutes during peak hours", "explanation": "Buses run every ten minutes at peak times."},
-            {"number": 18, "label": "Cost of one-day travel card", "answer": "£6.50 / six pounds fifty", "transcript_quote": "A one-day travel card costs six pounds fifty", "explanation": "A one-day travel card costs six pounds fifty."},
-            {"number": 19, "label": "Walk time from station to city centre", "answer": "15 / fifteen minutes", "transcript_quote": "a fifteen-minute walk from the city centre", "explanation": "The station is fifteen minutes walk from the centre."},
-            {"number": 20, "label": "Location of tourist information centre", "answer": "Bridge Street", "transcript_quote": "tourist information centre on Bridge Street", "explanation": "The tourist centre is on Bridge Street."}
+            {
+              "number": 16,
+              "label": "Cafe",
+              "answer": "A",
+              "transcript_quote": "in the northwest corner of the park ... you will find the Cafe",
+              "explanation": "The Cafe is in the northwest corner of the park, elevated above the lake — position A on the map."
+            },
+            {
+              "number": 17,
+              "label": "Exhibition Hall",
+              "answer": "C",
+              "transcript_quote": "To the east of the lake ... you will see a grand Victorian building ... That is the Exhibition Hall",
+              "explanation": "The Exhibition Hall is to the east of the lake — position C on the map."
+            },
+            {
+              "number": 18,
+              "label": "Bandstand",
+              "answer": "D",
+              "transcript_quote": "a circular open-sided structure surrounded by low flower beds ... That is the Bandstand",
+              "explanation": "The Bandstand is a circular structure on the left (west) path — position D on the map."
+            },
+            {
+              "number": 19,
+              "label": "Children''s play area",
+              "answer": "E",
+              "transcript_quote": "an open fenced area with climbing frames, a splash pad ... That is the children''s play area",
+              "explanation": "The play area is north along the right (east) path past the Car Park and First Aid Post — position E on the map."
+            },
+            {
+              "number": 20,
+              "label": "First Aid Post",
+              "answer": "F",
+              "transcript_quote": "a compact red-brick building ... That is the First Aid Post",
+              "explanation": "The First Aid Post is a small red-brick building just beyond the Car Park on the east path — position F on the map."
+            }
           ]
         }
       ]
