@@ -157,7 +157,7 @@ VALUES (
       ]
     }
   ]'::jsonb,
-  '["tourism", "city services", "urban planning"]'::jsonb,
+  ARRAY['tourism', 'city services', 'urban planning'],
   true
 );
 
@@ -313,6 +313,6 @@ VALUES (
       ]
     }
   ]'::jsonb,
-  '["healthcare", "medical appointments", "public health"]'::jsonb,
+  ARRAY['healthcare', 'medical appointments', 'public health'],
   true
 );
