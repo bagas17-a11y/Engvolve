@@ -142,7 +142,7 @@ export function BridgeToSuccess() {
   return (
     <div className="space-y-6">
       {/* Path to Target Visual */}
-      <div className="glass-card p-6 space-y-4">
+      <div className="glass-card p-6 space-y-5">
         <div className="flex items-center justify-between">
           <h3 className="font-medium flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-accent" />
@@ -152,50 +152,47 @@ export function BridgeToSuccess() {
             {(targetBand - currentBand).toFixed(1)} bands to go
           </span>
         </div>
-        
-        <div className="relative pt-8 pb-4">
-          {/* Progress Line */}
-          <div className="relative h-3 bg-muted rounded-full overflow-hidden">
-            <div 
-              className="absolute left-0 top-0 h-full bg-gradient-to-r from-accent to-elite-gold rounded-full transition-all duration-500"
+
+        {/* Current / Target chips */}
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-3xl font-light text-accent leading-none">{currentBand}</span>
+            <span className="text-[11px] font-medium text-accent/70 uppercase tracking-wide">Current</span>
+          </div>
+          <div className="flex-1 mx-4 border-t-2 border-dashed border-border/50" />
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-3xl font-light text-elite-gold leading-none">{targetBand}</span>
+            <span className="text-[11px] font-medium text-elite-gold/70 uppercase tracking-wide">Target</span>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="relative">
+          <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-accent to-elite-gold rounded-full transition-all duration-700"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
-          
-          {/* Current Band Marker */}
-          <div 
-            className="absolute top-0 transform -translate-x-1/2"
+          {/* Thumb dot at current position */}
+          <div
+            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-accent ring-2 ring-background shadow-md transition-all duration-700"
             style={{ left: `${progressPercentage}%` }}
-          >
-            <div className="flex flex-col items-center">
-              <span className="text-2xl font-light text-accent">{currentBand}</span>
-              <span className="text-xs text-muted-foreground">Current</span>
+          />
+        </div>
+
+        {/* Band scale */}
+        <div className="flex justify-between px-0.5">
+          {[5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9].map((band) => (
+            <div key={band} className="flex flex-col items-center gap-1">
+              <div className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                band <= currentBand ? "bg-accent" : "bg-border"
+              }`} />
+              {Number.isInteger(band) && (
+                <span className="text-[10px] text-muted-foreground">{band}</span>
+              )}
             </div>
-          </div>
-          
-          {/* Target Band Marker */}
-          <div className="absolute top-0 right-0 transform translate-x-1/2">
-            <div className="flex flex-col items-center">
-              <span className="text-2xl font-light text-elite-gold">{targetBand}</span>
-              <span className="text-xs text-muted-foreground">Target</span>
-            </div>
-          </div>
-          
-          {/* Band milestones */}
-          <div className="flex justify-between mt-4 px-2">
-            {[5, 5.5, 6, 6.5, 7, 7.5, 8].map((band) => (
-              <div 
-                key={band}
-                className={`w-2 h-2 rounded-full ${
-                  band <= currentBand 
-                    ? "bg-accent" 
-                    : band <= targetBand 
-                      ? "bg-muted-foreground/30" 
-                      : "bg-muted"
-                }`}
-              />
-            ))}
-          </div>
+          ))}
         </div>
       </div>
 

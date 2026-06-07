@@ -1,3 +1,4 @@
+import { useLayoutEffect } from "react";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { SocialProofBar } from "@/components/SocialProofBar";
@@ -10,6 +11,25 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 const Index = () => {
+  // Landing page is always dark regardless of the user's saved theme preference.
+  // MutationObserver blocks ThemeProvider from re-adding the .light class while
+  // this component is mounted. Cleanup restores the user's theme on navigation away.
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove("light");
+
+    const observer = new MutationObserver(() => {
+      if (root.classList.contains("light")) root.classList.remove("light");
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+
+    return () => {
+      observer.disconnect();
+      const stored = localStorage.getItem("ielts-theme");
+      if (!stored || stored === "light") root.classList.add("light");
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />

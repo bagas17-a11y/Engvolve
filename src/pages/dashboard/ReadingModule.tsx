@@ -605,27 +605,6 @@ export default function ReadingModule() {
                 </p>
               </div>
             </div>
-            {/* AI Generate button */}
-            <div className="flex items-center gap-2">
-              <select
-                value={aiDifficulty}
-                onChange={(e) => setAiDifficulty(e.target.value as typeof aiDifficulty)}
-                className="bg-secondary/50 border border-border/50 rounded-md px-2 py-1.5 text-sm text-foreground"
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-              <Button
-                onClick={generateAITest}
-                disabled={isAiGenerating || !!loadingTestId}
-                className="bg-accent hover:bg-accent/90 whitespace-nowrap"
-                size="sm"
-              >
-                {isAiGenerating ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : null}
-                Generate AI Test
-              </Button>
-            </div>
           </div>
 
           {/* Filter bar */}
