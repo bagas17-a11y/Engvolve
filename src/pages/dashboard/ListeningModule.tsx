@@ -117,6 +117,8 @@ const QUESTION_TYPE_LABEL: Record<string, string> = {
   table_completion: "Table Completion",
 };
 
+const SPEAKER_VOICES = ["fable", "nova", "onyx", "shimmer"] as const;
+
 type SpeakerTurn = { speaker: string | null; text: string };
 
 const parseTranscriptToTurns = (transcript: string): SpeakerTurn[] => {
@@ -143,6 +145,138 @@ const parseTranscriptToTurns = (transcript: string): SpeakerTurn[] => {
     }
   }
   return merged;
+};
+
+// ─── Module-level audio utilities ─────────────────────────────────────────────
+
+const fetchTTSBuffer = async (text: string, voice: string, signal: AbortSignal): Promise<ArrayBuffer> => {
+  const res = await fetch("https://api.openai.com/v1/audio/speech", {
+    method: "POST", signal,
+    headers: { Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ model: "tts-1-hd", input: text.slice(0, 4096), voice, speed: 0.88 }),
+  });
+  if (!res.ok) { const err = await res.text().catch(() => ""); throw new Error(`TTS ${res.status}: ${err}`); }
+  return res.arrayBuffer();
+};
+
+const createSilenceBuffer = (audioCtx: AudioContext, seconds: number): AudioBuffer =>
+  audioCtx.createBuffer(1, Math.ceil(audioCtx.sampleRate * seconds), audioCtx.sampleRate);
+
+const concatAudioBuffers = (audioCtx: AudioContext, buffers: AudioBuffer[]): AudioBuffer => {
+  const total = buffers.reduce((s, b) => s + b.length, 0);
+  const out = audioCtx.createBuffer(1, total, audioCtx.sampleRate);
+  const outData = out.getChannelData(0);
+  let offset = 0;
+  for (const buf of buffers) {
+    const ch0 = buf.getChannelData(0);
+    if (buf.numberOfChannels > 1) {
+      const ch1 = buf.getChannelData(1);
+      for (let i = 0; i < buf.length; i++) outData[offset + i] = (ch0[i] + ch1[i]) / 2;
+    } else { outData.set(ch0, offset); }
+    offset += buf.length;
+  }
+  return out;
+};
+
+const encodeWav = (audioBuffer: AudioBuffer): Blob => {
+  const sr = audioBuffer.sampleRate;
+  const n = audioBuffer.length;
+  const dataLen = n * 2;
+  const buf = new ArrayBuffer(44 + dataLen);
+  const v = new DataView(buf);
+  const ws = (o: number, s: string) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0, "RIFF"); v.setUint32(4, 36 + dataLen, true); ws(8, "WAVE");
+  ws(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+  v.setUint16(22, 1, true); v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true);
+  v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  ws(36, "data"); v.setUint32(40, dataLen, true);
+  const ch = audioBuffer.getChannelData(0);
+  let off = 44;
+  for (let i = 0; i < n; i++) {
+    const s = Math.max(-1, Math.min(1, ch[i]));
+    v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    off += 2;
+  }
+  return new Blob([buf], { type: "audio/wav" });
+};
+
+// Generates the full IELTS-format WAV for one part (intro → 20s pause → dialogue → mid-pause → dialogue → end)
+// Returns an object URL. Caller is responsible for revoking.
+const generatePartAudio = async (section: ListeningPart, signal: AbortSignal): Promise<string> => {
+  const groups = section.question_groups;
+  const qStart = groups[0].question_range[0];
+  const qEnd = groups[groups.length - 1].question_range[1];
+  const partWord = PART_NUMBER_WORDS[section.part_number - 1] ?? section.part_number.toString();
+  const splitGroupIdx = groups.length > 1 ? 1 : null;
+  const splitQ = splitGroupIdx !== null ? groups[splitGroupIdx].question_range[0] : null;
+  const firstHalfEnd = splitQ ? splitQ - 1 : qEnd;
+
+  const allTurns = parseTranscriptToTurns(section.transcript);
+  const uniqueSpeakers = [...new Set(allTurns.map((t) => t.speaker).filter(Boolean) as string[])];
+  const speakerVoice: Record<string, string> = { NARRATOR: "alloy" };
+  uniqueSpeakers.forEach((sp, i) => { speakerVoice[sp] = SPEAKER_VOICES[i % SPEAKER_VOICES.length]; });
+
+  let group0Turns = allTurns;
+  let group1Turns: SpeakerTurn[] = [];
+  if (splitGroupIdx !== null) {
+    if (groups[0].group_transcript) {
+      group0Turns = parseTranscriptToTurns(groups[0].group_transcript);
+      group1Turns = groups[splitGroupIdx].group_transcript
+        ? parseTranscriptToTurns(groups[splitGroupIdx].group_transcript!)
+        : allTurns.slice(Math.ceil(allTurns.length / 2));
+    } else if (groups[splitGroupIdx].group_transcript) {
+      group1Turns = parseTranscriptToTurns(groups[splitGroupIdx].group_transcript!);
+      group0Turns = allTurns.slice(0, Math.ceil(allTurns.length / 2));
+    } else {
+      const mid = Math.ceil(allTurns.length / 2);
+      group0Turns = allTurns.slice(0, mid);
+      group1Turns = allTurns.slice(mid);
+    }
+  }
+  for (const t of [...group0Turns, ...group1Turns]) {
+    if (t.speaker && !(t.speaker in speakerVoice)) {
+      speakerVoice[t.speaker] = SPEAKER_VOICES[(Object.keys(speakerVoice).length - 1) % SPEAKER_VOICES.length];
+    }
+  }
+  const voiceFor = (sp: string | null) => sp ? (speakerVoice[sp] ?? SPEAKER_VOICES[0]) : SPEAKER_VOICES[0];
+
+  type TtsItem = { type: "tts"; text: string; voice: string };
+  type TimelineItem = TtsItem | { type: "pause"; seconds: number };
+  const ttsItems: TtsItem[] = [];
+  const timeline: TimelineItem[] = [];
+  const addTts = (text: string, voice: string) => { const it: TtsItem = { type: "tts", text, voice }; timeline.push(it); ttsItems.push(it); };
+  const addPause = (s: number) => timeline.push({ type: "pause", seconds: s });
+
+  addTts(`IELTS Listening. Part ${partWord}. Questions ${qStart} to ${qEnd}.`, "alloy");
+  addTts(section.context, "alloy");
+  addTts(`You now have some time to look at Questions ${qStart} to ${firstHalfEnd}.`, "alloy");
+  addPause(20);
+  addTts(`Now listen carefully and answer Questions ${qStart} to ${firstHalfEnd}.`, "alloy");
+  addPause(1);
+  for (const turn of group0Turns) { if (turn.text.trim()) addTts(turn.text, voiceFor(turn.speaker)); }
+  if (splitQ !== null) {
+    addPause(2);
+    addTts(`Before you hear the rest of Part ${partWord}, you have some time to look at Questions ${splitQ} to ${qEnd}.`, "alloy");
+    addPause(20);
+    addTts(`Now listen and answer Questions ${splitQ} to ${qEnd}.`, "alloy");
+    addPause(1);
+    for (const turn of group1Turns) { if (turn.text.trim()) addTts(turn.text, voiceFor(turn.speaker)); }
+  }
+  addPause(2);
+  addTts(`That is the end of Part ${partWord}.`, "alloy");
+
+  const rawBuffers = await Promise.all(ttsItems.map((it) => fetchTTSBuffer(it.text, it.voice, signal)));
+  const audioCtx = new AudioContext();
+  const decoded = await Promise.all(rawBuffers.map((buf) => audioCtx.decodeAudioData(buf)));
+  let ttsIdx = 0;
+  const parts: AudioBuffer[] = [];
+  for (const item of timeline) {
+    parts.push(item.type === "tts" ? decoded[ttsIdx++] : createSilenceBuffer(audioCtx, item.seconds));
+  }
+  const combined = concatAudioBuffers(audioCtx, parts);
+  const wavBlob = encodeWav(combined);
+  await audioCtx.close();
+  return URL.createObjectURL(wavBlob);
 };
 
 export default function ListeningModule() {
@@ -182,6 +316,12 @@ export default function ListeningModule() {
   const isPausedRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+
+  // Pre-generated audio cache: part number → WAV object URL
+  const audioUrlsRef = useRef<Record<number, string>>({});
+  const preloadAbortRef = useRef<AbortController | null>(null);
+  const [preloadedParts, setPreloadedParts] = useState<Record<number, boolean>>({});
+  const [preloadingParts, setPreloadingParts] = useState<Record<number, boolean>>({});
 
   const LISTENING_SESSION_PREFIX = `ielts-listening-${user?.id || "guest"}`;
 
@@ -344,6 +484,11 @@ export default function ListeningModule() {
   }, [isSeeking, playingPart]);
 
   const startTest = async (test: ListeningTest) => {
+    preloadAbortRef.current?.abort();
+    Object.values(audioUrlsRef.current).forEach((u) => URL.revokeObjectURL(u));
+    audioUrlsRef.current = {};
+    setPreloadedParts({});
+    setPreloadingParts({});
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
     if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); audioBlobUrlRef.current = null; }
     speechRef.current = null;
@@ -400,67 +545,35 @@ export default function ListeningModule() {
         console.error("Failed to save initial progress:", err);
       }
     }
+
+    preloadAllParts(test);
   };
 
-  const fetchTTSBuffer = async (text: string, voice: string, signal: AbortSignal): Promise<ArrayBuffer> => {
-    const res = await fetch("https://api.openai.com/v1/audio/speech", {
-      method: "POST",
-      signal,
-      headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ model: "tts-1-hd", input: text.slice(0, 4096), voice, speed: 0.88 }),
-    });
-    if (!res.ok) {
-      const err = await res.text().catch(() => "");
-      throw new Error(`TTS ${res.status}: ${err}`);
-    }
-    return res.arrayBuffer();
-  };
-
-  const createSilenceBuffer = (audioCtx: AudioContext, seconds: number): AudioBuffer =>
-    audioCtx.createBuffer(1, Math.ceil(audioCtx.sampleRate * seconds), audioCtx.sampleRate);
-
-  const concatAudioBuffers = (audioCtx: AudioContext, buffers: AudioBuffer[]): AudioBuffer => {
-    const total = buffers.reduce((s, b) => s + b.length, 0);
-    const out = audioCtx.createBuffer(1, total, audioCtx.sampleRate);
-    const outData = out.getChannelData(0);
-    let offset = 0;
-    for (const buf of buffers) {
-      const ch0 = buf.getChannelData(0);
-      if (buf.numberOfChannels > 1) {
-        const ch1 = buf.getChannelData(1);
-        for (let i = 0; i < buf.length; i++) outData[offset + i] = (ch0[i] + ch1[i]) / 2;
-      } else {
-        outData.set(ch0, offset);
+  // Pre-generate audio for all parts sequentially in background
+  const preloadAllParts = useCallback((test: ListeningTest) => {
+    preloadAbortRef.current?.abort();
+    const abort = new AbortController();
+    preloadAbortRef.current = abort;
+    const run = async () => {
+      for (let i = 0; i < test.sections.length; i++) {
+        const partNum = i + 1;
+        if (abort.signal.aborted) break;
+        if (audioUrlsRef.current[partNum]) continue;
+        setPreloadingParts((prev) => ({ ...prev, [partNum]: true }));
+        try {
+          const url = await generatePartAudio(test.sections[i], abort.signal);
+          if (abort.signal.aborted) { URL.revokeObjectURL(url); break; }
+          audioUrlsRef.current[partNum] = url;
+          setPreloadedParts((prev) => ({ ...prev, [partNum]: true }));
+        } catch {
+          // silent — user can still generate on demand when pressing play
+        } finally {
+          setPreloadingParts((prev) => ({ ...prev, [partNum]: false }));
+        }
       }
-      offset += buf.length;
-    }
-    return out;
-  };
-
-  const encodeWav = (audioBuffer: AudioBuffer): Blob => {
-    const sr = audioBuffer.sampleRate;
-    const n = audioBuffer.length;
-    const dataLen = n * 2;
-    const buf = new ArrayBuffer(44 + dataLen);
-    const v = new DataView(buf);
-    const ws = (o: number, s: string) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-    ws(0, "RIFF"); v.setUint32(4, 36 + dataLen, true); ws(8, "WAVE");
-    ws(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
-    v.setUint16(22, 1, true); v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true);
-    v.setUint16(32, 2, true); v.setUint16(34, 16, true);
-    ws(36, "data"); v.setUint32(40, dataLen, true);
-    const ch = audioBuffer.getChannelData(0);
-    let off = 44;
-    for (let i = 0; i < n; i++) {
-      const s = Math.max(-1, Math.min(1, ch[i]));
-      v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
-      off += 2;
-    }
-    return new Blob([buf], { type: "audio/wav" });
-  };
+    };
+    run();
+  }, []);
 
   const speakPart = useCallback(async (partNumber: number) => {
     if (!currentTest) return;
@@ -468,7 +581,6 @@ export default function ListeningModule() {
     if (!section?.transcript) return;
 
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
-    if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); audioBlobUrlRef.current = null; }
     abortRef.current?.abort();
 
     const token = Symbol();
@@ -480,141 +592,22 @@ export default function ListeningModule() {
     setPlayingPart(partNumber);
     setIsPlaying(false);
     setIsPaused(false);
-    setIsLoadingAudio(true);
-    setAudioCurrentTime(0);
-    setAudioDuration(0);
     setPlayedParts((prev) => ({ ...prev, [partNumber]: true }));
 
-    // Part info
-    const groups = section.question_groups;
-    const qStart = groups[0].question_range[0];
-    const qEnd = groups[groups.length - 1].question_range[1];
-    const partWord = PART_NUMBER_WORDS[partNumber - 1] ?? partNumber.toString();
-    const splitGroupIdx = groups.length > 1 ? 1 : null;
-    const splitQ = splitGroupIdx !== null ? groups[splitGroupIdx].question_range[0] : null;
-
-    // Parse the full transcript into turns
-    const allTurns = parseTranscriptToTurns(section.transcript);
-
-    // Determine speaker voices across the entire part
-    const SPEAKER_VOICES = ["fable", "nova", "onyx", "shimmer"];
-    const uniqueSpeakers = [...new Set(allTurns.map((t) => t.speaker).filter(Boolean) as string[])];
-    const speakerVoice: Record<string, string> = { NARRATOR: "alloy" };
-    uniqueSpeakers.forEach((sp, i) => { speakerVoice[sp] = SPEAKER_VOICES[i % SPEAKER_VOICES.length]; });
-
-    // Split turns at midpoint (or use per-group transcripts when provided)
-    let group0Turns: SpeakerTurn[] = allTurns;
-    let group1Turns: SpeakerTurn[] = [];
-    if (splitGroupIdx !== null) {
-      if (groups[0].group_transcript) {
-        group0Turns = parseTranscriptToTurns(groups[0].group_transcript);
-        if (groups[splitGroupIdx].group_transcript) {
-          group1Turns = parseTranscriptToTurns(groups[splitGroupIdx].group_transcript!);
-        } else {
-          // No second group transcript: fall back to the remainder of the full transcript by midpoint
-          const mid = Math.ceil(allTurns.length / 2);
-          group1Turns = allTurns.slice(mid);
-        }
-      } else if (groups[splitGroupIdx].group_transcript) {
-        group1Turns = parseTranscriptToTurns(groups[splitGroupIdx].group_transcript!);
-        const mid = Math.ceil(allTurns.length / 2);
-        group0Turns = allTurns.slice(0, mid);
-      } else {
-        const mid = Math.ceil(allTurns.length / 2);
-        group0Turns = allTurns.slice(0, mid);
-        group1Turns = allTurns.slice(mid);
-      }
-    }
-
-    // Update unique speakers in case group transcripts introduced new ones
-    const allKnownTurns = [...group0Turns, ...group1Turns];
-    for (const t of allKnownTurns) {
-      if (t.speaker && !(t.speaker in speakerVoice)) {
-        const nextIdx = Object.keys(speakerVoice).length - 1; // exclude NARRATOR
-        speakerVoice[t.speaker] = SPEAKER_VOICES[nextIdx % SPEAKER_VOICES.length];
-      }
-    }
-
-    const voiceFor = (speaker: string | null): string =>
-      speaker ? (speakerVoice[speaker] ?? SPEAKER_VOICES[0]) : SPEAKER_VOICES[0];
-
-    // IELTS-standard audio timeline:
-    // [intro] → [20s reading pause] → [now listen] → [Q1-N dialogue]
-    // → [2s gap] → [mid-part: look at Q(N+1)-end] → [20s reading pause]
-    // → [now listen] → [Q(N+1)-end dialogue] → [end of part]
-    const firstHalfEnd = splitQ ? splitQ - 1 : qEnd;
-
-    type TtsItem = { type: "tts"; text: string; voice: string };
-    type PauseItem = { type: "pause"; seconds: number };
-    type TimelineItem = TtsItem | PauseItem;
-
-    const ttsItems: TtsItem[] = [];
-    const timeline: TimelineItem[] = [];
-
-    const addTts = (text: string, voice: string) => {
-      const item: TtsItem = { type: "tts", text, voice };
-      timeline.push(item);
-      ttsItems.push(item);
-    };
-    const addPause = (seconds: number) => timeline.push({ type: "pause", seconds });
-
-    // Part intro
-    addTts(`IELTS Listening. Part ${partWord}. Questions ${qStart} to ${qEnd}.`, "alloy");
-    addTts(section.context, "alloy");
-    addTts(`You now have some time to look at Questions ${qStart} to ${firstHalfEnd}.`, "alloy");
-    // 20-second reading pause (IELTS standard is 20-30s; 20s for practice app)
-    addPause(20);
-    addTts(`Now listen carefully and answer Questions ${qStart} to ${firstHalfEnd}.`, "alloy");
-    addPause(1);
-    for (const turn of group0Turns) {
-      if (turn.text.trim()) addTts(turn.text, voiceFor(turn.speaker));
-    }
-    if (splitQ !== null) {
-      addPause(2);
-      addTts(`Before you hear the rest of Part ${partWord}, you have some time to look at Questions ${splitQ} to ${qEnd}.`, "alloy");
-      addPause(20);
-      addTts(`Now listen and answer Questions ${splitQ} to ${qEnd}.`, "alloy");
-      addPause(1);
-      for (const turn of group1Turns) {
-        if (turn.text.trim()) addTts(turn.text, voiceFor(turn.speaker));
-      }
-    }
-    addPause(2);
-    addTts(`That is the end of Part ${partWord}.`, "alloy");
-
-    if (ttsItems.length === 0) { setIsLoadingAudio(false); return; }
-
     try {
-      // Fetch all TTS segments in parallel as ArrayBuffers
-      const rawBuffers = await Promise.all(
-        ttsItems.map((item) => fetchTTSBuffer(item.text, item.voice, abort.signal))
-      );
-      if (speechRef.current !== token) return;
-
-      // Decode all TTS buffers with AudioContext
-      const audioCtx = new AudioContext();
-      const decoded = await Promise.all(rawBuffers.map((buf) => audioCtx.decodeAudioData(buf)));
-      if (speechRef.current !== token) { audioCtx.close(); return; }
-
-      // Build ordered buffer list from timeline (TTS decoded + silence gaps)
-      let ttsIdx = 0;
-      const parts: AudioBuffer[] = [];
-      for (const item of timeline) {
-        if (item.type === "tts") {
-          parts.push(decoded[ttsIdx++]);
-        } else {
-          parts.push(createSilenceBuffer(audioCtx, item.seconds));
-        }
+      // Use cached URL if already pre-generated, otherwise generate now
+      let url = audioUrlsRef.current[partNumber];
+      if (!url) {
+        setIsLoadingAudio(true);
+        setAudioCurrentTime(0);
+        setAudioDuration(0);
+        url = await generatePartAudio(section, abort.signal);
+        if (speechRef.current !== token) { URL.revokeObjectURL(url); return; }
+        audioUrlsRef.current[partNumber] = url;
+        setPreloadedParts((prev) => ({ ...prev, [partNumber]: true }));
       }
 
-      // Concatenate into one AudioBuffer and encode as seekable WAV
-      const combined = concatAudioBuffers(audioCtx, parts);
-      const wavBlob = encodeWav(combined);
-      await audioCtx.close();
-
-      const url = URL.createObjectURL(wavBlob);
       audioBlobUrlRef.current = url;
-
       if (!audioRef.current) { setIsLoadingAudio(false); return; }
       audioRef.current.src = url;
       audioRef.current.onended = () => {
@@ -623,13 +616,11 @@ export default function ListeningModule() {
         setIsPaused(false);
         setPlayingPart(null);
         setCompletedParts((prev) => ({ ...prev, [partNumber]: true }));
-        if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); audioBlobUrlRef.current = null; }
         speechRef.current = null;
       };
       audioRef.current.onerror = () => {
         if (speechRef.current !== token) return;
         setIsPlaying(false); setIsPaused(false); setPlayingPart(null);
-        if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); audioBlobUrlRef.current = null; }
         speechRef.current = null;
       };
       await audioRef.current.play();
@@ -674,7 +665,7 @@ export default function ListeningModule() {
   const handleStop = () => {
     abortRef.current?.abort();
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
-    if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); audioBlobUrlRef.current = null; }
+    audioBlobUrlRef.current = null; // don't revoke — URL is cached in audioUrlsRef
     speechRef.current = null;
     isPausedRef.current = false;
     setIsLoadingAudio(false);
@@ -834,8 +825,11 @@ export default function ListeningModule() {
   };
 
   const resetTest = () => {
+    preloadAbortRef.current?.abort();
     abortRef.current?.abort();
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
+    Object.values(audioUrlsRef.current).forEach((u) => URL.revokeObjectURL(u));
+    audioUrlsRef.current = {};
     if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); audioBlobUrlRef.current = null; }
     speechRef.current = null;
     isPausedRef.current = false;
@@ -859,13 +853,15 @@ export default function ListeningModule() {
     setTimerEndAt(null);
     setAudioCurrentTime(0);
     setAudioDuration(0);
+    setPreloadedParts({});
+    setPreloadingParts({});
   };
 
   const handleSwitchPart = (newPart: number) => {
     if (newPart === activePart) return;
     abortRef.current?.abort();
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
-    if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); audioBlobUrlRef.current = null; }
+    audioBlobUrlRef.current = null; // don't revoke — URL is cached in audioUrlsRef
     speechRef.current = null;
     isPausedRef.current = false;
     setIsLoadingAudio(false);
@@ -879,8 +875,10 @@ export default function ListeningModule() {
 
   useEffect(() => {
     return () => {
+      preloadAbortRef.current?.abort();
       abortRef.current?.abort();
       if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
+      Object.values(audioUrlsRef.current).forEach((u) => URL.revokeObjectURL(u));
       if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); }
     };
   }, []);
@@ -1482,6 +1480,10 @@ export default function ListeningModule() {
               ? `Part ${activePart} complete — answer the questions below, or press play to replay`
               : playedParts[activePart]
               ? `Stopped — press play to restart Part ${activePart}`
+              : preloadedParts[activePart]
+              ? `Audio ready — press play to begin Part ${activePart}`
+              : preloadingParts[activePart]
+              ? `Preparing audio for Part ${activePart}…`
               : `Press play to begin Part ${activePart}`}
           </p>
         </div>
@@ -1498,7 +1500,7 @@ export default function ListeningModule() {
                     key={part}
                     onClick={() => handleSwitchPart(part)}
                     className={cn(
-                      "px-4 py-2 text-sm rounded-t-lg transition-colors relative",
+                      "px-4 py-2 text-sm rounded-t-lg transition-colors relative flex items-center gap-1.5",
                       activePart === part
                         ? "text-accent font-medium bg-accent/5 border-b-2 border-accent"
                         : "text-muted-foreground hover:text-foreground"
@@ -1506,12 +1508,18 @@ export default function ListeningModule() {
                   >
                     Part {part}
                     {!isSubmitted && (
-                      <span className="ml-1 text-xs opacity-60">
+                      <span className="text-xs opacity-60">
                         ({partCounts[part - 1]?.answered ?? 0}/{partCounts[part - 1]?.total ?? 0})
                       </span>
                     )}
                     {completedParts[part] && !isSubmitted && (
-                      <span className="ml-1 text-green-500">✓</span>
+                      <span className="text-green-500">✓</span>
+                    )}
+                    {!isSubmitted && preloadingParts[part] && (
+                      <Loader2 className="w-3 h-3 animate-spin text-muted-foreground/60" />
+                    )}
+                    {!isSubmitted && preloadedParts[part] && !preloadingParts[part] && !completedParts[part] && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" title="Audio ready" />
                     )}
                   </button>
                 ))}
