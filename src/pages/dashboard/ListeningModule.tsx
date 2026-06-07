@@ -1056,7 +1056,7 @@ export default function ListeningModule() {
           if (/^\s*[–\-]\s+/.test(line)) {
             const content = line.replace(/^\s*[–\-]\s+/, "");
             return (
-              <p key={key} className="text-base leading-loose text-foreground pl-4 flex items-center flex-wrap gap-y-1">
+              <p key={key} className="text-sm leading-relaxed text-foreground pl-4 flex items-center flex-wrap gap-y-1">
                 <span className="mr-2 text-muted-foreground">–</span>
                 {renderLineContent(content, key)}
               </p>
@@ -1064,7 +1064,7 @@ export default function ListeningModule() {
           }
 
           return (
-            <p key={key} className="text-base leading-loose text-foreground flex items-center flex-wrap gap-y-1">
+            <p key={key} className="text-sm leading-relaxed text-foreground flex items-center flex-wrap gap-y-1">
               {renderLineContent(line, key)}
             </p>
           );
