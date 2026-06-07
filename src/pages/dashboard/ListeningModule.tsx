@@ -402,7 +402,7 @@ export default function ListeningModule() {
     }
   };
 
-  const fetchTTS = async (text: string, voice: string, signal: AbortSignal): Promise<Blob> => {
+  const fetchTTSBuffer = async (text: string, voice: string, signal: AbortSignal): Promise<ArrayBuffer> => {
     const res = await fetch("https://api.openai.com/v1/audio/speech", {
       method: "POST",
       signal,
@@ -416,7 +416,50 @@ export default function ListeningModule() {
       const err = await res.text().catch(() => "");
       throw new Error(`TTS ${res.status}: ${err}`);
     }
-    return res.blob();
+    return res.arrayBuffer();
+  };
+
+  const createSilenceBuffer = (audioCtx: AudioContext, seconds: number): AudioBuffer =>
+    audioCtx.createBuffer(1, Math.ceil(audioCtx.sampleRate * seconds), audioCtx.sampleRate);
+
+  const concatAudioBuffers = (audioCtx: AudioContext, buffers: AudioBuffer[]): AudioBuffer => {
+    const total = buffers.reduce((s, b) => s + b.length, 0);
+    const out = audioCtx.createBuffer(1, total, audioCtx.sampleRate);
+    const outData = out.getChannelData(0);
+    let offset = 0;
+    for (const buf of buffers) {
+      const ch0 = buf.getChannelData(0);
+      if (buf.numberOfChannels > 1) {
+        const ch1 = buf.getChannelData(1);
+        for (let i = 0; i < buf.length; i++) outData[offset + i] = (ch0[i] + ch1[i]) / 2;
+      } else {
+        outData.set(ch0, offset);
+      }
+      offset += buf.length;
+    }
+    return out;
+  };
+
+  const encodeWav = (audioBuffer: AudioBuffer): Blob => {
+    const sr = audioBuffer.sampleRate;
+    const n = audioBuffer.length;
+    const dataLen = n * 2;
+    const buf = new ArrayBuffer(44 + dataLen);
+    const v = new DataView(buf);
+    const ws = (o: number, s: string) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    ws(0, "RIFF"); v.setUint32(4, 36 + dataLen, true); ws(8, "WAVE");
+    ws(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+    v.setUint16(22, 1, true); v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true);
+    v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    ws(36, "data"); v.setUint32(40, dataLen, true);
+    const ch = audioBuffer.getChannelData(0);
+    let off = 44;
+    for (let i = 0; i < n; i++) {
+      const s = Math.max(-1, Math.min(1, ch[i]));
+      v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+      off += 2;
+    }
+    return new Blob([buf], { type: "audio/wav" });
   };
 
   const speakPart = useCallback(async (partNumber: number) => {
@@ -495,43 +538,81 @@ export default function ListeningModule() {
     const voiceFor = (speaker: string | null): string =>
       speaker ? (speakerVoice[speaker] ?? SPEAKER_VOICES[0]) : SPEAKER_VOICES[0];
 
-    // Build the IELTS-format segments
-    const segments: { text: string; voice: string }[] = [];
-
+    // IELTS-standard audio timeline:
+    // [intro] → [20s reading pause] → [now listen] → [Q1-N dialogue]
+    // → [2s gap] → [mid-part: look at Q(N+1)-end] → [20s reading pause]
+    // → [now listen] → [Q(N+1)-end dialogue] → [end of part]
     const firstHalfEnd = splitQ ? splitQ - 1 : qEnd;
-    segments.push({
-      text: `IELTS Listening. Part ${partWord}. Questions ${qStart} to ${qEnd}. ${section.context}. You now have some time to look at Questions ${qStart} to ${firstHalfEnd}.`,
-      voice: "alloy",
-    });
-    segments.push({
-      text: `Now listen carefully and answer Questions ${qStart} to ${firstHalfEnd}.`,
-      voice: "alloy",
-    });
+
+    type TtsItem = { type: "tts"; text: string; voice: string };
+    type PauseItem = { type: "pause"; seconds: number };
+    type TimelineItem = TtsItem | PauseItem;
+
+    const ttsItems: TtsItem[] = [];
+    const timeline: TimelineItem[] = [];
+
+    const addTts = (text: string, voice: string) => {
+      const item: TtsItem = { type: "tts", text, voice };
+      timeline.push(item);
+      ttsItems.push(item);
+    };
+    const addPause = (seconds: number) => timeline.push({ type: "pause", seconds });
+
+    // Part intro
+    addTts(`IELTS Listening. Part ${partWord}. Questions ${qStart} to ${qEnd}.`, "alloy");
+    addTts(section.context, "alloy");
+    addTts(`You now have some time to look at Questions ${qStart} to ${firstHalfEnd}.`, "alloy");
+    // 20-second reading pause (IELTS standard is 20-30s; 20s for practice app)
+    addPause(20);
+    addTts(`Now listen carefully and answer Questions ${qStart} to ${firstHalfEnd}.`, "alloy");
+    addPause(1);
     for (const turn of group0Turns) {
-      if (!turn.text.trim()) continue;
-      segments.push({ text: turn.text, voice: voiceFor(turn.speaker) });
+      if (turn.text.trim()) addTts(turn.text, voiceFor(turn.speaker));
     }
     if (splitQ !== null) {
-      segments.push({
-        text: `Before you hear the rest of Part ${partWord}, look at Questions ${splitQ} to ${qEnd}. Now listen and answer Questions ${splitQ} to ${qEnd}.`,
-        voice: "alloy",
-      });
+      addPause(2);
+      addTts(`Before you hear the rest of Part ${partWord}, you have some time to look at Questions ${splitQ} to ${qEnd}.`, "alloy");
+      addPause(20);
+      addTts(`Now listen and answer Questions ${splitQ} to ${qEnd}.`, "alloy");
+      addPause(1);
       for (const turn of group1Turns) {
-        if (!turn.text.trim()) continue;
-        segments.push({ text: turn.text, voice: voiceFor(turn.speaker) });
+        if (turn.text.trim()) addTts(turn.text, voiceFor(turn.speaker));
       }
     }
-    segments.push({ text: `That is the end of Part ${partWord}.`, voice: "alloy" });
+    addPause(2);
+    addTts(`That is the end of Part ${partWord}.`, "alloy");
 
-    if (segments.length === 0) { setIsLoadingAudio(false); return; }
+    if (ttsItems.length === 0) { setIsLoadingAudio(false); return; }
 
     try {
-      const blobs = await Promise.all(segments.map((s) => fetchTTS(s.text, s.voice, abort.signal)));
+      // Fetch all TTS segments in parallel as ArrayBuffers
+      const rawBuffers = await Promise.all(
+        ttsItems.map((item) => fetchTTSBuffer(item.text, item.voice, abort.signal))
+      );
       if (speechRef.current !== token) return;
 
-      // Concatenate MP3 blobs into a single blob
-      const combinedBlob = new Blob(blobs, { type: "audio/mpeg" });
-      const url = URL.createObjectURL(combinedBlob);
+      // Decode all TTS buffers with AudioContext
+      const audioCtx = new AudioContext();
+      const decoded = await Promise.all(rawBuffers.map((buf) => audioCtx.decodeAudioData(buf)));
+      if (speechRef.current !== token) { audioCtx.close(); return; }
+
+      // Build ordered buffer list from timeline (TTS decoded + silence gaps)
+      let ttsIdx = 0;
+      const parts: AudioBuffer[] = [];
+      for (const item of timeline) {
+        if (item.type === "tts") {
+          parts.push(decoded[ttsIdx++]);
+        } else {
+          parts.push(createSilenceBuffer(audioCtx, item.seconds));
+        }
+      }
+
+      // Concatenate into one AudioBuffer and encode as seekable WAV
+      const combined = concatAudioBuffers(audioCtx, parts);
+      const wavBlob = encodeWav(combined);
+      await audioCtx.close();
+
+      const url = URL.createObjectURL(wavBlob);
       audioBlobUrlRef.current = url;
 
       if (!audioRef.current) { setIsLoadingAudio(false); return; }
@@ -542,21 +623,13 @@ export default function ListeningModule() {
         setIsPaused(false);
         setPlayingPart(null);
         setCompletedParts((prev) => ({ ...prev, [partNumber]: true }));
-        if (audioBlobUrlRef.current) {
-          URL.revokeObjectURL(audioBlobUrlRef.current);
-          audioBlobUrlRef.current = null;
-        }
+        if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); audioBlobUrlRef.current = null; }
         speechRef.current = null;
       };
       audioRef.current.onerror = () => {
         if (speechRef.current !== token) return;
-        setIsPlaying(false);
-        setIsPaused(false);
-        setPlayingPart(null);
-        if (audioBlobUrlRef.current) {
-          URL.revokeObjectURL(audioBlobUrlRef.current);
-          audioBlobUrlRef.current = null;
-        }
+        setIsPlaying(false); setIsPaused(false); setPlayingPart(null);
+        if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); audioBlobUrlRef.current = null; }
         speechRef.current = null;
       };
       await audioRef.current.play();
