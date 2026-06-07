@@ -155,72 +155,223 @@ VALUES (
     },
     {
       "part_number": 3,
-      "context": "Two students, Daniel and Priya, discussing their history project on city development",
-      "transcript": "DANIEL: Hi Priya, how is our city development project coming along?\nPRIYA: Really well. I have been focusing on urban expansion patterns from the nineteenth century.\nDANIEL: Great. My section is about the impact of the railway. The arrival of the railway in the eighteen eighties completely transformed the city.\nPRIYA: Yes, I found data showing the population tripled within twenty years of the railway opening.\nDANIEL: I also read that the textile industry played a major role in attracting workers from rural areas.\nPRIYA: Right, and that led to the development of worker housing in the east of the city. I found some fascinating old photographs of those streets.\nDANIEL: Do you think we should focus on economic factors or social changes in our presentation?\nPRIYA: Let us emphasise the social aspect since we have stronger evidence there.\nDANIEL: Agreed. What format should we use?\nPRIYA: Professor Johnson suggested using maps to show how the city boundaries changed decade by decade.\nDANIEL: I can create the maps from the historical data at the city archive.\nPRIYA: Perfect. And I will write the narrative sections.\nDANIEL: Should we include interviews with local historians?\nPRIYA: Yes. I already contacted Dr Harrison at the local museum. She agreed to meet us next Tuesday at two o clock.\nDANIEL: Let us aim to have a draft ready by Friday.\nPRIYA: Agreed. I will send you my sections by Thursday evening so you have time to review.",
+      "context": "Two students, Tom and Aisha, discussing their university assignment on urban parks and green spaces",
+      "transcript": "TOM: Hi Aisha, have you had a chance to look at the reading list Professor Webb gave us?\nAISHA: Yes, I went through most of it last night. The article by Larssen was the most useful I thought. Especially for our angle on community engagement.\nTOM: I actually found it a bit too theoretical. The case studies in the Mitchell report were more practical. But I can see why you liked the Larssen piece — her methodology section is very thorough.\nAISHA: That is the part I want us to reference in the introduction. What do you think we should focus on as our main argument?\nTOM: I was thinking we would look at the economic benefits of green spaces — things like property values and tourism revenue. There is plenty of data we could use.\nAISHA: That is a strong angle, but I wonder if it is a bit narrow. I have been looking at the wellbeing research, and I think making the case from a public health perspective would be more convincing for our audience — which is supposed to be local government, remember.\nTOM: Good point. Actually, that fits better with the sources we have anyway. The Mitchell report has a whole section on mental health outcomes. Let us go with that.\nAISHA: Agreed. I was going to start drafting the literature review this week. I think I can have a first version to you by Thursday.\nTOM: That works. I will be at the city archive on Tuesday pulling the historical data on how park usage has changed. Then I will start writing the methodology section.\nAISHA: Before you go to the archive — have you checked whether the data is available online? I found quite a bit on the council open data portal last week, which saved me a trip.\nTOM: I had not thought of that. I will check first. If it is all there, that frees up a lot of time.\nAISHA: One thing I am unsure about is the fieldwork component. Professor Webb said we should include some primary data. I was thinking we could do a visitor survey at the park, but I am not sure we have enough time.\nTOM: What about interviews instead? They take less time to organise and the qualitative data would actually strengthen the argument we are making.\nAISHA: Yes, that is a much better idea. We could interview three or four park managers and a couple of local residents.\nTOM: Should we include the council environmental officer? She was really helpful when Marcus did his project last year.\nAISHA: I think we would get more relevant responses from the park staff directly. But if Professor Webb thinks it would add value, maybe.\nTOM: Let us stick with park managers and residents for now and see what the supervisor says on Friday.\nTOM: Right, let us talk about the presentation format. Professor Webb said ten minutes maximum, with questions after.\nAISHA: So roughly seven minutes of content and three for questions?\nTOM: That sounds about right. I was thinking we open with the historical context — show how park usage in this city has shifted over the past fifty years.\nAISHA: I like that as an opener. It sets the scene. Then we move into the current challenges?\nTOM: Exactly. And then the wellbeing data, which is the core of our argument.\nAISHA: What about the recommendations? That is the part I think local government will be most interested in.\nTOM: We should definitely include those. Maybe four or five specific policy points. I can draft those once I have looked at the case studies more carefully.\nAISHA: One thing I think is really important — we need to be careful not to overload the slides. Last time I did a group presentation, we had far too much text on screen.\nTOM: Agreed. Images and graphs, not walls of text. And I think we should rehearse at least twice before the actual presentation.\nAISHA: Yes — once with just the two of us to check timing, and then once with a small audience, maybe some people from the study group.\nTOM: I will set up a practice session for next Wednesday evening if that works for you.\nAISHA: Wednesday is fine. I have a seminar until four, but I am free from five.",
       "question_groups": [
         {
           "type": "matching",
-          "title": "RESEARCH TASKS AND FINDINGS",
-          "instruction": "What did each student do or find? Choose FIVE answers from the box and write the correct letter, A-F, next to questions 21-25.",
+          "title": "RESEARCH SOURCES AND ACTIONS",
+          "instruction": "What does each student say about the following? Choose FIVE answers from the box and write the correct letter, A–G, next to Questions 21–25.",
           "question_range": [21, 25],
+          "group_transcript": "TOM: Hi Aisha, have you had a chance to look at the reading list Professor Webb gave us?\nAISHA: Yes, I went through most of it last night. The article by Larssen was the most useful I thought. Especially for our angle on community engagement.\nTOM: I actually found it a bit too theoretical. The case studies in the Mitchell report were more practical. But I can see why you liked the Larssen piece — her methodology section is very thorough.\nAISHA: That is the part I want us to reference in the introduction. What do you think we should focus on as our main argument?\nTOM: I was thinking we would look at the economic benefits of green spaces — things like property values and tourism revenue. There is plenty of data we could use.\nAISHA: That is a strong angle, but I wonder if it is a bit narrow. I have been looking at the wellbeing research, and I think making the case from a public health perspective would be more convincing for our audience — which is supposed to be local government, remember.\nTOM: Good point. Actually, that fits better with the sources we have anyway. The Mitchell report has a whole section on mental health outcomes. Let us go with that.\nAISHA: Agreed. I was going to start drafting the literature review this week. I think I can have a first version to you by Thursday.\nTOM: That works. I will be at the city archive on Tuesday pulling the historical data on how park usage has changed. Then I will start writing the methodology section.\nAISHA: Before you go to the archive — have you checked whether the data is available online? I found quite a bit on the council open data portal last week, which saved me a trip.\nTOM: I had not thought of that. I will check first. If it is all there, that frees up a lot of time.\nAISHA: One thing I am unsure about is the fieldwork component. Professor Webb said we should include some primary data. I was thinking we could do a visitor survey at the park, but I am not sure we have enough time.\nTOM: What about interviews instead? They take less time to organise and the qualitative data would actually strengthen the argument we are making.\nAISHA: Yes, that is a much better idea. We could interview three or four park managers and a couple of local residents.\nTOM: Should we include the council environmental officer? She was really helpful when Marcus did his project last year.\nAISHA: I think we would get more relevant responses from the park staff directly. But if Professor Webb thinks it would add value, maybe.\nTOM: Let us stick with park managers and residents for now and see what the supervisor says on Friday.",
           "options_pool": {
-            "A": "researched railway impact",
-            "B": "analysed population data",
-            "C": "collected historic photographs",
-            "D": "will create maps",
-            "E": "will write narrative sections",
-            "F": "contacted a historian"
+            "A": "is considered overly academic in approach",
+            "B": "contains practical examples from real situations",
+            "C": "avoids the need to travel to a physical location",
+            "D": "would take too long to complete properly",
+            "E": "produces qualitative evidence that strengthens the argument",
+            "F": "is particularly suited to a local government audience",
+            "G": "includes detailed coverage of health-related outcomes"
           },
           "items": [
-            {"number": 21, "label": "Daniel research focus", "answer": "A", "transcript_quote": "My section is about the impact of the railway", "explanation": "Daniel researched the impact of the railway."},
-            {"number": 22, "label": "Priya statistical finding", "answer": "B", "transcript_quote": "I found data showing the population tripled", "explanation": "Priya found population data."},
-            {"number": 23, "label": "Priya visual evidence", "answer": "C", "transcript_quote": "I found some fascinating old photographs", "explanation": "Priya collected historic photographs."},
-            {"number": 24, "label": "Daniel technical contribution", "answer": "D", "transcript_quote": "I can create the maps", "explanation": "Daniel will create the maps."},
-            {"number": 25, "label": "Priya presentation role", "answer": "E", "transcript_quote": "I will write the narrative sections", "explanation": "Priya will write the narrative sections."}
+            {
+              "number": 21,
+              "label": "The Larssen article",
+              "answer": "A",
+              "transcript_quote": "I actually found it a bit too theoretical",
+              "explanation": "Tom describes the Larssen article as too theoretical, meaning it is overly academic. Aisha liked it, but Tom is the one commenting on its nature here. Option B (practical examples) fits the Mitchell report, and G (health outcomes) also fits Mitchell — both are deliberate distractors."
+            },
+            {
+              "number": 22,
+              "label": "The Mitchell report",
+              "answer": "G",
+              "transcript_quote": "The Mitchell report has a whole section on mental health outcomes",
+              "explanation": "Aisha notes the Mitchell report covers mental health outcomes — health-related outcomes (G). Option B (practical examples) is a distractor because Tom also praised Mitchell for its case studies, but the deciding quote comes from Aisha about health outcomes."
+            },
+            {
+              "number": 23,
+              "label": "The council open data portal",
+              "answer": "C",
+              "transcript_quote": "I found quite a bit on the council open data portal last week, which saved me a trip",
+              "explanation": "Aisha found the data online, which saved her travelling to the archive — it avoided the need for a physical visit (C)."
+            },
+            {
+              "number": 24,
+              "label": "Conducting a visitor survey",
+              "answer": "D",
+              "transcript_quote": "I am not sure we have enough time",
+              "explanation": "Aisha suggests a visitor survey but immediately doubts there is enough time to complete it — it would take too long (D)."
+            },
+            {
+              "number": 25,
+              "label": "Conducting interviews",
+              "answer": "E",
+              "transcript_quote": "the qualitative data would actually strengthen the argument we are making",
+              "explanation": "Tom argues that interviews produce qualitative data that strengthens their argument (E). Option F (suited to local government) is a distractor — the public health perspective was described that way, not interviews specifically."
+            }
           ]
         },
         {
           "type": "multiple_choice",
           "instruction": "Choose the correct letter, A, B or C.",
           "question_range": [26, 30],
+          "group_transcript": "TOM: Right, let us talk about the presentation format. Professor Webb said ten minutes maximum, with questions after.\nAISHA: So roughly seven minutes of content and three for questions?\nTOM: That sounds about right. I was thinking we open with the historical context — show how park usage in this city has shifted over the past fifty years.\nAISHA: I like that as an opener. It sets the scene. Then we move into the current challenges?\nTOM: Exactly. And then the wellbeing data, which is the core of our argument.\nAISHA: What about the recommendations? That is the part I think local government will be most interested in.\nTOM: We should definitely include those. Maybe four or five specific policy points. I can draft those once I have looked at the case studies more carefully.\nAISHA: One thing I think is really important — we need to be careful not to overload the slides. Last time I did a group presentation, we had far too much text on screen.\nTOM: Agreed. Images and graphs, not walls of text. And I think we should rehearse at least twice before the actual presentation.\nAISHA: Yes — once with just the two of us to check timing, and then once with a small audience, maybe some people from the study group.\nTOM: I will set up a practice session for next Wednesday evening if that works for you.\nAISHA: Wednesday is fine. I have a seminar until four, but I am free from five.",
           "items": [
-            {"number": 26, "question": "What caused the city population to triple?", "options": {"A": "The textile industry", "B": "The arrival of the railway", "C": "The development of housing"}, "answer": "B", "transcript_quote": "population tripled within twenty years of the railway opening", "explanation": "The railway caused the population to triple."},
-            {"number": 27, "question": "Which aspect will the presentation emphasise?", "options": {"A": "Economic factors", "B": "Technical development", "C": "Social changes"}, "answer": "C", "transcript_quote": "let us emphasise the social aspect", "explanation": "The students will emphasise social changes."},
-            {"number": 28, "question": "Who suggested using maps in the presentation?", "options": {"A": "Daniel", "B": "Priya", "C": "Professor Johnson"}, "answer": "C", "transcript_quote": "Professor Johnson suggested using maps", "explanation": "Professor Johnson suggested the maps idea."},
-            {"number": 29, "question": "Where does Dr Harrison work?", "options": {"A": "The city archive", "B": "The university", "C": "The local museum"}, "answer": "C", "transcript_quote": "Dr Harrison at the local museum", "explanation": "Dr Harrison works at the local museum."},
-            {"number": 30, "question": "When will Priya send Daniel her sections?", "options": {"A": "Tuesday evening", "B": "Thursday evening", "C": "Friday morning"}, "answer": "B", "transcript_quote": "I will send you my sections by Thursday evening", "explanation": "Priya will send her sections on Thursday evening."}
+            {
+              "number": 26,
+              "question": "What do the students agree will be the central focus of their assignment?",
+              "options": {"A": "The economic value of urban parks", "B": "The effect of green spaces on public health", "C": "The history of park development in the city"},
+              "answer": "B",
+              "transcript_quote": "making the case from a public health perspective would be more convincing",
+              "explanation": "They agree on the public health angle after Tom drops his original suggestion of economic benefits (A). Historical context (C) is mentioned only as a presentation opener, not the main argument."
+            },
+            {
+              "number": 27,
+              "question": "Why does Aisha suggest Tom checks the internet before going to the city archive?",
+              "options": {"A": "The archive is not open on Tuesdays", "B": "He would need to book a visit in advance", "C": "The information might already be available online"},
+              "answer": "C",
+              "transcript_quote": "I found quite a bit on the council open data portal last week, which saved me a trip",
+              "explanation": "Aisha found data online that saved her a visit, so she suggests Tom check first in case the same is true for him. No information is given about the archive being closed (A) or requiring a booking (B)."
+            },
+            {
+              "number": 28,
+              "question": "What do Tom and Aisha decide about the primary data for their assignment?",
+              "options": {"A": "They will run a survey for park visitors", "B": "They will speak to park staff and local residents", "C": "They will approach the council environmental officer"},
+              "answer": "B",
+              "transcript_quote": "Let us stick with park managers and residents for now",
+              "explanation": "They decide on interviews with park managers and local residents (B). A visitor survey (A) was Aisha's initial idea but was rejected as too time-consuming. The council environmental officer (C) was proposed by Tom but Aisha was unconvinced and they postponed that decision."
+            },
+            {
+              "number": 29,
+              "question": "What does Aisha say is the most important thing about the presentation slides?",
+              "options": {"A": "They should use a consistent visual theme", "B": "They should not contain too much written text", "C": "They should include all the key references"},
+              "answer": "B",
+              "transcript_quote": "we need to be careful not to overload the slides ... far too much text on screen",
+              "explanation": "Aisha stresses avoiding too much text on the slides based on a previous bad experience. Visual theme (A) and references (C) are not mentioned."
+            },
+            {
+              "number": 30,
+              "question": "When is the practice session Tom plans to arrange?",
+              "options": {"A": "Friday afternoon", "B": "Wednesday morning", "C": "Wednesday evening"},
+              "answer": "C",
+              "transcript_quote": "I will set up a practice session for next Wednesday evening",
+              "explanation": "Tom suggests Wednesday evening. Aisha confirms she is free from five pm on that day. Wednesday morning (B) is wrong — Aisha has a seminar until four. Friday (A) is not mentioned as the practice time."
+            }
           ]
         }
       ]
     },
     {
       "part_number": 4,
-      "context": "An academic lecture on the principles of sustainable urban design",
-      "transcript": "Good afternoon, everyone. Today I want to explore the principles of sustainable urban design and how modern cities are adapting to climate change and rapid population growth. Sustainable urban design has historical roots in the garden city movement, pioneered by Ebenezer Howard in nineteen oh two. Howard envisioned self-contained communities surrounded by greenbelts, each with a maximum population of thirty-two thousand residents. The key concept today is what we call the fifteen-minute city, developed by urban theorist Carlos Moreno in twenty nineteen. The central idea is that all essential services should be accessible within a fifteen-minute walk or cycle from any home. Paris is the most prominent example, with Mayor Hidalgo committing to the transformation in twenty twenty. Several strategies characterise sustainable urban design. First, mixed-use zoning integrates residential, commercial, and recreational spaces, reducing the need for transport. Second, transit-oriented development places housing and services within a four-hundred-metre radius of public transport hubs. Third, green infrastructure manages stormwater and reduces the urban heat island effect. Research shows that cities with more than twenty percent tree coverage experience significantly cooler temperatures. Finally, participatory planning has become central to the field. Cities such as Copenhagen and Bogota have shown that involving residents in design decisions leads to higher adoption of sustainable behaviours and greater community satisfaction.",
+      "context": "An academic lecture on urban ecology and the role of city green spaces in supporting biodiversity",
+      "transcript": "Good afternoon, everyone. In this lecture, I want to explore a topic that sits at the intersection of ecology and urban planning — specifically, what city green spaces contribute to biodiversity, and why this matters for both environmental policy and public health.\n\nLet me begin with some context. Urban expansion is happening at a remarkable pace. By two thousand and fifty, the United Nations projects that sixty-eight percent of the world population will live in cities. This rapid urbanisation has significant consequences for wildlife habitats. As land is converted to roads and buildings, the original ecosystems are broken up into fragments, making it difficult for species to move, reproduce, and survive.\n\nGreen spaces — parks, gardens, green roofs, street trees, and waterways within urban areas — can partially compensate for this habitat loss. But their effectiveness depends critically on how they are designed and how well they are connected to one another.\n\nLet us look at the research. A major study conducted in the city of Sheffield in two thousand and four found that urban gardens collectively covered an area equivalent to one thousand eight hundred hectares — larger than any single nature reserve in the region. More importantly, the study found that these private gardens supported over six hundred species of plants, many of which were absent from surrounding farmland. This finding challenged the long-held assumption that conservation was only possible in officially designated protected areas.\n\nMore recent data suggests that the diversity of species in urban areas is strongly correlated with what ecologists call structural complexity — how varied and layered the vegetation is. A garden with multiple layers of plants — ground cover, shrubs, and trees — supports significantly more insect species than a flat lawn, even when both cover the same area. This has direct implications for how we design parks and public gardens.\n\nOne concept gaining traction in policy circles is the green corridor — a continuous strip of vegetation connecting larger green spaces, allowing species to move between them. Research in Berlin found that corridors as narrow as thirty metres could support viable populations of several small mammal species. Crucially, the key variable was not the width of the corridor, but the absence of barriers such as busy roads cutting across it.\n\nCities are increasingly recognising the value of blue spaces as well — rivers, canals, ponds, and wetlands. The waterway network in London provides habitat for over one hundred breeding species of birds. Wetlands in particular are extremely efficient at storing carbon — estimated at five times the rate of tropical rainforests, per unit area.\n\nI want to turn now to the question of what makes green space effective for human wellbeing, because this is increasingly the argument planners use to secure funding. Studies consistently show that access to natural environments within cities reduces cortisol levels — the hormone most strongly associated with chronic stress. A landmark study from the Netherlands, published in two thousand and nine, found that residents living within one kilometre of green space reported significantly better mental health outcomes than those who lived further away. Interestingly, the effect was strongest among people on lower incomes, suggesting that urban green spaces are particularly important in reducing health inequalities.\n\nFinally, I want to mention the growing importance of citizen science in this field. Urban ecology relies heavily on community data — records of species sightings submitted by ordinary residents through digital platforms. In the United Kingdom, the iNaturalist platform receives over two million observations a year from urban areas alone, contributing to datasets used to monitor changes in biodiversity over time. The challenge, as with all citizen science, is ensuring consistency in identification — particularly for invertebrates such as insects, which require specialist knowledge to identify accurately.\n\nTo summarise: urban green spaces are not merely aesthetic amenities. They are ecologically functional, medically significant, and — when properly connected and designed — can support a surprising range of biodiversity even in the densest city centres. The challenge for the next generation of urban planners is to integrate ecological thinking from the very beginning of the design process, rather than treating green space as an afterthought.\n\nThank you. Are there any questions?",
       "question_groups": [
         {
           "type": "note_completion",
-          "title": "SUSTAINABLE URBAN DESIGN",
+          "title": "URBAN ECOLOGY LECTURE NOTES",
           "instruction": "Complete the notes below. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
           "question_range": [31, 36],
+          "group_transcript": "Good afternoon, everyone. In this lecture, I want to explore a topic that sits at the intersection of ecology and urban planning — specifically, what city green spaces contribute to biodiversity, and why this matters for both environmental policy and public health.\n\nLet me begin with some context. Urban expansion is happening at a remarkable pace. By two thousand and fifty, the United Nations projects that sixty-eight percent of the world population will live in cities. This rapid urbanisation has significant consequences for wildlife habitats. As land is converted to roads and buildings, the original ecosystems are broken up into fragments, making it difficult for species to move, reproduce, and survive.\n\nGreen spaces — parks, gardens, green roofs, street trees, and waterways within urban areas — can partially compensate for this habitat loss. But their effectiveness depends critically on how they are designed and how well they are connected to one another.\n\nLet us look at the research. A major study conducted in the city of Sheffield in two thousand and four found that urban gardens collectively covered an area equivalent to one thousand eight hundred hectares — larger than any single nature reserve in the region. More importantly, the study found that these private gardens supported over six hundred species of plants, many of which were absent from surrounding farmland. This finding challenged the long-held assumption that conservation was only possible in officially designated protected areas.\n\nMore recent data suggests that the diversity of species in urban areas is strongly correlated with what ecologists call structural complexity — how varied and layered the vegetation is. A garden with multiple layers of plants — ground cover, shrubs, and trees — supports significantly more insect species than a flat lawn, even when both cover the same area. This has direct implications for how we design parks and public gardens.\n\nOne concept gaining traction in policy circles is the green corridor — a continuous strip of vegetation connecting larger green spaces, allowing species to move between them. Research in Berlin found that corridors as narrow as thirty metres could support viable populations of several small mammal species. Crucially, the key variable was not the width of the corridor, but the absence of barriers such as busy roads cutting across it.\n\nCities are increasingly recognising the value of blue spaces as well — rivers, canals, ponds, and wetlands. The waterway network in London provides habitat for over one hundred breeding species of birds. Wetlands in particular are extremely efficient at storing carbon — estimated at five times the rate of tropical rainforests, per unit area.",
+          "template": "**Urban Expansion**\n\n- UN projection: {{31}} per cent of world population in cities by 2050\n- Urbanisation fragments habitats, reducing species survival\n\n**Sheffield Garden Study (2004)**\n\n- Urban gardens total area: {{32}} hectares — exceeded any regional nature reserve\n- Supported over {{33}} plant species, many absent from surrounding farmland\n\n**Structural Complexity**\n\n- Gardens with multiple {{34}} of plants support significantly more insect species\n\n**Green Corridors — Berlin Research**\n\n- Corridors as narrow as {{35}} metres sustained viable small mammal populations\n- Critical factor: absence of road barriers, not corridor width\n\n**Blue Spaces**\n\n- Wetlands store carbon at {{36}} times the rate of tropical rainforests per unit area",
           "items": [
-            {"number": 31, "label": "Year Howard proposed the garden city", "answer": "1902", "transcript_quote": "pioneered by Ebenezer Howard in nineteen oh two", "explanation": "Howard proposed the garden city in 1902."},
-            {"number": 32, "label": "Maximum population per garden city", "answer": "32,000 / thirty-two thousand", "transcript_quote": "a maximum population of thirty-two thousand residents", "explanation": "Each garden city would have 32,000 people maximum."},
-            {"number": 33, "label": "Developer of the fifteen-minute city concept", "answer": "Carlos Moreno", "transcript_quote": "developed by urban theorist Carlos Moreno", "explanation": "Carlos Moreno developed the fifteen-minute city concept."},
-            {"number": 34, "label": "Year Paris committed to the fifteen-minute city", "answer": "2020", "transcript_quote": "committing to the transformation in twenty twenty", "explanation": "Paris committed in 2020."},
-            {"number": 35, "label": "Radius around transport hubs", "answer": "400 metres / four hundred metres", "transcript_quote": "within a four-hundred-metre radius of public transport hubs", "explanation": "Housing is placed within 400 metres of transport hubs."},
-            {"number": 36, "label": "Tree coverage needed for cooler temperatures", "answer": "20 / twenty percent", "transcript_quote": "more than twenty percent tree coverage", "explanation": "Cities need more than 20% tree coverage."}
+            {
+              "number": 31,
+              "label": "UN projected urban population share by 2050",
+              "answer": "68",
+              "transcript_quote": "the United Nations projects that sixty-eight percent of the world population will live in cities",
+              "explanation": "The UN projects 68% of the world population will live in cities by 2050."
+            },
+            {
+              "number": 32,
+              "label": "Sheffield urban gardens total area",
+              "answer": "1,800 / one thousand eight hundred",
+              "transcript_quote": "an area equivalent to one thousand eight hundred hectares",
+              "explanation": "Urban gardens in Sheffield collectively covered 1,800 hectares."
+            },
+            {
+              "number": 33,
+              "label": "Plant species count in Sheffield gardens",
+              "answer": "600 / six hundred",
+              "transcript_quote": "supported over six hundred species of plants",
+              "explanation": "The Sheffield gardens supported over 600 plant species."
+            },
+            {
+              "number": 34,
+              "label": "Vegetation structure linked to insect diversity",
+              "answer": "layers",
+              "transcript_quote": "A garden with multiple layers of plants — ground cover, shrubs, and trees",
+              "explanation": "Multiple layers of plants (ground cover, shrubs, trees) create structural complexity that supports more insect species."
+            },
+            {
+              "number": 35,
+              "label": "Minimum corridor width that supported mammals in Berlin",
+              "answer": "30 / thirty",
+              "transcript_quote": "corridors as narrow as thirty metres could support viable populations",
+              "explanation": "The Berlin study found corridors as narrow as 30 metres could support small mammal populations."
+            },
+            {
+              "number": 36,
+              "label": "Carbon storage rate of wetlands vs tropical rainforests",
+              "answer": "5 / five",
+              "transcript_quote": "estimated at five times the rate of tropical rainforests, per unit area",
+              "explanation": "Wetlands store carbon at five times the rate of tropical rainforests per unit area."
+            }
           ]
         },
         {
-          "type": "sentence_completion",
-          "instruction": "Complete each sentence with NO MORE THAN TWO WORDS AND/OR A NUMBER.",
+          "type": "multiple_choice",
+          "instruction": "Choose the correct letter, A, B or C.",
           "question_range": [37, 40],
+          "group_transcript": "I want to turn now to the question of what makes green space effective for human wellbeing, because this is increasingly the argument planners use to secure funding. Studies consistently show that access to natural environments within cities reduces cortisol levels — the hormone most strongly associated with chronic stress. A landmark study from the Netherlands, published in two thousand and nine, found that residents living within one kilometre of green space reported significantly better mental health outcomes than those who lived further away. Interestingly, the effect was strongest among people on lower incomes, suggesting that urban green spaces are particularly important in reducing health inequalities.\n\nFinally, I want to mention the growing importance of citizen science in this field. Urban ecology relies heavily on community data — records of species sightings submitted by ordinary residents through digital platforms. In the United Kingdom, the iNaturalist platform receives over two million observations a year from urban areas alone, contributing to datasets used to monitor changes in biodiversity over time. The challenge, as with all citizen science, is ensuring consistency in identification — particularly for invertebrates such as insects, which require specialist knowledge to identify accurately.",
           "items": [
-            {"number": 37, "sentence": "The fifteen-minute city concept states all essential services should be within a _____ walk or cycle from home.", "answer": "fifteen-minute", "transcript_quote": "within a fifteen-minute walk or cycle", "explanation": "Services should be within a fifteen-minute walk or cycle."},
-            {"number": 38, "sentence": "Mixed-use zoning integrates different types of spaces to reduce the need for _____.", "answer": "transport", "transcript_quote": "reducing the need for transport", "explanation": "Mixed-use zoning reduces the need for transport."},
-            {"number": 39, "sentence": "Green infrastructure manages stormwater and reduces the urban _____ effect.", "answer": "heat island", "transcript_quote": "reduces the urban heat island effect", "explanation": "Green infrastructure reduces the heat island effect."},
-            {"number": 40, "sentence": "Cities like Copenhagen and Bogota showed that involving _____ in design decisions improves sustainability outcomes.", "answer": "residents", "transcript_quote": "involving residents in design decisions", "explanation": "Involving residents improves sustainability outcomes."}
+            {
+              "number": 37,
+              "question": "What did the Sheffield study challenge?",
+              "options": {
+                "A": "The accuracy of urban species recording methods",
+                "B": "The idea that wildlife conservation required protected areas",
+                "C": "The assumption that private gardens had little ecological value"
+              },
+              "answer": "B",
+              "transcript_quote": "challenged the long-held assumption that conservation was only possible in officially designated protected areas",
+              "explanation": "The Sheffield study showed that unprotected urban gardens could support significant biodiversity, challenging the assumption that conservation required protected areas (B). Option C is a tempting distractor — gardens did have value — but the assumption being challenged was specifically about protected areas, not gardens generally."
+            },
+            {
+              "number": 38,
+              "question": "According to the Berlin research, what was the most important factor for green corridors supporting wildlife?",
+              "options": {
+                "A": "Having a width of at least thirty metres",
+                "B": "Containing a variety of native plant species",
+                "C": "Not being interrupted by roads"
+              },
+              "answer": "C",
+              "transcript_quote": "the key variable was not the width of the corridor, but the absence of barriers such as busy roads cutting across it",
+              "explanation": "The lecturer explicitly states the key variable was not width (A) but the absence of road barriers (C). Plant species composition (B) is not mentioned as a factor."
+            },
+            {
+              "number": 39,
+              "question": "In the Netherlands study, which group benefited most from living near green space?",
+              "options": {
+                "A": "Elderly residents",
+                "B": "People with lower incomes",
+                "C": "Children under school age"
+              },
+              "answer": "B",
+              "transcript_quote": "the effect was strongest among people on lower incomes",
+              "explanation": "The lecturer states the mental health benefit was strongest for lower-income residents (B). Elderly people (A) and young children (C) are not mentioned as the group with the strongest effect."
+            },
+            {
+              "number": 40,
+              "question": "What does the lecturer identify as the main challenge for citizen science data in urban ecology?",
+              "options": {
+                "A": "Too few people submitting observations",
+                "B": "A shortage of suitable recording platforms",
+                "C": "Reliably identifying certain types of organism"
+              },
+              "answer": "C",
+              "transcript_quote": "ensuring consistency in identification — particularly for invertebrates such as insects, which require specialist knowledge",
+              "explanation": "The challenge is accurate identification, especially of invertebrates (C). The number of volunteers (A) is not mentioned as a problem — two million UK observations per year suggests participation is high. Platform availability (B) is also not raised as an issue."
+            }
           ]
         }
       ]
