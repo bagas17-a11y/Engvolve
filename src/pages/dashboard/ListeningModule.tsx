@@ -17,28 +17,16 @@ import {
   FileText,
   RefreshCw,
   Loader2,
-  Lock,
-  Wand2,
-  ChevronRight,
+  ChevronLeft,
+  Volume2,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useSessionStorage } from "@/hooks/useLocalStorage";
 import { useUserProgress } from "@/hooks/useUserProgress";
-import { useFeatureGating } from "@/hooks/useFeatureGating";
-import { useGenerationContext } from "@/hooks/useGenerationContext";
-import { UpgradeModal } from "@/components/UpgradeModal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ListeningCheatsheet } from "@/components/listening/ListeningCheatsheet";
-
-type Difficulty = "easy" | "medium" | "hard";
-
-const DIFFICULTY_BADGE: Record<string, "destructive" | "secondary" | "default"> = {
-  hard: "destructive",
-  easy: "secondary",
-};
 
 const NUMBER_WORDS: Record<string, string> = {
   "0": "zero", "1": "one", "2": "two", "3": "three", "4": "four",
@@ -52,6 +40,13 @@ const NUMBER_WORDS: Record<string, string> = {
 const NUMBER_WORDS_REVERSE = Object.fromEntries(
   Object.entries(NUMBER_WORDS).map(([k, v]) => [v, k])
 );
+
+const PART_NUMBER_WORDS = ["one", "two", "three", "four"];
+
+const DIFFICULTY_BADGE: Record<string, "destructive" | "secondary" | "default"> = {
+  hard: "destructive",
+  easy: "secondary",
+};
 
 interface QuestionItem {
   number: number;
@@ -124,33 +119,11 @@ export default function ListeningModule() {
   const { user, profile } = useAuth();
   const isElite = profile?.subscription_tier === "elite";
 
-  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
-  const [doneFilter, setDoneFilter] = useState<"all" | "done" | "not-done">("all");
-
-  useEffect(() => {
-    if (!user?.id) return;
-    try {
-      const stored = localStorage.getItem(`ielts-listening-completed-${user.id}`);
-      if (stored) setCompletedIds(new Set(JSON.parse(stored)));
-    } catch { }
-  }, [user?.id]);
-
-  const markListeningCompleted = (testId: string) => {
-    if (!user?.id) return;
-    setCompletedIds((prev) => {
-      if (prev.has(testId)) return prev;
-      const next = new Set(prev);
-      next.add(testId);
-      try { localStorage.setItem(`ielts-listening-completed-${user.id}`, JSON.stringify([...next])); } catch { }
-      return next;
-    });
-  };
-
   const [tests, setTests] = useState<ListeningTest[]>([]);
+  const [isLoadingTests, setIsLoadingTests] = useState(true);
   const [currentTest, setCurrentTest] = useState<ListeningTest | null>(null);
-  const genCtx = useGenerationContext();
-  const isGenerating = genCtx.listening.status === "generating";
-  const stopGeneration = () => genCtx.resetListening();
+  const [difficultyFilter, setDifficultyFilter] = useState<"all" | "easy" | "medium" | "hard">("all");
+
   const [answers, setAnswers] = useState<UserAnswers>({});
   const [notes, setNotes] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
@@ -165,60 +138,64 @@ export default function ListeningModule() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const [results, setResults] = useState<Record<string, { correct: boolean; correctAnswer: string }>>({});
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [difficulty, setDifficulty] = useState<Difficulty>(() => {
-    if (typeof window !== "undefined") {
-      const stored = sessionStorage.getItem(`ielts-listening-active-diff-${user?.id || 'guest'}`);
-      if (stored === "easy" || stored === "medium" || stored === "hard") return stored;
-    }
-    return "medium";
-  });
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const speechRef = useRef<any>(null);
-  const lastTestIdRef = useRef<string | null>(null);
-  const usedTopicsRef = useRef<string[]>([]);
   const audioBlobUrlRef = useRef<string | null>(null);
   const isPausedRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
 
-  const LISTENING_SESSION_PREFIX = `ielts-listening-${user?.id || 'guest'}`;
+  const LISTENING_SESSION_PREFIX = `ielts-listening-${user?.id || "guest"}`;
 
   const [cachedState, setCachedState] = useSessionStorage<CachedListeningState | null>(
     `${LISTENING_SESSION_PREFIX}-active`,
     null
   );
   const { saveProgress } = useUserProgress();
-  const { canAccess, refreshCounts, isLoading: isGatingLoading } = useFeatureGating();
-  const navigate = useNavigate();
 
+  // Fetch tests from DB on mount
   useEffect(() => {
-    if (user?.id) sessionStorage.setItem(`ielts-listening-active-diff-${user.id}`, difficulty);
-  }, [difficulty, user?.id]);
+    const fetchTests = async () => {
+      const { data, error } = await supabase
+        .from("listening_test_library")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at");
 
-  useEffect(() => {
-    try {
-      const key = `ielts-listening-used-topics-${user?.id || 'guest'}`;
-      const stored = sessionStorage.getItem(key);
-      if (stored) usedTopicsRef.current = JSON.parse(stored);
-    } catch { }
-  }, [user?.id]);
+      if (error) {
+        console.error("Failed to fetch listening tests:", error);
+      } else if (data) {
+        setTests(
+          data.map((t) => ({
+            id: t.id,
+            title: t.title,
+            difficulty: t.difficulty,
+            totalQuestions: t.total_questions,
+            durationMinutes: t.duration_minutes,
+            topicTags: t.topic_tags || [],
+            sections: t.sections as ListeningPart[],
+          }))
+        );
+      }
+      setIsLoadingTests(false);
+    };
+    fetchTests();
+  }, []);
 
+  // Restore session state
   useEffect(() => {
     if (!user?.id) return;
     const activeKey = `${LISTENING_SESSION_PREFIX}-active`;
     try {
       const stored = sessionStorage.getItem(activeKey);
-      if (!stored || stored === 'null') return;
+      if (!stored || stored === "null") return;
       const parsed = JSON.parse(stored) as CachedListeningState;
       if (!parsed) return;
 
       const cachedTest = parsed.testContext;
-      // Validate structure — stale caches from older code versions don't
-      // have the new sections/question_groups shape and will render blank.
       const isValidStructure =
         cachedTest &&
         Array.isArray(cachedTest.sections) &&
@@ -254,6 +231,7 @@ export default function ListeningModule() {
     }
   }, [user?.id]);
 
+  // Persist session state
   useEffect(() => {
     if (currentTest) {
       const newState: CachedListeningState = {
@@ -276,12 +254,12 @@ export default function ListeningModule() {
     }
   }, [currentTest, answers, notes, hasStarted, playedParts, completedParts, timeRemaining, timerEndAt, activePart, isSubmitted, score, results]);
 
+  // Timer
   useEffect(() => {
     if (hasStarted && !isSubmitted && timerEndAt) {
       timerRef.current = setInterval(() => {
         const remaining = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000));
         setTimeRemaining(remaining);
-
         if (remaining <= 0) {
           handleSubmit();
           if (timerRef.current) clearInterval(timerRef.current);
@@ -293,33 +271,10 @@ export default function ListeningModule() {
     };
   }, [hasStarted, isSubmitted, timerEndAt]);
 
-  const generateTest = () => {
-    if (isGatingLoading) return;
-    if (!canAccess("listening")) {
-      setShowUpgradeModal(true);
-      return;
-    }
-    genCtx.startListeningGeneration(difficulty, lastTestIdRef.current, usedTopicsRef.current);
-  };
-
   const startTest = async (test: ListeningTest) => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = "";
-    }
-    if (audioBlobUrlRef.current) {
-      URL.revokeObjectURL(audioBlobUrlRef.current);
-      audioBlobUrlRef.current = null;
-    }
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
+    if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); audioBlobUrlRef.current = null; }
     speechRef.current = null;
-
-    // Record used topics so next generation avoids repeats
-    if (test.topicTags?.length) {
-      const key = `ielts-listening-used-topics-${user?.id || 'guest'}`;
-      const updated = [...new Set([...usedTopicsRef.current, ...test.topicTags])].slice(-16);
-      usedTopicsRef.current = updated;
-      try { sessionStorage.setItem(key, JSON.stringify(updated)); } catch { }
-    }
 
     const newCache: CachedListeningState = {
       testId: test.id,
@@ -361,59 +316,17 @@ export default function ListeningModule() {
           band_score: null,
           total_questions: null,
           correct_answers: null,
-          feedback: `Started: ${test.title}. Difficulty: ${test.difficulty}`,
+          feedback: `Started: ${test.title}`,
           completed_at: new Date().toISOString(),
           time_taken: null,
           errors_log: [],
-          metadata: {
-            testId: test.id,
-            testTitle: test.title,
-            difficulty: test.difficulty,
-            status: "started",
-          },
+          metadata: { testId: test.id, testTitle: test.title, difficulty: test.difficulty, status: "started" },
         });
-        await refreshCounts();
       } catch (err) {
-        console.error("Failed to save initial listening progress:", err);
+        console.error("Failed to save initial progress:", err);
       }
     }
   };
-
-  // React to completed/failed generation (fires even when returning to this module)
-  useEffect(() => {
-    const { status, data, errorMessage } = genCtx.listening;
-    if (status === "done" && data) {
-      const resolved = data;
-      const validSections = Array.isArray(resolved.sections) &&
-        resolved.sections.length > 0 &&
-        resolved.sections.every(
-          (s: ListeningPart) =>
-            Array.isArray(s?.question_groups) &&
-            s.question_groups.length > 0 &&
-            s.question_groups.every((g: QuestionGroup) => Array.isArray(g.items) && g.items.length > 0)
-        );
-      if (!validSections) {
-        genCtx.resetListening();
-        toast.error("Invalid test data received. Please try again.");
-        return;
-      }
-      const test: ListeningTest = {
-        id: resolved.id ?? crypto.randomUUID(),
-        title: resolved.title ?? "Listening Test",
-        difficulty: resolved.difficulty ?? difficulty,
-        totalQuestions: resolved.totalQuestions ?? 40,
-        durationMinutes: resolved.durationMinutes ?? 30,
-        topicTags: resolved.topicTags ?? [],
-        sections: resolved.sections,
-      };
-      genCtx.consumeListening();
-      startTest(test);
-    } else if (status === "error" && errorMessage) {
-      genCtx.resetListening();
-      toast.error(errorMessage);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [genCtx.listening.status]);
 
   const speakPart = useCallback(async (partNumber: number) => {
     if (!currentTest) return;
@@ -434,9 +347,18 @@ export default function ListeningModule() {
     setIsPlaying(false);
     setIsPaused(false);
     setIsLoadingAudio(true);
-    setPlayedParts(prev => ({ ...prev, [partNumber]: true }));
+    setPlayedParts((prev) => ({ ...prev, [partNumber]: true }));
 
-    // Parse transcript into speaker turns, merge consecutive same-speaker lines
+    // Build intro narration text (Cambridge-style announcer)
+    const firstGroup = section.question_groups[0];
+    const lastGroup = section.question_groups[section.question_groups.length - 1];
+    const qStart = firstGroup.question_range[0];
+    const qEnd = lastGroup.question_range[1];
+    const partWord = PART_NUMBER_WORDS[partNumber - 1] ?? partNumber.toString();
+    const instructions = [...new Set(section.question_groups.map((g) => g.instruction))].join(" ");
+    const introText = `Part ${partWord}. Questions ${qStart} to ${qEnd}. ${instructions} You will now hear the recording.`;
+
+    // Parse transcript into speaker turns
     const raw_turns: { speaker: string | null; text: string }[] = [];
     for (const raw of section.transcript.split("\n")) {
       const line = raw.trim();
@@ -451,22 +373,27 @@ export default function ListeningModule() {
       }
     }
 
-    const turns: { speaker: string | null; text: string }[] = [];
+    // Merge consecutive same-speaker turns
+    const transcriptTurns: { speaker: string | null; text: string }[] = [];
     for (const turn of raw_turns) {
-      if (turns.length > 0 && turns[turns.length - 1].speaker === turn.speaker) {
-        turns[turns.length - 1].text += " " + turn.text;
+      if (transcriptTurns.length > 0 && transcriptTurns[transcriptTurns.length - 1].speaker === turn.speaker) {
+        transcriptTurns[transcriptTurns.length - 1].text += " " + turn.text;
       } else {
-        turns.push({ ...turn });
+        transcriptTurns.push({ ...turn });
       }
     }
-    if (turns.length === 0) { setIsLoadingAudio(false); return; }
 
-    // Assign a distinct voice to each unique speaker
-    // fable = British male, nova = female, onyx = deep male, shimmer = soft female
+    // All turns: narrator intro first, then speakers
     const SPEAKER_VOICES = ["fable", "nova", "onyx", "shimmer"];
-    const uniqueSpeakers = [...new Set(turns.map(t => t.speaker).filter(Boolean) as string[])];
-    const speakerVoice: Record<string, string> = {};
+    const uniqueSpeakers = [...new Set(transcriptTurns.map((t) => t.speaker).filter(Boolean) as string[])];
+    const speakerVoice: Record<string, string> = { NARRATOR: "alloy" };
     uniqueSpeakers.forEach((sp, i) => { speakerVoice[sp] = SPEAKER_VOICES[i % SPEAKER_VOICES.length]; });
+
+    const allTurns = [
+      { speaker: "NARRATOR", text: introText },
+      ...transcriptTurns,
+    ];
+    if (allTurns.length === 0) { setIsLoadingAudio(false); return; }
 
     const fetchTurn = async (text: string, voice: string): Promise<Blob> => {
       const res = await fetch("https://api.openai.com/v1/audio/speech", {
@@ -476,7 +403,7 @@ export default function ListeningModule() {
           Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ model: "tts-1-hd", input: text.slice(0, 4096), voice, speed: 0.9 }),
+        body: JSON.stringify({ model: "tts-1-hd", input: text.slice(0, 4096), voice, speed: 0.88 }),
       });
       if (!res.ok) {
         const errBody = await res.text().catch(() => "");
@@ -486,29 +413,26 @@ export default function ListeningModule() {
     };
 
     try {
-      // Fetch all turns in parallel
       const blobs = await Promise.all(
-        turns.map(t => fetchTurn(t.text, t.speaker ? (speakerVoice[t.speaker] ?? SPEAKER_VOICES[0]) : SPEAKER_VOICES[0]))
+        allTurns.map((t) => fetchTurn(t.text, t.speaker ? (speakerVoice[t.speaker] ?? SPEAKER_VOICES[0]) : SPEAKER_VOICES[0]))
       );
 
       if (speechRef.current !== token) return;
       setIsLoadingAudio(false);
       setIsPlaying(true);
 
-      // Play turns sequentially
       for (let i = 0; i < blobs.length; i++) {
         if (speechRef.current !== token) return;
 
-        // If paused between turns, wait until resumed
         while (isPausedRef.current && speechRef.current === token) {
-          await new Promise(r => setTimeout(r, 80));
+          await new Promise((r) => setTimeout(r, 80));
         }
         if (speechRef.current !== token) return;
 
         const url = URL.createObjectURL(blobs[i]);
         audioBlobUrlRef.current = url;
 
-        await new Promise<void>(resolve => {
+        await new Promise<void>((resolve) => {
           if (!audioRef.current) { resolve(); return; }
           audioRef.current.src = url;
           audioRef.current.onended = () => { URL.revokeObjectURL(url); audioBlobUrlRef.current = null; resolve(); };
@@ -516,9 +440,14 @@ export default function ListeningModule() {
           audioRef.current.play();
         });
 
-        // Brief gap between speaker changes
-        if (i < blobs.length - 1 && turns[i].speaker !== turns[i + 1].speaker) {
-          await new Promise(r => setTimeout(r, 350));
+        // Pause between speaker changes (not needed after narrator intro since transcript starts immediately)
+        if (i < blobs.length - 1 && allTurns[i].speaker !== allTurns[i + 1].speaker) {
+          if (i === 0) {
+            // Pause after intro before transcript begins
+            await new Promise((r) => setTimeout(r, 800));
+          } else {
+            await new Promise((r) => setTimeout(r, 350));
+          }
         }
       }
 
@@ -526,7 +455,7 @@ export default function ListeningModule() {
       setIsPlaying(false);
       setIsPaused(false);
       setPlayingPart(null);
-      setCompletedParts(prev => ({ ...prev, [partNumber]: true }));
+      setCompletedParts((prev) => ({ ...prev, [partNumber]: true }));
       speechRef.current = null;
     } catch (err) {
       if (abort.signal.aborted || speechRef.current !== token) return;
@@ -542,12 +471,10 @@ export default function ListeningModule() {
 
   const handlePlay = () => {
     if (!currentTest) return;
-
     if (!hasStarted) {
       setHasStarted(true);
       setTimerEndAt(Date.now() + timeRemaining * 1000);
     }
-
     if (isPaused && playingPart === activePart) {
       isPausedRef.current = false;
       if (audioRef.current?.src) audioRef.current.play();
@@ -555,7 +482,6 @@ export default function ListeningModule() {
       setIsPlaying(true);
       return;
     }
-
     speakPart(activePart);
   };
 
@@ -580,38 +506,38 @@ export default function ListeningModule() {
   };
 
   const handleAnswerChange = (questionId: string, value: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
-  const normalizeAnswer = (answer: string): string => {
-    return answer.toLowerCase().trim();
-  };
+  const normalizeAnswer = (answer: string): string => answer.toLowerCase().trim();
 
   const checkAnswer = useCallback((userAnswer: string, correctAnswer: string): boolean => {
     const normalizedUser = normalizeAnswer(userAnswer);
     const normalizedCorrect = normalizeAnswer(correctAnswer);
-
     if (normalizedUser === normalizedCorrect) return true;
-
     if (NUMBER_WORDS[normalizedUser] === normalizedCorrect) return true;
     if (NUMBER_WORDS_REVERSE[normalizedUser] === normalizedCorrect) return true;
 
-    const digitsOnly = (s: string) => s.replace(/\D/g, '');
+    const digitsOnly = (s: string) => s.replace(/\D/g, "");
     const userDigits = digitsOnly(normalizedUser);
     const correctDigits = digitsOnly(normalizedCorrect);
     if (userDigits.length >= 4 && userDigits === correctDigits) return true;
 
     const normalizeDate = (s: string) =>
       s
-        .replace(/\b(\d+)(st|nd|rd|th)\b/g, '$1')
-        .replace(/\bjan\b/g, 'january').replace(/\bfeb\b/g, 'february')
-        .replace(/\bmar\b/g, 'march').replace(/\bapr\b/g, 'april')
-        .replace(/\bjun\b/g, 'june').replace(/\bjul\b/g, 'july')
-        .replace(/\baug\b/g, 'august').replace(/\bsept?\b/g, 'september')
-        .replace(/\boct\b/g, 'october').replace(/\bnov\b/g, 'november')
-        .replace(/\bdec\b/g, 'december')
-        .replace(/\s+/g, ' ').trim();
+        .replace(/\b(\d+)(st|nd|rd|th)\b/g, "$1")
+        .replace(/\bjan\b/g, "january").replace(/\bfeb\b/g, "february")
+        .replace(/\bmar\b/g, "march").replace(/\bapr\b/g, "april")
+        .replace(/\bjun\b/g, "june").replace(/\bjul\b/g, "july")
+        .replace(/\baug\b/g, "august").replace(/\bsept?\b/g, "september")
+        .replace(/\boct\b/g, "october").replace(/\bnov\b/g, "november")
+        .replace(/\bdec\b/g, "december")
+        .replace(/\s+/g, " ").trim();
     if (normalizeDate(normalizedUser) === normalizeDate(normalizedCorrect)) return true;
+
+    // Accept if any slash-separated alternative matches
+    const alternatives = normalizedCorrect.split(/\s*\/\s*/);
+    if (alternatives.length > 1 && alternatives.some((alt) => normalizeAnswer(alt) === normalizedUser)) return true;
 
     const editDist = (a: string, b: string): number => {
       const m = a.length, n = b.length;
@@ -620,9 +546,8 @@ export default function ListeningModule() {
       );
       for (let i = 1; i <= m; i++) {
         for (let j = 1; j <= n; j++) {
-          dp[i][j] = a[i - 1] === b[j - 1]
-            ? dp[i - 1][j - 1]
-            : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+          dp[i][j] =
+            a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
         }
       }
       return dp[m][n];
@@ -638,21 +563,19 @@ export default function ListeningModule() {
       });
       if (allClose) return true;
     }
-
     return false;
   }, []);
 
   const handleSubmit = async () => {
     if (!currentTest) return;
-
     if (timerRef.current) clearInterval(timerRef.current);
 
     let correctCount = 0;
     const newResults: Record<string, { correct: boolean; correctAnswer: string }> = {};
 
-    currentTest.sections.forEach(section => {
-      section.question_groups.forEach(group => {
-        group.items.forEach(item => {
+    currentTest.sections.forEach((section) => {
+      section.question_groups.forEach((group) => {
+        group.items.forEach((item) => {
           const questionId = item.number.toString();
           const userAnswer = answers[questionId] || "";
           const isCorrect = checkAnswer(userAnswer, item.answer);
@@ -668,7 +591,6 @@ export default function ListeningModule() {
     setScore(correctCount);
     setResults(newResults);
     setIsSubmitted(true);
-    markListeningCompleted(currentTest.id);
 
     if (user) {
       try {
@@ -688,15 +610,11 @@ export default function ListeningModule() {
             band_score: bandScore,
             total_questions: totalQuestions,
             correct_answers: correctCount,
-            feedback: `Test: ${currentTest.title}. Difficulty: ${currentTest.difficulty}`,
+            feedback: `Test: ${currentTest.title}`,
             completed_at: new Date().toISOString(),
             time_taken: currentTest.durationMinutes * 60 - timeRemaining,
             errors_log: [],
-            metadata: {
-              testId: currentTest.id,
-              testTitle: currentTest.title,
-              difficulty: currentTest.difficulty,
-            },
+            metadata: { testId: currentTest.id, testTitle: currentTest.title, difficulty: currentTest.difficulty },
           }),
         ]);
       } catch (error) {
@@ -704,11 +622,10 @@ export default function ListeningModule() {
       }
     }
 
-    toast.success(`Test completed! Score: ${correctCount}/${totalQuestions}`);
+    toast.success(`Test complete! Score: ${correctCount}/${totalQuestions} — Band ${bandScore}`);
   };
 
   const calculateBandScore = (correct: number, total: number): number => {
-    // Official IELTS Listening raw score → band conversion (out of 40)
     const raw = total === 40 ? correct : Math.round((correct / total) * 40);
     if (raw >= 39) return 9;
     if (raw >= 37) return 8.5;
@@ -737,7 +654,6 @@ export default function ListeningModule() {
   };
 
   const resetTest = () => {
-    if (currentTest?.id) lastTestIdRef.current = currentTest.id;
     abortRef.current?.abort();
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
     if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); audioBlobUrlRef.current = null; }
@@ -763,7 +679,6 @@ export default function ListeningModule() {
     setTimerEndAt(null);
   };
 
-  // Stop any active playback when switching parts
   const handleSwitchPart = (newPart: number) => {
     if (newPart === activePart) return;
     abortRef.current?.abort();
@@ -778,18 +693,14 @@ export default function ListeningModule() {
     setActivePart(newPart);
   };
 
-  // Stop audio on unmount
   useEffect(() => {
     return () => {
+      abortRef.current?.abort();
       if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
       if (audioBlobUrlRef.current) { URL.revokeObjectURL(audioBlobUrlRef.current); }
     };
   }, []);
 
-  // Build a default options pool for matching groups when the data doesn't
-  // include one. We collect the answer letters from the items and (when the
-  // test has been submitted) reveal the transcript_quote that each letter
-  // corresponds to so the user can see the matches after grading.
   const deriveMatchingPool = (group: QuestionGroup): Record<string, string> | null => {
     if (group.type !== "matching") return null;
     const byLetter = new Map<string, string>();
@@ -810,27 +721,26 @@ export default function ListeningModule() {
   const renderQuestion = (
     question: QuestionItem,
     groupType: string,
-    matchingPool?: Record<string, string> | null,
+    matchingPool?: Record<string, string> | null
   ) => {
     const result = results[question.number.toString()];
     const isCorrect = result?.correct;
     const userAnswer = answers[question.number.toString()] || "";
 
-    const textInput = (
-      <Input
-        value={userAnswer}
-        onChange={(e) => handleAnswerChange(question.number.toString(), e.target.value)}
-        className={isSubmitted ? isCorrect ? "border-green-500 bg-green-500/10" : "border-red-500 bg-red-500/10" : ""}
-        disabled={isSubmitted}
-        placeholder="..."
-      />
+    const inputClass = cn(
+      "h-9 text-sm",
+      isSubmitted
+        ? isCorrect
+          ? "border-green-500 bg-green-500/10"
+          : "border-red-500 bg-red-500/10"
+        : ""
     );
 
     const correctnessHint = isSubmitted && !isCorrect && (
-      <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1">
-        Correct: <span className="font-medium">{result?.correctAnswer}</span>
+      <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-2">
+        Correct answer: <span className="font-semibold">{result?.correctAnswer}</span>
         {question.transcript_quote && (
-          <span className="text-muted-foreground ml-2">— "{question.transcript_quote}"</span>
+          <span className="text-muted-foreground ml-2 italic">— "{question.transcript_quote}"</span>
         )}
       </p>
     );
@@ -839,11 +749,15 @@ export default function ListeningModule() {
 
     if (groupType === "form_completion" || groupType === "note_completion" || groupType === "table_completion") {
       body = (
-        <div className="space-y-2">
-          <p className="text-foreground leading-relaxed">
-            <span className="font-medium">{question.label || question.statement}</span>
-          </p>
-          {textInput}
+        <div className="space-y-1">
+          <p className="text-sm text-muted-foreground font-medium">{question.label || question.statement}</p>
+          <Input
+            value={userAnswer}
+            onChange={(e) => handleAnswerChange(question.number.toString(), e.target.value)}
+            className={inputClass}
+            disabled={isSubmitted}
+            placeholder="Your answer..."
+          />
           {correctnessHint}
         </div>
       );
@@ -852,7 +766,7 @@ export default function ListeningModule() {
       const parts = sentenceText.split("_____");
       body = (
         <div className="space-y-2">
-          <p className="text-foreground leading-relaxed font-serif">
+          <p className="text-foreground leading-relaxed">
             {parts.map((part, idx) => (
               <span key={idx}>
                 {part}
@@ -860,7 +774,7 @@ export default function ListeningModule() {
                   <Input
                     value={userAnswer}
                     onChange={(e) => handleAnswerChange(question.number.toString(), e.target.value)}
-                    className={`inline-block w-36 mx-1 h-8 text-center ${isSubmitted ? isCorrect ? "border-green-500 bg-green-500/10" : "border-red-500 bg-red-500/10" : ""}`}
+                    className={cn("inline-block w-40 mx-1 h-8 text-center text-sm", isSubmitted ? (isCorrect ? "border-green-500 bg-green-500/10" : "border-red-500 bg-red-500/10") : "")}
                     disabled={isSubmitted}
                     placeholder="..."
                   />
@@ -876,22 +790,19 @@ export default function ListeningModule() {
       body = (
         <div className="space-y-2">
           <p className="text-foreground leading-relaxed">{question.label || question.statement}</p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {poolKeys.length > 0 ? (
               <select
                 value={userAnswer}
                 onChange={(e) => handleAnswerChange(question.number.toString(), e.target.value)}
                 disabled={isSubmitted}
-                className={`w-24 px-2 py-1 rounded border bg-background text-foreground text-sm uppercase ${
-                  isSubmitted
-                    ? isCorrect
-                      ? "border-green-500 bg-green-500/10"
-                      : "border-red-500 bg-red-500/10"
-                    : "border-border/50"
-                }`}
+                className={cn(
+                  "w-28 px-2 py-1.5 rounded-md border bg-background text-foreground text-sm uppercase",
+                  isSubmitted ? (isCorrect ? "border-green-500 bg-green-500/10" : "border-red-500 bg-red-500/10") : "border-border/50"
+                )}
               >
                 <option value="">—</option>
-                {poolKeys.map(k => (
+                {poolKeys.map((k) => (
                   <option key={k} value={k}>{k}</option>
                 ))}
               </select>
@@ -899,7 +810,7 @@ export default function ListeningModule() {
               <Input
                 value={userAnswer}
                 onChange={(e) => handleAnswerChange(question.number.toString(), e.target.value.toUpperCase())}
-                className={`w-16 text-center uppercase ${isSubmitted ? isCorrect ? "border-green-500 bg-green-500/10" : "border-red-500 bg-red-500/10" : ""}`}
+                className={cn("w-20 text-center uppercase text-sm", isSubmitted ? (isCorrect ? "border-green-500 bg-green-500/10" : "border-red-500 bg-red-500/10") : "")}
                 disabled={isSubmitted}
                 maxLength={1}
                 placeholder="A–G"
@@ -910,46 +821,48 @@ export default function ListeningModule() {
         </div>
       );
     } else {
-      // multiple_choice and anything else
       body = (
         <div className="space-y-3">
-          <p className="text-foreground leading-relaxed">{question.question || question.statement}</p>
+          <p className="text-foreground leading-relaxed font-medium">{question.question || question.statement}</p>
           <div className="space-y-2">
-            {question.options && Object.entries(question.options).map(([key, value]) => {
-              const isSelected = userAnswer === key;
-              const isCorrectOption = result?.correctAnswer === key;
-              return (
-                <label
-                  key={key}
-                  className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
-                    isSubmitted
-                      ? isCorrectOption
-                        ? "bg-green-500/10 border border-green-500/50"
-                        : isSelected && !isCorrectOption
-                        ? "bg-red-500/10 border border-red-500/50"
-                        : "bg-secondary/20 border border-transparent"
-                      : isSelected
-                      ? "bg-accent/10 border border-accent/50"
-                      : "bg-secondary/20 border border-transparent hover:bg-secondary/40"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name={`question-${question.number}`}
-                    value={key}
-                    checked={isSelected}
-                    onChange={(e) => handleAnswerChange(question.number.toString(), e.target.value)}
-                    disabled={isSubmitted}
-                    className="w-4 h-4 text-accent"
-                  />
-                  <span className="font-medium text-muted-foreground mr-2">{key}.</span>
-                  <span className="text-foreground">{value}</span>
-                  {isSubmitted && isCorrectOption && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
-                  {isSubmitted && isSelected && !isCorrectOption && <XCircle className="w-4 h-4 text-red-500 ml-auto" />}
-                </label>
-              );
-            })}
+            {question.options &&
+              Object.entries(question.options).map(([key, value]) => {
+                const isSelected = userAnswer === key;
+                const isCorrectOption = result?.correctAnswer === key;
+                return (
+                  <label
+                    key={key}
+                    className={cn(
+                      "flex items-start gap-3 p-3.5 rounded-xl cursor-pointer transition-all border",
+                      isSubmitted
+                        ? isCorrectOption
+                          ? "bg-green-500/10 border-green-500/40"
+                          : isSelected && !isCorrectOption
+                          ? "bg-red-500/10 border-red-500/40"
+                          : "bg-secondary/20 border-transparent"
+                        : isSelected
+                        ? "bg-accent/10 border-accent/50"
+                        : "bg-secondary/20 border-transparent hover:bg-secondary/40 hover:border-border/50"
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name={`question-${question.number}`}
+                      value={key}
+                      checked={isSelected}
+                      onChange={(e) => handleAnswerChange(question.number.toString(), e.target.value)}
+                      disabled={isSubmitted}
+                      className="mt-0.5 w-4 h-4 text-accent flex-shrink-0"
+                    />
+                    <span className="font-semibold text-muted-foreground mr-1 flex-shrink-0">{key}.</span>
+                    <span className="text-foreground">{value}</span>
+                    {isSubmitted && isCorrectOption && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto flex-shrink-0 mt-0.5" />}
+                    {isSubmitted && isSelected && !isCorrectOption && <XCircle className="w-4 h-4 text-red-500 ml-auto flex-shrink-0 mt-0.5" />}
+                  </label>
+                );
+              })}
           </div>
+          {correctnessHint}
         </div>
       );
     }
@@ -958,19 +871,27 @@ export default function ListeningModule() {
       <div
         key={question.number}
         data-question={question.number}
-        className={`p-4 rounded-lg border transition-all ${
+        className={cn(
+          "p-5 rounded-2xl border transition-all",
           isSubmitted
             ? isCorrect
-              ? "border-green-500/50 bg-green-500/5"
-              : "border-red-500/50 bg-red-500/5"
-            : "border-border/50 bg-secondary/20"
-        }`}
+              ? "border-green-500/40 bg-green-500/5"
+              : "border-red-500/40 bg-red-500/5"
+            : "border-border/40 bg-card/50"
+        )}
       >
-        <div className="flex items-start gap-3">
-          <span className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/10 text-accent flex items-center justify-center text-sm font-medium">
+        <div className="flex items-start gap-4">
+          <span className={cn(
+            "flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold",
+            isSubmitted
+              ? isCorrect
+                ? "bg-green-500/20 text-green-600 dark:text-green-400"
+                : "bg-red-500/20 text-red-600 dark:text-red-400"
+              : "bg-accent/15 text-accent"
+          )}>
             {question.number}
           </span>
-          <div className="flex-1">{body}</div>
+          <div className="flex-1 min-w-0">{body}</div>
         </div>
       </div>
     );
@@ -979,152 +900,103 @@ export default function ListeningModule() {
   const currentPart = currentTest?.sections[activePart - 1];
   const partCounts = useMemo(() => {
     if (!currentTest) return [] as { answered: number; total: number }[];
-    return currentTest.sections.map(section => ({
+    return currentTest.sections.map((section) => ({
       answered: section.question_groups.reduce(
-        (sum, g) => sum + g.items.filter(item => answers[item.number.toString()]).length, 0
+        (sum, g) => sum + g.items.filter((item) => answers[item.number.toString()]).length,
+        0
       ),
       total: section.question_groups.reduce((sum, g) => sum + g.items.length, 0),
     }));
   }, [currentTest, answers]);
 
-  if (isGenerating) {
-    return (
-      <DashboardLayout>
-        <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />
-          <p className="text-sm text-muted-foreground animate-pulse">
-            Generating your IELTS listening test — this may take a few seconds…
-          </p>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const filteredTests = difficultyFilter === "all" ? tests : tests.filter((t) => t.difficulty === difficultyFilter);
 
+  // Library view
   if (!currentTest) {
-    const practiceContent = tests.length === 0 ? (
-      <div className="glass-card p-12 text-center">
-        <Headphones className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-        <h2 className="text-xl font-light mb-2">Generate an AI Listening Test</h2>
-        <p className="text-muted-foreground mb-6">
-          No pre-built tests yet. Generate a fresh IELTS-style test with AI.
-        </p>
-        <div className="flex flex-col items-center gap-4 max-w-xs mx-auto">
-          <select
-            value={difficulty}
-            disabled={isGenerating}
-            onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-            className="w-full bg-secondary/50 border border-border/50 rounded-md px-3 py-2 text-sm text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-          </select>
-          {isGenerating ? (
-            <Button
-              onClick={stopGeneration}
-              variant="destructive"
-              className="w-full"
-            >
-              <XCircle className="w-4 h-4 mr-2" />
-              Stop Generation
-            </Button>
-          ) : (
-            <Button
-              onClick={() => !canAccess("listening") ? setShowUpgradeModal(true) : generateTest()}
-              className="w-full bg-accent hover:bg-accent/90"
-            >
-              <Wand2 className="w-4 h-4 mr-2" />
-              Generate AI Test
-            </Button>
-          )}
-        </div>
-      </div>
-    ) : (
-      <div className="grid gap-4">
-        {/* Done filter pills */}
+    const practiceContent = (
+      <div className="space-y-6">
+        {/* Difficulty filter */}
         <div className="flex items-center gap-2 flex-wrap">
-          {(["all", "done", "not-done"] as const).map((f) => (
+          {(["all", "easy", "medium", "hard"] as const).map((f) => (
             <button
               key={f}
-              onClick={() => setDoneFilter(f)}
+              onClick={() => setDifficultyFilter(f)}
               className={cn(
-                "text-xs px-3 py-1.5 rounded-full border transition-colors",
-                doneFilter === f
+                "px-4 py-1.5 rounded-full text-sm border transition-colors capitalize",
+                difficultyFilter === f
                   ? "bg-accent text-accent-foreground border-accent"
                   : "border-border/50 text-muted-foreground hover:border-accent/50 hover:text-foreground"
               )}
             >
-              {f === "all" ? "All" : f === "done" ? "Done" : "Not Done"}
+              {f === "all" ? "All Tests" : f}
             </button>
           ))}
-          <span className="ml-auto text-sm text-muted-foreground">
-            {tests.filter(t => doneFilter === "all" || (doneFilter === "done" ? completedIds.has(t.id) : !completedIds.has(t.id))).length} tests
-          </span>
+          <span className="ml-auto text-sm text-muted-foreground">{filteredTests.length} tests</span>
         </div>
-        {tests.filter(t =>
-          doneFilter === "all" || (doneFilter === "done" ? completedIds.has(t.id) : !completedIds.has(t.id))
-        ).map((test) => (
-          <button
-            key={test.id}
-            onClick={() => !canAccess("listening") ? setShowUpgradeModal(true) : startTest(test)}
-            className={cn(
-              "glass-card p-6 text-left hover:scale-[1.01] transition-all group border",
-              completedIds.has(test.id) ? "border-green-500/30 bg-green-500/5" : "border-transparent"
-            )}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-light mb-1">{test.title}</h3>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    {test.durationMinutes} mins
-                  </span>
-                  <Badge variant={DIFFICULTY_BADGE[test.difficulty] ?? "default"}>
-                    {test.difficulty}
-                  </Badge>
-                  <span>{test.totalQuestions} questions</span>
-                  {completedIds.has(test.id) && (
-                    <span className="flex items-center gap-1 text-green-500">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Done
-                    </span>
-                  )}
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-accent transition-colors" />
-            </div>
-          </button>
-        ))}
-        {/* AI Generation row */}
-        <div className="glass-card p-4 border-dashed">
-          <div className="flex items-center gap-3 flex-wrap">
-            <Wand2 className="w-4 h-4 text-accent flex-shrink-0" />
-            <span className="text-sm text-muted-foreground flex-1">Generate a new AI test</span>
-            <select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-              className="bg-secondary/50 border border-border/50 rounded-md px-2 py-1.5 text-sm text-foreground"
-            >
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
-            {isGenerating ? (
-              <Button size="sm" onClick={stopGeneration} variant="destructive">
-                <XCircle className="w-4 h-4 mr-1" /> Stop
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                onClick={() => !canAccess("listening") ? setShowUpgradeModal(true) : generateTest()}
-                className="bg-accent hover:bg-accent/90"
-              >
-                Generate
-              </Button>
-            )}
+
+        {isLoadingTests ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
-        </div>
+        ) : filteredTests.length === 0 ? (
+          <div className="glass-card p-12 text-center">
+            <Headphones className="w-14 h-14 text-muted-foreground/30 mx-auto mb-4" />
+            <p className="text-muted-foreground">No tests available for this difficulty.</p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {filteredTests.map((test) => {
+              const totalAnswerable = test.sections.reduce(
+                (s, sec) => s + sec.question_groups.reduce((ss, g) => ss + g.items.length, 0),
+                0
+              );
+              return (
+                <button
+                  key={test.id}
+                  onClick={() => startTest(test)}
+                  className="glass-card p-6 text-left hover:scale-[1.01] transition-all group border border-transparent hover:border-accent/20"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg font-medium truncate">{test.title}</h3>
+                        <Badge variant={DIFFICULTY_BADGE[test.difficulty] ?? "default"} className="flex-shrink-0">
+                          {test.difficulty}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5" />
+                          {test.durationMinutes} min
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <FileText className="w-3.5 h-3.5" />
+                          {totalAnswerable} questions
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Headphones className="w-3.5 h-3.5" />
+                          4 parts
+                        </span>
+                      </div>
+                      {test.topicTags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {test.topicTags.map((tag) => (
+                            <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-secondary/60 text-muted-foreground capitalize">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                      <Play className="w-4 h-4 text-accent ml-0.5" />
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
 
@@ -1137,9 +1009,7 @@ export default function ListeningModule() {
             </div>
             <div>
               <h1 className="text-2xl font-light">Listening Practice</h1>
-              <p className="text-sm text-muted-foreground">
-                {isElite ? "Select a test or explore MudahInAja" : "Select a test"}
-              </p>
+              <p className="text-sm text-muted-foreground">Cambridge IELTS-style tests · 4 parts · 40 questions each</p>
             </div>
           </div>
 
@@ -1149,9 +1019,7 @@ export default function ListeningModule() {
                 <TabsTrigger value="practice">Practice Tests</TabsTrigger>
                 <TabsTrigger value="cheatsheet">MudahInAja</TabsTrigger>
               </TabsList>
-              <TabsContent value="practice" className="mt-0">
-                {practiceContent}
-              </TabsContent>
+              <TabsContent value="practice" className="mt-0">{practiceContent}</TabsContent>
               <TabsContent value="cheatsheet" className="mt-0">
                 <div className="glass-card p-6">
                   <h2 className="text-lg font-semibold mb-4">Elite Cheatsheet & Hard Tips</h2>
@@ -1167,33 +1035,42 @@ export default function ListeningModule() {
     );
   }
 
+  // Test view
+  const firstGroup = currentPart?.question_groups[0];
+  const lastGroup = currentPart?.question_groups[currentPart.question_groups.length - 1];
+  const partQStart = firstGroup?.question_range[0];
+  const partQEnd = lastGroup?.question_range[1];
+
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-120px)] flex flex-col">
+      <div className="h-[calc(100vh-100px)] flex flex-col gap-3">
         {/* Header */}
-        <div className="flex-shrink-0 flex items-center justify-between mb-4">
+        <div className="flex-shrink-0 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-              <Headphones className="w-5 h-5 text-accent" />
-            </div>
+            <button
+              onClick={resetTest}
+              className="p-2 rounded-lg hover:bg-secondary/60 transition-colors text-muted-foreground hover:text-foreground"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
             <div>
-              <h1 className="text-xl font-light">{currentTest.title}</h1>
-              <Badge variant={DIFFICULTY_BADGE[currentTest.difficulty] ?? "default"}>
+              <h1 className="text-lg font-medium leading-tight">{currentTest.title}</h1>
+              <Badge variant={DIFFICULTY_BADGE[currentTest.difficulty] ?? "default"} className="mt-0.5">
                 {currentTest.difficulty}
               </Badge>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-              timeRemaining < 60 ? "bg-red-500/10 text-red-500" : "bg-secondary/50"
-            }`}>
+          <div className="flex items-center gap-3">
+            <div className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-xl font-mono text-base",
+              timeRemaining < 60 ? "bg-red-500/10 text-red-500" : "bg-secondary/60 text-foreground"
+            )}>
               <Clock className="w-4 h-4" />
-              <span className="font-mono text-lg">{formatTime(timeRemaining)}</span>
+              {formatTime(timeRemaining)}
             </div>
-
             {isSubmitted && (
-              <Button variant="outline" onClick={resetTest}>
+              <Button variant="outline" onClick={resetTest} size="sm">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 New Test
               </Button>
@@ -1201,107 +1078,19 @@ export default function ListeningModule() {
           </div>
         </div>
 
-        {/* Audio Player */}
-        <div className="flex-shrink-0 glass-card p-4 mb-4">
-          <audio
-            ref={audioRef}
-            preload="metadata"
-          />
-
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              {isLoadingAudio ? (
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full w-12 h-12"
-                  disabled
-                >
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                </Button>
-              ) : isPlaying && playingPart === activePart ? (
-                <Button
-                  onClick={handlePause}
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full w-12 h-12"
-                  title="Pause"
-                  disabled={isSubmitted}
-                >
-                  <Pause className="w-5 h-5" />
-                </Button>
-              ) : (
-                <Button
-                  onClick={handlePlay}
-                  variant="neumorphicPrimary"
-                  size="lg"
-                  className="rounded-full w-12 h-12"
-                  title={
-                    isPaused && playingPart === activePart
-                      ? "Resume"
-                      : completedParts[activePart]
-                      ? "Replay"
-                      : "Play"
-                  }
-                  disabled={isSubmitted}
-                >
-                  <Play className="w-5 h-5 ml-0.5" />
-                </Button>
-              )}
-
-              {(isPlaying || isPaused) && playingPart === activePart && (
-                <Button
-                  onClick={handleStop}
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full w-9 h-9 text-muted-foreground hover:text-destructive"
-                  title="Stop"
-                  disabled={isSubmitted}
-                >
-                  <Square className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
-
-            <div className="flex-1">
-              {isLoadingAudio ? (
-                <p className="text-accent text-sm animate-pulse">Generating audio...</p>
-              ) : isPlaying && playingPart === activePart ? (
-                <p className="text-accent text-sm animate-pulse">
-                  Audio playing for Part {activePart}... Listen carefully.
-                </p>
-              ) : isPaused && playingPart === activePart ? (
-                <p className="text-yellow-500 text-sm">Paused — press play to resume.</p>
-              ) : completedParts[activePart] ? (
-                <p className="text-emerald-600 dark:text-emerald-400 text-sm">
-                  Part {activePart} complete. Answer the questions below or replay.
-                </p>
-              ) : playedParts[activePart] ? (
-                <p className="text-muted-foreground text-sm">
-                  Audio stopped. Press play to restart Part {activePart}.
-                </p>
-              ) : (
-                <p className="text-muted-foreground text-sm">
-                  Press play to listen to Part {activePart}.
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Score Banner */}
+        {/* Score banner */}
         {isSubmitted && score !== null && (
-          <div className="flex-shrink-0 glass-card p-4 mb-4 bg-gradient-to-r from-accent/10 to-elite-gold/10">
+          <div className="flex-shrink-0 glass-card p-4 bg-gradient-to-r from-accent/10 to-elite-gold/10">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Your Score</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Your Score</p>
                 <p className="text-3xl font-light">
                   <span className="text-accent">{score}</span>
-                  <span className="text-muted-foreground">/{currentTest.totalQuestions}</span>
+                  <span className="text-muted-foreground text-xl">/{currentTest.totalQuestions}</span>
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-muted-foreground">Estimated Band</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Estimated Band</p>
                 <p className="text-3xl font-light text-elite-gold">
                   {calculateBandScore(score, currentTest.totalQuestions)}
                 </p>
@@ -1310,59 +1099,145 @@ export default function ListeningModule() {
           </div>
         )}
 
-        {/* Main Content */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 min-h-0">
-          {/* Questions Panel */}
-          <div className="lg:col-span-3 glass-card p-4 flex flex-col min-h-0">
-            <div className="flex-shrink-0 mb-4">
-              <Tabs value={`part-${activePart}`} onValueChange={(v) => handleSwitchPart(parseInt(v.split('-')[1]))}>
-                <TabsList>
-                  {[1, 2, 3, 4].map(part => (
-                    <TabsTrigger key={part} value={`part-${part}`} className="text-xs">
-                      Part {part}
-                      {!isSubmitted && (
-                        <span className="ml-1 text-xs text-muted-foreground">
-                          ({partCounts[part - 1]?.answered ?? 0}/{partCounts[part - 1]?.total ?? 0})
-                        </span>
-                      )}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
+        {/* Audio player */}
+        <div className="flex-shrink-0 glass-card p-4">
+          <audio ref={audioRef} preload="none" />
+          <div className="flex items-center gap-4">
+            {/* Play/Pause/Loading button */}
+            <div className="flex items-center gap-2">
+              {isLoadingAudio ? (
+                <Button variant="outline" size="lg" className="rounded-full w-12 h-12" disabled>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                </Button>
+              ) : isPlaying && playingPart === activePart ? (
+                <Button onClick={handlePause} variant="outline" size="lg" className="rounded-full w-12 h-12" disabled={isSubmitted}>
+                  <Pause className="w-5 h-5" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={handlePlay}
+                  variant="neumorphicPrimary"
+                  size="lg"
+                  className="rounded-full w-12 h-12"
+                  title={isPaused && playingPart === activePart ? "Resume" : completedParts[activePart] ? "Replay" : "Play"}
+                  disabled={isSubmitted}
+                >
+                  <Play className="w-5 h-5 ml-0.5" />
+                </Button>
+              )}
+              {(isPlaying || isPaused) && playingPart === activePart && !isSubmitted && (
+                <Button onClick={handleStop} variant="ghost" size="icon" className="rounded-full w-9 h-9 text-muted-foreground hover:text-destructive">
+                  <Square className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+
+            {/* Part info + status */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <Volume2 className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                <p className="text-sm font-medium text-foreground">
+                  Part {activePart} — Questions {partQStart}–{partQEnd}
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {isLoadingAudio
+                  ? "Generating audio…"
+                  : isPlaying && playingPart === activePart
+                  ? "Playing — listen carefully and answer as you go"
+                  : isPaused && playingPart === activePart
+                  ? "Paused — press play to resume"
+                  : completedParts[activePart]
+                  ? "Complete — answer the questions below or replay"
+                  : playedParts[activePart]
+                  ? "Stopped — press play to restart"
+                  : "Press play to begin Part " + activePart}
+              </p>
+            </div>
+
+            {/* Context hint */}
+            <div className="hidden lg:block text-right">
+              <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">{currentPart?.context}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Main content */}
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-3 min-h-0">
+          {/* Questions panel */}
+          <div className="lg:col-span-3 glass-card flex flex-col min-h-0 overflow-hidden">
+            {/* Part tabs */}
+            <div className="flex-shrink-0 border-b border-border/30 px-4 pt-3">
+              <div className="flex gap-1">
+                {[1, 2, 3, 4].map((part) => (
+                  <button
+                    key={part}
+                    onClick={() => handleSwitchPart(part)}
+                    className={cn(
+                      "px-4 py-2 text-sm rounded-t-lg transition-colors relative",
+                      activePart === part
+                        ? "text-accent font-medium bg-accent/5 border-b-2 border-accent"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    Part {part}
+                    {!isSubmitted && (
+                      <span className="ml-1 text-xs opacity-60">
+                        ({partCounts[part - 1]?.answered ?? 0}/{partCounts[part - 1]?.total ?? 0})
+                      </span>
+                    )}
+                    {completedParts[part] && !isSubmitted && (
+                      <span className="ml-1 text-green-500">✓</span>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <ScrollArea className="flex-1">
-              <div className="space-y-6 pr-4">
+              <div className="p-6 space-y-8">
+                {/* Transcript (after submission) */}
                 {isSubmitted && currentPart?.transcript && (
-                  <div className="p-4 bg-secondary/30 rounded-lg">
-                    <h3 className="font-medium mb-3 text-accent">Part {activePart} Transcript</h3>
-                    <p className="whitespace-pre-wrap font-serif text-foreground/90 leading-relaxed">
+                  <div className="p-5 rounded-2xl bg-secondary/30 border border-border/30">
+                    <h3 className="font-semibold mb-3 text-accent flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      Part {activePart} Transcript
+                    </h3>
+                    <p className="whitespace-pre-wrap text-foreground/90 leading-relaxed text-sm font-mono">
                       {currentPart.transcript}
                     </p>
                   </div>
                 )}
 
+                {/* Question groups */}
                 {currentPart?.question_groups.map((group, idx) => {
                   const matchingPool =
                     group.type === "matching"
                       ? group.options_pool ?? deriveMatchingPool(group)
                       : null;
                   return (
-                    <div key={idx}>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                        {group.title || QUESTION_TYPE_LABEL[group.type] || group.type}
-                      </h3>
-                      <p className="text-xs text-muted-foreground mb-4">{group.instruction}</p>
+                    <div key={idx} className="space-y-4">
+                      {/* Group header */}
+                      <div className="space-y-1">
+                        {group.title && (
+                          <h3 className="text-base font-semibold text-foreground uppercase tracking-wide">
+                            {group.title}
+                          </h3>
+                        )}
+                        <p className="text-sm font-medium text-muted-foreground">
+                          {QUESTION_TYPE_LABEL[group.type] || group.type} — Questions {group.question_range[0]}–{group.question_range[1]}
+                        </p>
+                        <p className="text-sm text-foreground/70 italic">{group.instruction}</p>
+                      </div>
 
+                      {/* Matching pool */}
                       {matchingPool && (
-                        <div className="mb-4 p-3 rounded-lg border border-border/50 bg-secondary/30">
-                          <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">
-                            Options
-                          </p>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
+                        <div className="p-4 rounded-2xl border border-border/40 bg-secondary/20">
+                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Options</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
                             {Object.entries(matchingPool).map(([letter, label]) => (
                               <p key={letter} className="text-sm text-foreground">
-                                <span className="font-medium text-accent mr-2">{letter}</span>
+                                <span className="font-bold text-accent mr-2">{letter}</span>
                                 {label}
                               </p>
                             ))}
@@ -1370,8 +1245,9 @@ export default function ListeningModule() {
                         </div>
                       )}
 
-                      <div className="space-y-4">
-                        {group.items.map(item => renderQuestion(item, group.type, matchingPool))}
+                      {/* Questions */}
+                      <div className="space-y-3">
+                        {group.items.map((item) => renderQuestion(item, group.type, matchingPool))}
                       </div>
                     </div>
                   );
@@ -1380,47 +1256,59 @@ export default function ListeningModule() {
             </ScrollArea>
           </div>
 
-          {/* Notes Sidebar */}
+          {/* Notes sidebar */}
           <div className="glass-card p-4 flex flex-col min-h-0">
-            <h2 className="text-lg font-light mb-4 flex-shrink-0 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex-shrink-0 flex items-center gap-2">
+              <FileText className="w-4 h-4" />
               Notes
             </h2>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Jot down keywords while listening..."
-              className="flex-1 resize-none bg-secondary/20 border-border/30"
+              placeholder={"Jot down keywords as you listen…\n\nUse this space for:\n• Key numbers\n• Names & places\n• Spelling clues\n• Answer guesses"}
+              className="flex-1 resize-none bg-transparent border-border/30 text-sm leading-relaxed placeholder:text-muted-foreground/40"
               disabled={isSubmitted}
             />
           </div>
         </div>
 
-        {/* Question Navigator */}
-        <div className="flex-shrink-0 mt-4 glass-card p-4">
-          <p className="text-xs text-muted-foreground mb-3">Questions</p>
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: currentTest.totalQuestions || 40 }, (_, i) => i + 1).map(num => {
+        {/* Question navigator */}
+        <div className="flex-shrink-0 glass-card p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Questions</p>
+            {!isSubmitted && (
+              <p className="text-xs text-muted-foreground">
+                {Object.keys(answers).length}/{currentTest.totalQuestions} answered
+              </p>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {Array.from({ length: currentTest.totalQuestions || 40 }, (_, i) => i + 1).map((num) => {
               const result = results[num.toString()];
               const isAnswered = answers[num.toString()];
-              let bgColor = "bg-secondary/50";
-              if (isSubmitted) {
-                bgColor = result?.correct ? "bg-green-500/20 border-green-500/50" : "bg-red-500/20 border-red-500/50";
-              } else if (isAnswered) {
-                bgColor = "bg-accent/20 border-accent/50";
-              }
-
+              const partForNum = Math.ceil(num / 10);
+              const isActivePart = partForNum === activePart;
               return (
                 <button
                   key={num}
                   onClick={() => {
-                    const part = Math.ceil(num / 10);
-                    handleSwitchPart(part);
+                    handleSwitchPart(partForNum);
                     setTimeout(() => {
-                      document.querySelector(`[data-question="${num}"]`)?.scrollIntoView({ behavior: 'smooth' });
-                    }, 0);
+                      document.querySelector(`[data-question="${num}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 50);
                   }}
-                  className={`w-8 h-8 rounded text-xs font-medium border transition-all ${bgColor}`}
+                  className={cn(
+                    "w-8 h-8 rounded-lg text-xs font-medium border transition-all",
+                    isSubmitted
+                      ? result?.correct
+                        ? "bg-green-500/20 border-green-500/50 text-green-700 dark:text-green-400"
+                        : "bg-red-500/20 border-red-500/50 text-red-700 dark:text-red-400"
+                      : isAnswered
+                      ? "bg-accent/20 border-accent/50 text-accent"
+                      : isActivePart
+                      ? "bg-secondary/60 border-border/50"
+                      : "bg-secondary/30 border-border/30 text-muted-foreground"
+                  )}
                 >
                   {num}
                 </button>
@@ -1429,13 +1317,13 @@ export default function ListeningModule() {
           </div>
         </div>
 
-        {/* Footer */}
+        {/* Submit */}
         {!isSubmitted && (
-          <div className="flex-shrink-0 mt-4 flex justify-end">
+          <div className="flex-shrink-0 flex justify-end">
             <Button
               onClick={handleSubmit}
               size="lg"
-              className="bg-accent hover:bg-accent/90"
+              className="bg-accent hover:bg-accent/90 px-8"
               disabled={!hasStarted}
             >
               Submit and Review
@@ -1443,12 +1331,6 @@ export default function ListeningModule() {
           </div>
         )}
       </div>
-
-      <UpgradeModal
-        isOpen={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        featureName="Listening"
-      />
     </DashboardLayout>
   );
 }
