@@ -1225,7 +1225,7 @@ export default function WritingModule() {
 
         {/* Practice View — split screen: left=content, right=AI chat */}
         {view === "practice" && selectedQuestion && (
-          <div className="flex flex-col xl:flex-row gap-6 items-start overflow-x-hidden">
+          <div className="flex flex-col xl:flex-row gap-6 items-start">
 
           {/* ── Left column: all practice content ── */}
           <div className="flex-1 min-w-0">
