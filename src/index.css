@@ -464,15 +464,24 @@
   animation-iteration-count: infinite;
 }
 
-/* Rocket flight — from bottom to top, looping */
-@keyframes rocket-soar {
-  0%   { transform: translateY(0px)     translateX(0px)   rotate(-10deg); opacity: 0;    }
-  7%   {                                                                    opacity: 0.65; }
-  88%  {                                                                    opacity: 0.65; }
-  100% { transform: translateY(-125vh)  translateX(-18px) rotate(-7deg);  opacity: 0;    }
+/* Rocket flight — diagonal bottom-left to top-right */
+@keyframes rocket-diagonal {
+  0%   { transform: translate(0,    0);             opacity: 0;    }
+  6%   {                                             opacity: 0.78; }
+  88%  {                                             opacity: 0.78; }
+  100% { transform: translate(92vw, -112vh);         opacity: 0;    }
 }
-.animate-rocket-soar {
-  animation: rocket-soar 14s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+.animate-rocket-diagonal {
+  animation: rocket-diagonal 18s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+}
+
+/* Moon glow pulse */
+@keyframes moon-glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 18px hsl(200 80% 70% / 0.28)) drop-shadow(0 0 60px hsl(200 80% 70% / 0.10)); }
+  50%       { filter: drop-shadow(0 0 30px hsl(200 80% 70% / 0.45)) drop-shadow(0 0 90px hsl(200 80% 70% / 0.18)); }
+}
+.animate-moon-glow {
+  animation: moon-glow-pulse 6s ease-in-out infinite;
 }
 
 /* Flame flicker */
@@ -565,9 +574,12 @@
   .aurora-orb {
     animation: none;
   }
-  .animate-rocket-soar {
+  .animate-rocket-diagonal {
     animation: none;
-    opacity: 0.5;
+    opacity: 0;
+  }
+  .animate-moon-glow {
+    animation: none;
   }
   .animate-flame {
     animation: none;
