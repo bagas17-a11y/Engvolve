@@ -164,7 +164,9 @@ export const WritingAIChat = ({ taskType, questionPrompt, userEssay, feedback }:
       });
 
       if (error) throw error;
-      setMessages(prev => [...prev, { role: "assistant", content: data.reply }]);
+      const reply = data?.data?.reply ?? data?.reply;
+      if (!reply) throw new Error("Empty response from tutor");
+      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
     } catch (err) {
       console.error("Writing tutor error:", err);
       setMessages(prev => [...prev, {
