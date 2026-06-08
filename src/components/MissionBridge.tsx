@@ -68,14 +68,15 @@ export const MissionBridge = () => {
           </div>
 
           <blockquote className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light leading-[1.3] mb-6">
-            <span className="text-foreground/90">The problem isn't effort.</span>
+            <span className="text-foreground/90">Most IELTS prep moves you an inch.</span>
             <br />
-            <span className="text-gradient">It's knowing what to fix.</span>
+            <span className="text-gradient">We move you a band.</span>
           </blockquote>
 
           <p className="text-base md:text-lg text-foreground/60 max-w-2xl mx-auto mb-16">
-            Most IELTS prep just gives you more exercises. We give you the exact
-            diagnosis — what's holding your band back, and a direct path out.
+            Stop grinding through practice sets and hoping something sticks.
+            IELTSinAja pinpoints exactly what's capping your score — then launches
+            you past it, band by band.
           </p>
         </div>
 
