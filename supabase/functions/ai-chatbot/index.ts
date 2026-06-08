@@ -100,23 +100,15 @@ serve(async (req) => {
       );
     }
 
-    const { messages, language } = validation.data;
+    const { messages, language, systemContext } = validation.data;
     const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
 
     if (!ANTHROPIC_API_KEY) {
       return internalError("AI service not configured", undefined, corsHeaders);
     }
 
-    const systemPrompt = language === 'id' ? SYSTEM_PROMPT_ID : SYSTEM_PROMPT_EN;
-
-    // Prepend system prompt to first user message for Claude API
-    const claudeMessages = [...messages];
-    if (claudeMessages.length > 0 && claudeMessages[0].role === 'user') {
-      claudeMessages[0] = {
-        ...claudeMessages[0],
-        content: `${systemPrompt}\n\n${claudeMessages[0].content}`
-      };
-    }
+    // systemContext overrides the default chatbot prompt (used by writing/speaking tutors)
+    const systemPrompt = systemContext ?? (language === 'id' ? SYSTEM_PROMPT_ID : SYSTEM_PROMPT_EN);
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -127,8 +119,9 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 512,
-        messages: claudeMessages,
+        max_tokens: 700,
+        system: systemPrompt,
+        messages,
       }),
     });
 

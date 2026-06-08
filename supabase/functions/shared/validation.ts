@@ -91,6 +91,7 @@ export const ChatbotMessageSchema = z.object({
 export const ChatbotSchema = z.object({
   messages: z.array(ChatbotMessageSchema).min(1).max(50),
   language: z.enum(['en', 'id']).default('en'),
+  systemContext: z.string().max(8000).optional(),
 });
 
 export type ChatbotInput = z.infer<typeof ChatbotSchema>;
