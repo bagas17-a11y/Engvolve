@@ -39,15 +39,15 @@ export const HeroSection = () => {
 
           {/* Main Heading */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light leading-[1.1] mb-6 animate-entrance delay-100">
-            Latihan IELTS lengkap.
+            Stuck at your band score?
             <br />
-            <span className="text-gradient">Feedback AI dalam detik.</span>
+            <span className="text-gradient">We know exactly why.</span>
           </h1>
 
           {/* Subheading */}
           <p className="text-lg md:text-xl text-foreground/75 max-w-2xl mx-auto mb-8 animate-entrance delay-200">
-            Practice Reading, Listening, Writing, and Speaking with instant AI band-score
-            feedback — then accelerate with a real 8.5+ scorer on Elite.
+            IELTSinAja's AI pinpoints the exact gaps holding your score back — then our
+            8.5+ alumni fix them with you, practice by practice.
           </p>
 
           {/* Trust bullets */}
