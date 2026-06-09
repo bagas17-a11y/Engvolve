@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { WritingCheatsheet } from "@/components/writing/WritingCheatsheet";
 import { SpeakingTutorial } from "@/components/speaking/SpeakingTutorial";
+import { ReadingTutorial } from "@/components/reading/ReadingTutorial";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -424,12 +425,12 @@ export default function EliteHubPage() {
                 <div>
                   <h2 className="text-lg font-semibold text-foreground mb-1">MudahinAja — Interactive Tutorials</h2>
                   <p className="text-sm text-muted-foreground">
-                    Choose a module to start your step-by-step tutorial. Writing is available now — more coming soon.
+                    Choose a module to start your step-by-step tutorial. Reading, Writing, and Speaking are available now — Listening coming soon.
                   </p>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {[
-                    { id: "reading", label: "Reading", icon: BookOpen, available: false },
+                    { id: "reading", label: "Reading", icon: BookOpen, available: true },
                     { id: "listening", label: "Listening", icon: Headphones, available: false },
                     { id: "writing", label: "Writing", icon: PenTool, available: true },
                     { id: "speaking", label: "Speaking", icon: Mic, available: true },
@@ -461,6 +462,16 @@ export default function EliteHubPage() {
                     </button>
                   ))}
                 </div>
+              </div>
+            ) : mudahinajaModule === "reading" ? (
+              <div className="space-y-6">
+                <button
+                  onClick={() => setMudahinajaModule(null)}
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back to modules
+                </button>
+                <ReadingTutorial />
               </div>
             ) : mudahinajaModule === "speaking" ? (
               <div className="space-y-6">
