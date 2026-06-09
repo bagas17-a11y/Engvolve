@@ -1469,23 +1469,7 @@ export default function ListeningModule() {
             </div>
           </div>
 
-          {isElite ? (
-            <Tabs defaultValue="practice" className="w-full">
-              <TabsList className="mb-6">
-                <TabsTrigger value="practice">Practice Tests</TabsTrigger>
-                <TabsTrigger value="cheatsheet">MudahInAja</TabsTrigger>
-              </TabsList>
-              <TabsContent value="practice" className="mt-0">{practiceContent}</TabsContent>
-              <TabsContent value="cheatsheet" className="mt-0">
-                <div className="glass-card p-6">
-                  <h2 className="text-lg font-semibold mb-4">Elite Cheatsheet & Hard Tips</h2>
-                  <ListeningCheatsheet />
-                </div>
-              </TabsContent>
-            </Tabs>
-          ) : (
-            practiceContent
-          )}
+          {practiceContent}
         </div>
       </DashboardLayout>
     );

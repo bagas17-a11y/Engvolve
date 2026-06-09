@@ -27,12 +27,19 @@ import {
   BookOpen,
   Layers,
   ChevronRight,
+  ChevronLeft,
   Clock,
   Sparkles,
   Crown,
   Lock,
   Calendar,
+  PenTool,
+  Headphones,
+  Mic,
+  BookMarked,
+  Construction,
 } from "lucide-react";
+import { WritingCheatsheet } from "@/components/writing/WritingCheatsheet";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -90,6 +97,8 @@ export default function EliteHubPage() {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [bookmarked, setBookmarked] = useState(false);
+  const [activeTab, setActiveTab] = useState("resources");
+  const [mudahinajaModule, setMudahinajaModule] = useState<string | null>(null);
 
   const isElite = profile?.subscription_tier === "elite";
 
@@ -209,13 +218,19 @@ export default function EliteHubPage() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="resources" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full justify-start overflow-x-auto border-b border-border rounded-none bg-transparent p-0 h-auto gap-0">
             <TabsTrigger
               value="resources"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-elite-gold data-[state=active]:text-elite-gold data-[state=active]:bg-transparent px-4 py-3"
             >
               Resources (The Study Hub)
+            </TabsTrigger>
+            <TabsTrigger
+              value="mudahinaja"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-elite-gold data-[state=active]:text-elite-gold data-[state=active]:bg-transparent px-4 py-3"
+            >
+              MudahinAja
             </TabsTrigger>
             <TabsTrigger
               value="mock-exams"
@@ -304,7 +319,108 @@ export default function EliteHubPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* MudahinAja card */}
+              <Card className="border-border bg-card md:col-span-2">
+                <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+                  <div className="w-10 h-10 rounded-lg bg-elite-gold/10 flex items-center justify-center">
+                    <Sparkles className="h-5 w-5 text-elite-gold" />
+                  </div>
+                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                    Interactive
+                  </Badge>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <CardTitle className="text-lg">MudahinAja — Step-by-Step Tutorials</CardTitle>
+                  <CardDescription>
+                    Interactive slide-based guides that walk you through exactly how to answer each module, sentence by sentence.
+                  </CardDescription>
+                  <div className="flex flex-wrap gap-4 pt-2">
+                    <button
+                      onClick={() => { setActiveTab("mudahinaja"); setMudahinajaModule(null); }}
+                      className="text-sm font-medium text-accent hover:underline inline-flex items-center gap-1"
+                    >
+                      Open MudahinAja
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
+          </TabsContent>
+
+          {/* MudahinAja Tab */}
+          <TabsContent value="mudahinaja" className="mt-8 focus-visible:outline-none">
+            {mudahinajaModule === null ? (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground mb-1">MudahinAja — Interactive Tutorials</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Choose a module to start your step-by-step tutorial. Writing is available now — more coming soon.
+                  </p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {[
+                    { id: "reading", label: "Reading", icon: BookOpen, available: false },
+                    { id: "listening", label: "Listening", icon: Headphones, available: false },
+                    { id: "writing", label: "Writing", icon: PenTool, available: true },
+                    { id: "speaking", label: "Speaking", icon: Mic, available: false },
+                  ].map((mod) => (
+                    <button
+                      key={mod.id}
+                      onClick={() => mod.available && setMudahinajaModule(mod.id)}
+                      className={cn(
+                        "flex flex-col items-center justify-center gap-3 p-6 rounded-xl border text-center transition-all",
+                        mod.available
+                          ? "border-elite-gold/30 bg-elite-gold/5 hover:bg-elite-gold/10 cursor-pointer"
+                          : "border-border bg-card opacity-50 cursor-not-allowed"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-12 h-12 rounded-full flex items-center justify-center",
+                        mod.available ? "bg-elite-gold/20" : "bg-secondary"
+                      )}>
+                        <mod.icon className={cn("w-6 h-6", mod.available ? "text-elite-gold" : "text-muted-foreground")} />
+                      </div>
+                      <div>
+                        <p className={cn("text-sm font-semibold", mod.available ? "text-foreground" : "text-muted-foreground")}>
+                          {mod.label}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {mod.available ? "Available now" : "Coming soon"}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : mudahinajaModule === "writing" ? (
+              <div className="space-y-6">
+                <button
+                  onClick={() => setMudahinajaModule(null)}
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back to modules
+                </button>
+                <WritingCheatsheet />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <button
+                  onClick={() => setMudahinajaModule(null)}
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back to modules
+                </button>
+                <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+                  <Construction className="w-12 h-12 text-muted-foreground/40" />
+                  <p className="text-lg font-medium text-muted-foreground">Coming Soon</p>
+                  <p className="text-sm text-muted-foreground/70 max-w-xs">
+                    The {mudahinajaModule.charAt(0).toUpperCase() + mudahinajaModule.slice(1)} tutorial is being built. Check back soon!
+                  </p>
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="mock-exams" className="mt-8 focus-visible:outline-none">

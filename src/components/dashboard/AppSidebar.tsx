@@ -43,22 +43,6 @@ const supportItems = [{
   title: "Elite Hub",
   path: "/dashboard/elite",
   icon: Crown
-}, {
-  title: "Materials",
-  path: "/dashboard/materials",
-  icon: Library
-}, {
-  title: "Revision Notes",
-  path: "/dashboard/revision-notes",
-  icon: FileText
-}, {
-  title: "Flashcards",
-  path: "/dashboard/flashcards",
-  icon: CreditCard
-}, {
-  title: "Consultation",
-  path: "/dashboard/consultation",
-  icon: MessageCircle
 }];
 export function AppSidebar() {
   const {

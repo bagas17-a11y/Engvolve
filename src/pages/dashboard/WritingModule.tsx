@@ -935,13 +935,7 @@ export default function WritingModule() {
         {/* Library View */}
         {view === "library" && (
           <>
-            {isElite ? (
-              <Tabs defaultValue="practice" className="w-full">
-                <TabsList className="mb-6">
-                  <TabsTrigger value="practice">Practice Questions</TabsTrigger>
-                  <TabsTrigger value="cheatsheet">MudahInAja</TabsTrigger>
-                </TabsList>
-                <TabsContent value="practice" className="mt-0">
+            <>
                   {/* Task Tabs */}
                   <Tabs value={activeTask} onValueChange={handleTaskChange} className="mb-6">
                     <TabsList className="grid w-full max-w-md grid-cols-2">
@@ -1075,27 +1069,6 @@ export default function WritingModule() {
                       ))
                     )}
                   </div>
-                </TabsContent>
-                <TabsContent value="cheatsheet" className="mt-0">
-                  <div className="glass-card p-6">
-                    <h2 className="text-lg font-semibold mb-4">Everything You Need for Writing Module (with an example)</h2>
-                    <WritingCheatsheet />
-                  </div>
-                </TabsContent>
-              </Tabs>
-            ) : (
-              <>
-                {/* Task Tabs */}
-                <Tabs value={activeTask} onValueChange={handleTaskChange} className="mb-6">
-                  <TabsList className="grid w-full max-w-md grid-cols-2">
-                    <TabsTrigger value="Task 1" className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
-                      Task 1 (Report)
-                    </TabsTrigger>
-                    <TabsTrigger value="Task 2" className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
-                      Task 2 (Essay)
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
 
                 {/* Filters: difficulty, graph type, done */}
                 <div className="flex items-center gap-3 mb-4 flex-wrap">
@@ -1218,8 +1191,7 @@ export default function WritingModule() {
                     ))
                   )}
                 </div>
-              </>
-            )}
+            </>
           </>
         )}
 
