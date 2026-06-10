@@ -711,14 +711,24 @@ function Slide5MultipleChoice({ onComplete }: { onComplete: () => void }) {
           Check Answers
         </button>
       ) : (
-        <div className={cn("rounded-xl p-4 text-sm space-y-1.5",
-          q1 === q1Correct && q2 === q2Correct
-            ? "bg-green-50 border border-green-200 text-green-800"
-            : "bg-amber-50 border border-amber-200 text-amber-800"
-        )}>
-          <p className="font-semibold">{q1 === q1Correct && q2 === q2Correct ? "Both correct!" : "Review:"}</p>
-          <p>Q1: Wind turbines (B) — Lisa first said solar panels, then settled on wind turbines.</p>
-          <p>Q2: Reduce carbon emissions (A) — Tom assumed cost reduction, but Lisa corrected him.</p>
+        <div className="space-y-3">
+          <div className={cn("rounded-xl p-4 text-sm space-y-1.5",
+            q1 === q1Correct && q2 === q2Correct
+              ? "bg-green-50 border border-green-200 text-green-800"
+              : "bg-amber-50 border border-amber-200 text-amber-800"
+          )}>
+            <p className="font-semibold">{q1 === q1Correct && q2 === q2Correct ? "Both correct!" : "Review:"}</p>
+            <p>Q1: Wind turbines (B) — Lisa first said solar panels, then settled on wind turbines.</p>
+            <p>Q2: Reduce carbon emissions (A) — Tom assumed cost reduction, but Lisa corrected him.</p>
+          </div>
+          {!(q1 === q1Correct && q2 === q2Correct) && (
+            <button
+              onClick={() => { setConfirmed(false); setQ1(null); setQ2(null); }}
+              className="text-sm font-medium text-sky-600 hover:underline"
+            >
+              Try again
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -816,12 +826,22 @@ function Slide6NoteCompletion({ onComplete }: { onComplete: () => void }) {
           Check Answers
         </button>
       ) : (
-        <div className={cn("rounded-xl p-3 text-sm",
-          numCorrect >= 3 ? "bg-green-50 border border-green-200 text-green-800" : "bg-amber-50 border border-amber-200 text-amber-800"
-        )}>
-          {numCorrect >= 3
-            ? `${numCorrect}/4 correct — great work! Section 4 is the hardest section; missing one is still strong.`
-            : `${numCorrect}/4 — press Play again and trace exactly where each answer appeared.`}
+        <div className="space-y-3">
+          <div className={cn("rounded-xl p-3 text-sm",
+            numCorrect >= 3 ? "bg-green-50 border border-green-200 text-green-800" : "bg-amber-50 border border-amber-200 text-amber-800"
+          )}>
+            {numCorrect >= 3
+              ? `${numCorrect}/4 correct — great work! Section 4 is the hardest section; missing one is still strong.`
+              : `${numCorrect}/4 — press Play again and trace exactly where each answer appeared.`}
+          </div>
+          {numCorrect < 3 && (
+            <button
+              onClick={() => { setChecked(false); setResults({}); setAnswers({}); }}
+              className="text-sm font-medium text-sky-600 hover:underline"
+            >
+              Try again
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -947,12 +967,22 @@ function Slide7MapLabeling({ onComplete }: { onComplete: () => void }) {
           Check Map Labels
         </button>
       ) : (
-        <div className={cn("rounded-xl p-3 text-sm",
-          numCorrect >= 3 ? "bg-green-50 border border-green-200 text-green-800" : "bg-amber-50 border border-amber-200 text-amber-800"
-        )}>
-          {numCorrect >= 3
-            ? `${numCorrect}/4 correct. Key: anchor at the entrance, then trace each directional word one step at a time.`
-            : `${numCorrect}/4 — press Play again and follow each direction from the entrance. Correct answers shown in green.`}
+        <div className="space-y-3">
+          <div className={cn("rounded-xl p-3 text-sm",
+            numCorrect >= 3 ? "bg-green-50 border border-green-200 text-green-800" : "bg-amber-50 border border-amber-200 text-amber-800"
+          )}>
+            {numCorrect >= 3
+              ? `${numCorrect}/4 correct. Key: anchor at the entrance, then trace each directional word one step at a time.`
+              : `${numCorrect}/4 — press Play again and follow each direction from the entrance. Correct answers shown in green.`}
+          </div>
+          {numCorrect < 3 && (
+            <button
+              onClick={() => { setChecked(false); setResults({}); setSel({}); }}
+              className="text-sm font-medium text-sky-600 hover:underline"
+            >
+              Try again
+            </button>
+          )}
         </div>
       )}
     </div>
