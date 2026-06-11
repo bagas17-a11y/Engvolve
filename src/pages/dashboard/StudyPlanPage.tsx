@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -9,6 +10,7 @@ import {
   ChevronDown, CheckCircle2, Circle, Clock, ArrowRight,
   Crown, BookOpen, Headphones, PenTool, Mic, Brain,
   Home, ChevronRight, Target, Sparkles, Trophy, Lock,
+  X, Maximize2,
 } from "lucide-react";
 import { buildWhatsAppLink } from "@/lib/contact";
 import {
@@ -27,7 +29,11 @@ interface VocabExample {
 
 interface VocabItem {
   term: string;
-  replaces?: string; // weaker word this upgrades
+  replaces?: string;
+  why?: string;
+  pattern?: string;
+  mistake?: string;
+  practice?: string;
   examples: VocabExample[];
 }
 
@@ -277,52 +283,77 @@ const POLISHING_PLAN: TierPlan = {
     {
       week: 1, theme: "Precision Vocabulary", focus: "Vocabulary",
       color: "blue",
-      rationale: "The difference between Band 7 and Band 8 vocabulary is not more words — it is precision and collocation. Replace overused adjectives, add hedging language that signals critical thinking, and master nominalization. These three upgrades affect every sentence you write.",
+      rationale: "The difference between Band 7 and Band 8 vocabulary is not more words — it is precision and collocation. Replace overused adjectives with words that carry exact meaning, add hedging language that signals critical thinking, and master nominalization. These three upgrades affect every sentence you write and hit every lexical marking criterion simultaneously.",
       tasks: [
         {
           id: "p-w1-t1",
           label: "Upgrade: Replace Your 5 Most Overused Words",
-          description: "Each word below is almost certainly in every essay you write. Use the slideshow to see the precise replacement and how it fits naturally in a Task 2 sentence and a Speaking Part 3 answer.",
-          minutes: 25,
+          description: "Open the full lesson to learn not just what replaces each weak word, but WHY it earns marks, HOW to collocate it correctly, what mistake to avoid, and a practice sentence to write before your next essay.",
+          minutes: 30,
           vocabList: [
             {
               term: "beneficial / advantageous",
               replaces: "good",
+              why: "Band 8 Lexical Resource requires 'uncommon lexical items used with awareness of style and collocation.' 'Good' appears in Band 4 writing — it carries no discriminatory weight because it's used by everyone. 'Beneficial' collocates with impact, effect, outcomes, and consequences. 'Advantageous' collocates with positions, situations, and strategies. Knowing which word pairs with which noun is exactly the collocation awareness the examiner is looking for.",
+              pattern: "[Noun phrase] is undeniably / particularly / arguably beneficial for [group, cause, or goal]\n[Policy / approach] is advantageous in [context], particularly when [condition]",
+              mistake: "Don't write 'very beneficial' — that reverts to Band 5 intensification. Use 'undeniably beneficial', 'arguably advantageous', or 'particularly beneficial' instead. The adverb before these words is where the extra precision lives.",
+              practice: "Upgrade this sentence: 'It is good for governments to invest in renewable energy.' Use 'beneficial' or 'advantageous' with the correct collocating adverb and add a reason clause that begins with 'particularly when' or 'especially given'.",
               examples: [
-                { label: "Writing Task 2", sentence: "Stricter environmental regulations are undeniably beneficial for future generations, even if they impose short-term economic costs." },
-                { label: "Speaking Part 3", sentence: "I think it's highly advantageous for students to study abroad, since exposure to different cultures builds real independence." },
+                { label: "Writing Task 2", sentence: "Stricter environmental regulations are undeniably beneficial for future generations, even if they impose short-term economic costs on industry." },
+                { label: "Speaking Part 3", sentence: "I think studying abroad is highly advantageous for students, since exposure to different educational systems builds genuine intellectual adaptability." },
+                { label: "Writing Task 2 (essay opener)", sentence: "While technological innovation has proved beneficial in countless respects, its impact on employment equity demands considerably more scrutiny." },
               ],
             },
             {
               term: "detrimental / adverse",
               replaces: "bad",
+              why: "'Detrimental' and 'adverse' are not interchangeable — and knowing the difference is Band 8. 'Detrimental' implies causing damage to something that was functioning (detrimental impact, detrimental effect, detrimental consequences). 'Adverse' implies unfavourable external conditions imposed on something (adverse effects, adverse conditions, adverse circumstances). Using each with its correct collocating noun demonstrates the collocational precision the Band 8 Lexical Resource descriptor demands.",
+              pattern: "have a detrimental impact / effect / consequence on [noun]\nadversely affect [noun] (particularly / significantly / profoundly)\nthe adverse effects / conditions / circumstances of [noun]",
+              mistake: "'Adverse' is an adjective only — 'this adversed the situation' is a grammatical error. When you need a verb, use 'adversely affect': 'social media adversely affects adolescent mental health.' Also, don't confuse 'adverse' (unfavourable) with 'averse' (unwilling): 'I am not averse to change' is correct; 'I am not adverse to change' is wrong.",
+              practice: "Rewrite this sentence twice: 'Too much fast food is bad for children's health.' First using 'detrimental' with the right collocating noun. Then again using 'adversely' as an adverb modifying a verb. Both rewrites should be more specific than the original.",
               examples: [
-                { label: "Writing Task 2", sentence: "Excessive screen time has a detrimental impact on children's social development and academic performance." },
-                { label: "Speaking Part 3", sentence: "The adverse effects of social media on mental health are well-documented, particularly among teenagers." },
+                { label: "Writing Task 2", sentence: "Excessive screen time has a detrimental impact on children's cognitive development, particularly their capacity for sustained concentration." },
+                { label: "Speaking Part 3", sentence: "The adverse effects of rapid urbanisation — overcrowding, pollution, and the erosion of community identity — are often underestimated by policymakers." },
+                { label: "Writing Task 2 (body paragraph)", sentence: "This trend has adversely affected low-income households to a disproportionate degree, compounding existing inequalities rather than alleviating them." },
               ],
             },
             {
               term: "pivotal / paramount",
               replaces: "important",
+              why: "'Pivotal' means functioning as the central point on which everything else turns — it implies structural centrality, not just significance. 'Paramount' means above all else in importance or authority. Both are tested collocations: you 'play a pivotal role', something is 'of paramount importance'. This is precisely what the Band 8 Lexical Resource criterion calls 'awareness of style and collocation' — not just knowing a synonym, but knowing the exact verb or noun it pairs with.",
+              pattern: "[Noun phrase] plays a pivotal role in [process / development / change]\n[Noun phrase] is of paramount importance to [stakeholder / outcome]\n[Consideration] remains paramount when [decision context]",
+              mistake: "Don't use 'paramount role' — you play a pivotal role, not a paramount role. 'Paramount' belongs with nouns like 'importance', 'concern', and 'consideration'. Also avoid 'most pivotal' — pivotal already implies centrality, so the superlative is redundant and will make you sound uncertain about how the word works.",
+              practice: "Write two sentences for a Task 2 essay about education policy: one using 'pivotal' with its correct collocating verb, one using 'paramount' with its correct collocating noun. Neither sentence should contain the word 'important'.",
               examples: [
-                { label: "Writing Task 2", sentence: "Access to quality education is paramount in addressing long-term economic inequality." },
-                { label: "Speaking Part 1", sentence: "Family plays a pivotal role in shaping a person's values from an early age." },
+                { label: "Writing Task 2", sentence: "Access to quality early-childhood education plays a pivotal role in breaking cycles of intergenerational poverty." },
+                { label: "Writing Task 2 (thesis)", sentence: "Transparency in governance is of paramount importance if democratic institutions are to retain public trust in the long term." },
+                { label: "Speaking Part 1", sentence: "Family plays a pivotal role in shaping a person's core values — the habits and beliefs formed in childhood tend to persist throughout adult life." },
               ],
             },
             {
               term: "considerably / markedly",
               replaces: "very",
+              why: "These adverbs do two things simultaneously: they intensify your adjective or verb AND signal academic register. They collocate naturally with verbs of change (increased, decreased, improved, declined, deteriorated) and with comparative adjectives (higher, lower, faster, slower, more effective). This makes them essential in Task 1 data description AND Task 2 argument — two completely different writing contexts — which is the range the Band 8 criterion rewards.",
+              pattern: "[Subject] has increased / decreased / improved considerably [over period]\nconsiderably / markedly [comparative adjective] than [comparator]\nthe rate of [noun] declined markedly [between X and Y]",
+              mistake: "Don't use 'considerably' with absolute adjectives that cannot be graded: 'considerably unique', 'considerably essential', or 'considerably impossible' are grammatically wrong. These adverbs only work with gradable adjectives (bigger, faster, more effective) and change verbs (risen, fallen, improved). If the adjective describes something that either is or isn't, use a different intensifier.",
+              practice: "Upgrade this Task 1 sentence: 'The number of people using smartphones went up very quickly between 2010 and 2020, and many more people now own one than before.' Use 'considerably' or 'markedly' correctly and remove any redundancy.",
               examples: [
-                { label: "Writing Task 2", sentence: "Urban populations have grown considerably faster than rural areas over the past three decades." },
-                { label: "Writing Task 1", sentence: "Renewable energy output increased markedly between 2010 and 2020, rising from 18% to 34% of total generation." },
+                { label: "Writing Task 2", sentence: "Urban populations have grown considerably faster than rural areas over the past three decades, placing enormous pressure on infrastructure and public services." },
+                { label: "Writing Task 1 (line graph)", sentence: "Renewable energy output increased markedly between 2010 and 2020, rising from 18% to 34% of total generation — the sharpest decade-on-decade rise since records began." },
+                { label: "Speaking Part 3", sentence: "The cost of university education has risen considerably since my parents' generation, which I think explains why student debt has become such a politically charged issue." },
               ],
             },
             {
               term: "a growing body of opinion suggests",
               replaces: "people think",
+              why: "'People think' commits two Band 4 errors simultaneously: a vague unquantified subject ('people') and a weak cognitive verb ('think'). The replacement corrects both. 'A growing body of opinion suggests' signals three things at once: (1) you're referencing a trend in public or academic opinion, not just personal feeling, (2) the noun phrase subject shows syntactic sophistication, and (3) 'suggests' rather than 'shows' or 'proves' is the correct epistemic hedge for an argumentative essay — indicating inference rather than certainty.",
+              pattern: "A growing body of opinion suggests that [complete arguable clause]\nAn increasing body of evidence indicates / demonstrates that [clause]\nA substantial body of research has shown that [clause with specific domain]",
+              mistake: "This phrase references collective trend, not specific individuals or studies. Don't write 'A growing body of opinion suggests Einstein believed...' — it's logically incoherent for a named individual. For specific sources, use 'Research conducted by [institution] indicates...' or 'Studies published in [field] have demonstrated...' Keep 'growing body of opinion' for broad social, economic, or cultural claims.",
+              practice: "Replace the weak subject and verb in this sentence: 'Many people think that nuclear energy should be reconsidered as part of a national clean energy strategy.' Use the full replacement phrase and adjust any grammar that needs to change as a result.",
               examples: [
-                { label: "Writing Task 2", sentence: "A growing body of opinion suggests that remote working will permanently reshape urban planning and commuter infrastructure." },
-                { label: "Speaking Part 3", sentence: "A growing body of opinion suggests that traditional schooling is no longer sufficient preparation for a technology-driven economy." },
+                { label: "Writing Task 2 (body paragraph)", sentence: "A growing body of opinion suggests that remote working will permanently reshape urban planning and commuter infrastructure, with implications for commercial real estate that are only beginning to emerge." },
+                { label: "Writing Task 2 (introduction)", sentence: "An increasing body of evidence indicates that biodiversity loss poses as significant a threat to human welfare as climate change itself, yet it commands a fraction of the political attention." },
+                { label: "Speaking Part 3", sentence: "A growing body of opinion suggests that traditional schooling is no longer sufficient preparation for a technology-driven economy — I'd add that the pace of change is the real problem, not the schools themselves." },
               ],
             },
           ],
@@ -330,49 +361,79 @@ const POLISHING_PLAN: TierPlan = {
         {
           id: "p-w1-t2",
           label: "Hedging Language: 6 Phrases That Signal Band 8 Thinking",
-          description: "Hedging phrases show the examiner you understand nuance — a key Band 8 quality. Each phrase below softens an argument without weakening your position. Use the slideshow to see each one in context.",
-          minutes: 20,
+          description: "Hedging is not weakness — it is the signal of critical thinking. Open the full lesson to learn where each phrase belongs in an essay, what mistake collapses its effect, and how to write the sentence that follows it.",
+          minutes: 25,
           vocabList: [
             {
               term: "It could be argued that…",
+              why: "This phrase is the most precise tool for introducing a counter-argument in Band 8 writing. It signals that you are actively considering the opposing view rather than ignoring it — which is exactly what the Band 8 Task Response descriptor ('well-developed ideas with relevant extended support') requires. Crucially, it frames the opposing view as arguable but not settled, which allows your subsequent refutation to carry more logical weight.",
+              pattern: "It could be argued that [opposing claim]; however / nevertheless, [your refutation with reason or evidence].\nIt could be argued that [opposing view], yet this position fails to account for [counter-evidence or logical gap].",
+              mistake: "Never hedge your own central thesis. If your position is 'technology harms education', do not write 'It could be argued that technology harms education.' This signals to the examiner that you are not committed to your own position. Hedge only the opposing view, then refute it decisively in the same sentence or the next.",
+              practice: "Essay position: 'Governments should make university education free.' Write one sentence using 'It could be argued that...' to introduce the strongest possible counter-argument. Then write one more sentence that refutes it using 'however' and a specific reason.",
               examples: [
-                { label: "Writing Task 2 (counter-argument)", sentence: "It could be argued that stricter gun laws infringe on individual freedoms; however, public safety must ultimately take precedence." },
-                { label: "Speaking Part 3", sentence: "It could be argued that universities are losing relevance, though I personally think they still provide irreplaceable social learning." },
+                { label: "Writing Task 2 (body paragraph)", sentence: "It could be argued that stricter gun legislation infringes upon individual freedoms guaranteed by constitutional law; however, the overwhelming evidence linking firearm availability to homicide rates suggests that public safety must ultimately take precedence." },
+                { label: "Writing Task 2 (rebuttal)", sentence: "It could be argued that economic growth and environmental protection are fundamentally incompatible objectives, yet this position fails to account for the growing body of evidence that sustainable industries can generate employment at rates comparable to fossil-fuel sectors." },
+                { label: "Speaking Part 3", sentence: "It could be argued that universities are becoming less relevant given the rise of online learning — I understand that view, though I personally think the social and networking dimensions of university are still irreplaceable." },
               ],
             },
             {
               term: "Evidence suggests that…",
+              why: "This phrase shifts your essay from personal assertion to evidential claim — the register academic discourse requires. Compared to the overused 'Research shows that', 'Evidence suggests that' is both more formally appropriate and correctly hedged: 'suggests' rather than 'proves' or 'demonstrates' signals inference rather than certainty, which is the correct epistemic stance when you are not citing a specific source (as in an IELTS essay). It also elevates any claim that follows it by implying it is grounded in observable data.",
+              pattern: "Evidence suggests that [specific, debatable, or counterintuitive claim].\nThe available evidence strongly suggests that [claim], particularly when one considers [qualifier].\nEvidence from [domain: psychology / economics / public health] suggests that [claim], though [appropriate caveat].",
+              mistake: "Do not follow 'Evidence suggests that' with an obvious or universally accepted claim: 'Evidence suggests that exercise improves health' undermines the phrase because no reader needed evidence to believe it. The claim after this phrase should be specific, somewhat surprising, or contestable — something that genuinely benefits from evidentiary framing.",
+              practice: "Write a body paragraph topic sentence for a Task 2 essay about the effects of social media on political participation. Use 'Evidence suggests that...' The claim must be specific and debatable — not a generalisation that everyone already accepts.",
               examples: [
-                { label: "Writing Task 2 (body paragraph)", sentence: "Evidence suggests that children who read for pleasure outperform their peers academically across all subjects, not just literacy." },
-                { label: "Speaking Part 3", sentence: "Evidence suggests that hybrid working models actually increase productivity, contrary to initial employer concerns." },
+                { label: "Writing Task 2 (body)", sentence: "Evidence suggests that children who read for pleasure outperform their peers academically across all subjects — not merely literacy — by a margin that persists into secondary and tertiary education." },
+                { label: "Writing Task 2 (counter-intuitive claim)", sentence: "Evidence suggests that hybrid working models increase productivity in knowledge-sector roles, contrary to initial employer concerns about supervision and collaboration." },
+                { label: "Speaking Part 3", sentence: "Evidence suggests that countries with the highest levels of income equality also score highest on measures of social trust and civic participation — which raises an interesting question about what drives political engagement." },
               ],
             },
             {
               term: "This is not to say that…",
+              why: "This phrase performs the most sophisticated rhetorical move in academic writing: partial concession with retained position. You acknowledge a legitimate dimension of the opposing view without abandoning your argument. The Band 8 Coherence and Cohesion criterion rewards 'clear overall progression' — this phrase allows your argument to advance while acknowledging nuance, which prevents it from feeling dogmatic or one-sided. It is also structurally elegant: it adds a qualification in one clause rather than requiring a full paragraph for the concession.",
+              pattern: "This is not to say that [legitimate concession or exception]; rather / merely, [your actual claim or the qualifier that restores your position].\n[State your main point]. This is not to say that [exception], but [reason your central claim still holds in the general case].",
+              mistake: "Do not use this phrase to open a paragraph — it is a mid-argument move. It should appear after you have established and developed a position and now wish to qualify it. Starting a paragraph with 'This is not to say that...' sounds structurally disorganised because the reader does not yet know what 'this' refers to.",
+              practice: "Complete this argument: 'Technology has undeniably made communication more efficient and accessible across the globe.' Add one sentence using 'This is not to say that...' that concedes a genuine limitation, then a final sentence that explains why your original point still stands despite that limitation.",
               examples: [
-                { label: "Writing Task 2 (concession)", sentence: "This is not to say that economic growth is irrelevant — merely that it cannot be pursued at the expense of environmental sustainability." },
-                { label: "Speaking Part 3", sentence: "This is not to say that tradition has no value, but rather that it must adapt alongside societal change." },
+                { label: "Writing Task 2 (qualification)", sentence: "This is not to say that economic growth is irrelevant — merely that it cannot be pursued at the expense of environmental sustainability without ultimately undermining the prosperity it seeks to create." },
+                { label: "Writing Task 2 (nuanced concession)", sentence: "Globalisation has demonstrably raised living standards in many developing nations. This is not to say that its benefits have been equitably distributed, but that the solution lies in redistribution policy rather than in reversing economic integration." },
+                { label: "Speaking Part 3", sentence: "I do think social media has made political participation more accessible. This is not to say it has made it more substantive — a retweet is not the same as an informed vote." },
               ],
             },
             {
               term: "To varying degrees…",
+              why: "This phrase signals that your claim applies differently across different contexts, groups, or cases — which is the hallmark of nuanced thinking at Band 8 level. Blanket statements ('all governments should invest in education') are a Band 6 quality; qualified positions ('most governments have, to varying degrees, acknowledged the link between education investment and economic growth') are Band 8. The phrase also functions as an effective discourse marker at the start of a sentence, signalling analytical sophistication before the main clause.",
+              pattern: "To varying degrees, [all / most / many] [subject] have [taken action / acknowledged position / experienced effect].\n[Noun phrase] affects [group] to varying degrees, depending on [determining factor].\nWhile [claim holds broadly], the extent to which it applies varies considerably across [contexts / regions / demographics].",
+              mistake: "Do not use 'to varying degrees' when the claim admits no genuine variation. 'To varying degrees, all humans require oxygen' is wrong because there is no variation. Reserve it for claims where real contextual differences exist — policy responses, social impacts, economic consequences, or cultural attitudes across different groups or nations.",
+              practice: "Write a sentence using 'to varying degrees' about the impact of artificial intelligence on employment across different sectors of the economy. Make sure the variation you're implying is genuine and worth noting — not just 'some sectors more than others' with no specifics.",
               examples: [
-                { label: "Writing Task 2 (qualification)", sentence: "To varying degrees, all developed nations have implemented some form of carbon pricing mechanism over the last decade." },
-                { label: "Speaking Part 3", sentence: "To varying degrees, people across different cultures place importance on collectivism over individual achievement." },
+                { label: "Writing Task 2 (body)", sentence: "To varying degrees, all developed nations have implemented some form of carbon pricing mechanism over the last decade, though the political will to enforce meaningful emissions targets remains conspicuously uneven." },
+                { label: "Writing Task 2 (analysis)", sentence: "Automation affects workers to varying degrees depending on the cognitive complexity of their roles — those in manual, repetitive positions face the most immediate displacement, while highly specialised professionals remain relatively insulated." },
+                { label: "Speaking Part 3", sentence: "I think globalisation has benefited people to varying degrees — it's created enormous wealth, but that wealth has concentrated at the top in ways that many communities haven't felt at all." },
               ],
             },
             {
               term: "One might contend that…",
+              why: "'One might contend' is formally distanced in a way that 'some people argue' is not. 'One' is impersonal and academic; 'contend' implies deliberate, sustained argumentation rather than casual opinion. Together, they allow you to introduce an opposing view with formal intellectual respect — treating it as a serious position worthy of engagement rather than a strawman — before you dismantle it. This signals the Band 8 quality of genuine critical engagement with the material.",
+              pattern: "One might contend that [opposing position]; [in reality / however / upon closer examination], [your counter with evidence or logical reasoning].\nOne might contend that [view], yet this perspective overlooks [critical factor or evidence that changes the analysis].",
+              mistake: "Do not use 'One might contend' to introduce your own view — it signals a position you are presenting in order to qualify or refute it. If you write 'One might contend that climate change is the defining challenge of our era' and then agree with it throughout the paragraph, you have created confusion about where your argument actually stands.",
+              practice: "Write a complete sentence for a Task 2 essay arguing that 'the internet has done more harm than good': Start with 'One might contend that...' to introduce the strongest pro-internet counter-argument. End the sentence with 'however' or 'yet this perspective fails to account for' and a specific refutation.",
               examples: [
-                { label: "Writing Task 2 (introducing other view)", sentence: "One might contend that automation leads to unemployment; in reality, history shows it tends to shift rather than eliminate work." },
-                { label: "Speaking Part 3", sentence: "One might contend that young people are less politically engaged, though online activism suggests otherwise." },
+                { label: "Writing Task 2 (counter-argument)", sentence: "One might contend that automation inevitably leads to mass unemployment; in reality, historical precedent consistently shows that technological disruption tends to shift rather than eliminate employment, creating new categories of work that were previously unimaginable." },
+                { label: "Writing Task 2 (nuanced refutation)", sentence: "One might contend that stricter immigration controls protect domestic employment — yet this perspective overlooks the significant contribution migrant labour makes to sectors that local workforces are structurally unwilling to fill." },
+                { label: "Speaking Part 3", sentence: "One might contend that young people are less politically engaged than previous generations — though I'd argue the form of engagement has changed more than the level of it, with online activism replacing doorstep canvassing." },
               ],
             },
             {
               term: "It remains to be seen whether…",
+              why: "This phrase signals intellectual honesty about genuine uncertainty — an essential quality in Band 8 academic writing. Overconfident conclusions ('It is clear that AI will solve all our problems') sound uncritical. 'It remains to be seen whether' acknowledges that the future is genuinely open, which is the correct epistemic position for claims about emerging technology, policy outcomes, or long-term social change. Used in a conclusion, it demonstrates that you can synthesise an argument without overclaiming — a key Band 8 distinction.",
+              pattern: "It remains to be seen whether [genuinely uncertain future outcome or contested claim].\nWhile [current observable trend is clear], it remains to be seen whether [the longer-term extrapolation or policy implication will hold].\n[Conclude your argument]. Ultimately, it remains to be seen whether [the open question your essay has raised but cannot fully resolve].",
+              mistake: "Do not use this phrase for things that are already known or empirically settled. 'It remains to be seen whether the Second World War ended in 1945' is obviously wrong. Use it only for claims about genuinely open futures: the long-term social effects of AI, the political viability of a policy, whether a current trend will continue or reverse. The uncertainty must be real, not manufactured.",
+              practice: "Write a conclusion sentence for a Task 2 essay about artificial intelligence in the workplace that uses 'It remains to be seen whether...' The phrase should introduce a genuinely open question that your essay's argument has raised — not just paraphrase the thesis in a cautious tone.",
               examples: [
-                { label: "Writing Task 2 (conclusion)", sentence: "It remains to be seen whether artificial intelligence will ultimately create more jobs than it displaces." },
-                { label: "Speaking Part 3", sentence: "It remains to be seen whether electric vehicles will achieve the price parity needed for mass adoption within this decade." },
+                { label: "Writing Task 2 (conclusion)", sentence: "It remains to be seen whether artificial intelligence will ultimately create more jobs than it displaces, but the urgency of preparing the current workforce for that transition is beyond dispute." },
+                { label: "Writing Task 2 (qualified prediction)", sentence: "While the short-term economic gains from offshore manufacturing are well-documented, it remains to be seen whether the long-term erosion of domestic industrial capacity will prove an acceptable trade-off for developed economies." },
+                { label: "Speaking Part 3", sentence: "I think the shift to remote work has already changed cities in ways we're only beginning to understand. It remains to be seen whether office culture as we knew it will ever fully recover, or whether we're looking at a permanent structural shift." },
               ],
             },
           ],
@@ -380,7 +441,7 @@ const POLISHING_PLAN: TierPlan = {
         {
           id: "p-w1-t3",
           label: "Writing Practice: Apply All Upgrades in One Essay",
-          description: "Submit a Task 2 with these non-negotiable rules: no 'good', 'bad', 'important', or 'very'; at least 3 hedging phrases; at least one nominalized structure (e.g. 'the failure of governments to act' instead of 'governments do not act').",
+          description: "Submit a Task 2 with these non-negotiable rules: no 'good', 'bad', 'important', or 'very'; at least 3 hedging phrases from the lesson above; at least one nominalized structure (e.g. 'the failure of governments to act' instead of 'governments do not act'). Count each rule before submitting.",
           resourcePath: "/dashboard/writing",
           resourceLabel: "Open Writing Module",
           minutes: 45,
@@ -390,47 +451,72 @@ const POLISHING_PLAN: TierPlan = {
     {
       week: 2, theme: "Task 1 Mastery", focus: "Writing",
       color: "green",
-      rationale: "At Band 7 you describe data accurately. At Band 8 you select only the most significant patterns and describe them with pinpoint language. The overview is one precise sentence per major trend; the body groups data by pattern, not by order. This week you perfect both.",
+      rationale: "At Band 7 you describe data accurately. At Band 8 you select only the most significant patterns and describe them with pinpoint language — knowing what to leave out is as important as knowing what to include. The overview is one precise sentence per major trend; the body groups data by pattern, not by column order. Open each lesson to learn the exact formula, what to avoid, and a practice sentence to write before your submission.",
       tasks: [
         {
           id: "p-w2-t1",
           label: "Data Language: High-Precision Comparison Phrases",
-          description: "Replace vague phrases like 'was more than' or 'went up a lot' with precise academic language. Use the slideshow to see each phrase in an authentic Task 1 context.",
-          minutes: 20,
+          description: "Open the full lesson to learn the exact grammatical pattern, what each phrase implies analytically (not just what it means), the most common error, and a practice description to write before your submission.",
+          minutes: 25,
           vocabList: [
             {
               term: "constituted approximately / accounted for roughly",
+              why: "These verb phrases replace two weak constructions simultaneously: the vague 'was about' and the passive 'represented around'. 'Constituted' implies composition — X was made up of Y. 'Accounted for' implies proportional contribution — X explained or made up Y of the whole. Both signal Band 8 data description precision because they don't just report a number; they embed that number in a relationship to the total, which is the analytical move examiners reward.",
+              pattern: "[Category] constituted approximately [X%] of [total noun], making it [superlative / comparative claim].\n[Category] accounted for roughly [X%] of [total], [compared to / while / up from] [comparator figure or time point].",
+              mistake: "Don't use 'constituted' with absolute counts — it works with proportions and percentages. 'Oil constituted 3 million barrels' is wrong; 'oil constituted approximately 68% of total consumption' is correct. For absolute figures, use 'stood at', 'reached', or 'totalled' instead.",
+              practice: "Describe this data in one sentence using 'constituted approximately' or 'accounted for roughly': In 2010, manufacturing made up 35% of Country A's GDP — the largest single sector. Include a comparative clause.",
               examples: [
-                { label: "Task 1 (pie chart)", sentence: "Oil and gas constituted approximately 68% of total energy consumption in 2005, making them by far the dominant sources." },
-                { label: "Task 1 (bar chart)", sentence: "Renewable sources accounted for roughly a quarter of electricity generation by 2020, up from just 9% a decade earlier." },
+                { label: "Task 1 (pie chart)", sentence: "Oil and gas constituted approximately 68% of total energy consumption in 2005, making them by far the dominant sources and dwarfing renewable alternatives, which accounted for a mere 7%." },
+                { label: "Task 1 (bar chart)", sentence: "Renewable sources accounted for roughly a quarter of electricity generation by 2020, up from just 9% a decade earlier — the most dramatic proportional shift of any energy category in the period." },
+                { label: "Task 1 (overview)", sentence: "Overall, fossil fuels constituted the majority of energy output throughout the period, though renewables accounted for a growing share of generation by the final year shown." },
               ],
             },
             {
               term: "was dwarfed by / fell considerably short of",
+              why: "'Was dwarfed by' communicates extreme proportional difference in a single compact phrase — it implies a visual comparison (one figure looks tiny next to another, like a dwarf next to a giant). 'Fell considerably short of' implies a gap where one figure failed to reach another's level, with a connotation of underperformance. Both phrases allow your data description to carry analytical interpretation — not just number-reporting — which is the quality that separates Band 7 from Band 8 Task 1 responses.",
+              pattern: "[Smaller figure / category] was dwarfed by [larger comparator], [which reached / standing at / with the latter at] [specific value].\n[Figure A] fell considerably short of [Figure B], at [value A] compared to [value B] [in year / over the period].",
+              mistake: "Don't use 'was dwarfed by' when the difference is modest — these phrases imply striking disparity. Using 'was dwarfed by' for a 5-percentage-point gap sounds hyperbolic and undermines the precision the examiner is looking for. If the gap is small, use 'was marginally lower than' or 'fell slightly short of' instead.",
+              practice: "Write a Task 1 comparison sentence about two countries' education spending (Country A: 3.1% of GDP; Country B: 8.7% of GDP) using 'was dwarfed by'. Include the specific values and a comparative clause about what the difference implies.",
               examples: [
-                { label: "Task 1 (comparison)", sentence: "China's manufacturing output was dwarfed by its services sector by 2015, which had grown to nearly three times its size." },
-                { label: "Task 1 (contrast)", sentence: "Public transport usage in rural areas fell considerably short of urban levels throughout the period shown." },
+                { label: "Task 1 (extreme gap comparison)", sentence: "Spending on public transport was dwarfed by private vehicle infrastructure investment throughout the period, with the latter consistently receiving over four times the funding allocated to rail and bus networks." },
+                { label: "Task 1 (underperformance contrast)", sentence: "Agricultural output in the northern region fell considerably short of southern levels throughout the decade, at approximately 2.3 million tonnes compared to 5.8 million — a gap that widened rather than narrowed over time." },
+                { label: "Task 1 (overview application)", sentence: "Overall, renewable energy output was dwarfed by fossil fuel generation across all years shown, though the gap narrowed considerably by the end of the period." },
               ],
             },
             {
               term: "peaked at / bottomed out at / levelled off at around",
+              why: "These three phrases describe the three key narrative moments in any trend line: the highest point, the lowest point, and the period of stability. Band 8 Task 1 essays describe trends with precision about both timing and value simultaneously — 'peaked at' automatically encodes the verb (upward direction), the noun (a maximum), and the implication of subsequent decline, saving words while adding analytical density. Using all three in one sentence or paragraph demonstrates sophisticated trend analysis.",
+              pattern: "[Subject] peaked at [value] in [year / period], [before / after which / subsequently] [next movement].\n[Subject] bottomed out at [value] in [year], [before recovering to / then rising to / remaining at] [next value].\n[Subject] levelled off at around [value] [from year to year / throughout / over the following period].",
+              mistake: "'Peaked' implies a definitive high point followed by decline. Don't use 'peaked at' if the figure continued to rise — 'peaked at 3 million in 2015 and then continued to grow to 4 million' is a logical contradiction. When a figure reaches a temporary high then continues rising, use 'reached a local high of' or 'hit a temporary high of' instead.",
+              practice: "Write one sentence describing a hypothetical unemployment rate trend: it rose from 5% in 2008 to 12% in 2010, then fell to 3.8% by 2014, and held between 4% and 4.5% from 2015 to 2020. Use all three phrases in a single fluid sentence.",
               examples: [
-                { label: "Task 1 (line graph — peak)", sentence: "Tourist arrivals peaked at just over 4.2 million in 2008 before declining sharply during the global recession." },
-                { label: "Task 1 (line graph — trough + plateau)", sentence: "After falling steadily for three years, unemployment bottomed out at 4.1% in 2015, then levelled off at around 5% through 2019." },
+                { label: "Task 1 (line graph — peak)", sentence: "Tourist arrivals peaked at just over 4.2 million in 2008 before declining sharply during the global recession, losing more than a third of that total by 2010." },
+                { label: "Task 1 (line graph — trough)", sentence: "After falling steadily for three consecutive years, manufacturing employment bottomed out at 1.1 million in 2013 — a figure not seen since the early post-war period." },
+                { label: "Task 1 (line graph — plateau)", sentence: "Following a period of sharp recovery between 2014 and 2016, the rate levelled off at around 6.5%, where it remained for the duration of the final four years shown." },
               ],
             },
             {
               term: "in excess of / a fraction of",
+              why: "'In excess of' replaces 'more than' when a figure substantially overshoots a reference point — it implies notable, perhaps surprising, magnitude. 'A fraction of' replaces 'much less than' when one figure is proportionally tiny compared to another, carrying a connotation of insignificance or disproportion. Both allow you to make emphatic comparative claims without a long comparison clause, which makes your Task 1 writing more economical — a Band 8 quality.",
+              pattern: "[Subject] reached in excess of [round reference figure] [in year / by period], [representing / marking / making it] [significance].\n[Figure A] represented a fraction of [Figure B], at [specific value A] compared to [value B] — a ratio of approximately [X to Y].",
+              mistake: "Don't use 'in excess of' for small exceedances — 'in excess of 5 people' sounds dramatically hyperbolic for such a small number. These phrases imply notable magnitude or proportion. 'In excess of' works best with large round-number comparisons: 'in excess of $10 billion', 'in excess of one million households'. For small exceedances, use 'just over' or 'slightly more than'.",
+              practice: "Write two sentences comparing military and arts funding in a hypothetical country (military: $45 billion; arts: $800 million). Use 'in excess of' for one figure and 'a fraction of' for the other. Include a ratio or approximate proportion.",
               examples: [
-                { label: "Task 1 (high value)", sentence: "By 2020, annual spending on healthcare had reached in excess of $10,000 per capita in the United States." },
-                { label: "Task 1 (small proportion)", sentence: "Funding for the arts represented a fraction of defence spending, at just 0.3% of GDP compared to 3.8%." },
+                { label: "Task 1 (large figure)", sentence: "By 2020, annual healthcare spending had reached in excess of $10,000 per capita in the United States — a figure that represented more than double the average of comparable high-income nations." },
+                { label: "Task 1 (small proportion)", sentence: "Funding allocated to arts and culture represented a fraction of defence expenditure, at just 0.3% of GDP compared to 3.8% — a ratio of roughly 1 to 13." },
+                { label: "Task 1 (comparative overview)", sentence: "Overall, private sector investment remained in excess of public spending throughout the period, while funding for social programmes consistently accounted for a fraction of total infrastructure outlay." },
               ],
             },
             {
               term: "roughly equivalent to / marginally higher than",
+              why: "When two figures are close but not identical, Band 6 responses either ignore the nuance ('was similar to' — vague) or overstate it ('was much higher' — inaccurate). Band 8 responses use degree-qualified comparisons precisely: 'roughly equivalent' signals approximate equality within a narrow range; 'marginally higher' signals a small but real and measurable difference. Choosing correctly between them — and knowing what range each implies — is the data precision the examiner rewards.",
+              pattern: "[Figure A] was roughly equivalent to [Figure B], at [value A] and [value B] respectively, [suggesting / indicating] [analytical implication].\n[Figure A] was marginally higher than [Figure B], averaging [value A] versus [value B] [over the period / in the final year shown].",
+              mistake: "Don't use 'roughly equivalent to' when there is a significant gap — it actively understates the difference and misleads the examiner. A rough guide: use 'roughly equivalent' for differences under approximately 3–5 percentage points. For larger gaps, 'notably higher than', 'substantially above', or 'considerably greater than' are more precise. Picking the wrong degree marker is one of the clearest signals of a Band 7 rather than Band 8 response.",
+              practice: "Describe this data accurately: Female part-time employment rate: 38.2%. Male part-time employment rate: 39.4%. Write one sentence using 'marginally higher than' with the correct values assigned to the correct groups, and add a clause noting what this small difference suggests.",
               examples: [
-                { label: "Task 1 (close comparison)", sentence: "In 2010, expenditure on education was roughly equivalent to that on healthcare, at approximately 5.2% and 5.5% of GDP respectively." },
-                { label: "Task 1 (small difference)", sentence: "Female graduation rates were marginally higher than male rates throughout the decade, averaging 63% versus 61%." },
+                { label: "Task 1 (close comparison)", sentence: "In 2010, expenditure on education was roughly equivalent to that on healthcare, at approximately 5.2% and 5.5% of GDP respectively — a parity that had shifted considerably in favour of healthcare by the end of the period." },
+                { label: "Task 1 (small measured difference)", sentence: "Female graduation rates were marginally higher than male rates throughout the decade, averaging 63% versus 61% — a gap that, while small, was consistent across all years and all three countries shown." },
+                { label: "Task 1 (nuanced overview)", sentence: "Overall, expenditure across the three categories remained roughly equivalent in the early years, though diverged markedly from 2015 onwards as infrastructure spending accelerated." },
               ],
             },
           ],
@@ -438,7 +524,7 @@ const POLISHING_PLAN: TierPlan = {
         {
           id: "p-w2-t2",
           label: "Writing Practice: Task 1 — Selective Data, Under 185 Words",
-          description: "Before writing, identify the 3 most striking data points only. Ask: 'If I could tell someone just 3 things about this chart, what would they be?' Write only those. Use at least 2 phrases from the slideshow above.",
+          description: "Before writing, identify the 3 most striking data points only. Ask: 'If I could tell someone just 3 things about this chart, what would they be?' Write only those. Use at least 2 phrases from the lesson above and check that your overview has no specific numbers in it.",
           resourcePath: "/dashboard/writing",
           resourceLabel: "Open Writing Module",
           minutes: 35,
@@ -448,36 +534,48 @@ const POLISHING_PLAN: TierPlan = {
     {
       week: 3, theme: "Task 2 + Advanced Grammar", focus: "Writing",
       color: "purple",
-      rationale: "Band 9 grammar means a wide range of structures used with full flexibility and accuracy — not as memorised templates, but naturally woven into your argument. This week you add cleft sentences, inversion, and participial clauses, then write an essay that uses all three.",
+      rationale: "Band 9 grammar means a wide range of structures used with full flexibility and accuracy — not as memorised templates, but naturally woven into your argument. Open each lesson to learn the exact structural formula, the most common error, and a practice sentence to write before your essay. The goal is not to drop these structures in artificially but to understand them well enough to use them when they genuinely fit.",
       tasks: [
         {
           id: "p-w3-t1",
           label: "Advanced Grammar: 3 Structures That Signal Band 8+",
-          description: "These three grammar structures appear consistently in Band 8–9 model answers. Use the slideshow to study each structure with real Task 2 examples — then try writing one of each before your essay.",
-          minutes: 30,
+          description: "Open the full lesson to see the grammatical formula, common structural errors, and three Band 8 model sentences for each structure. Then write one example of each before attempting the essay below.",
+          minutes: 35,
           vocabList: [
             {
               term: "Cleft sentences: What… is / It is… that",
+              why: "Cleft sentences are the most immediately recognisable marker of Band 8 grammatical range. They shift the logical emphasis of a sentence onto a specific element by splitting a simple statement into two clauses. 'Technology improves education' becomes 'What technology fundamentally improves is access to education' — the second version tells the examiner exactly which aspect you consider most significant. This structural choice demonstrates flexible grammatical thinking, not just memorised templates.",
+              pattern: "What [subject] [verb phrase] is [the element you want to emphasise].\nIt is [emphasised noun phrase] that [rest of the predicate].\nIt is [specific cause / time / actor] that [explains or drives the main claim].",
+              mistake: "Don't use cleft sentences to emphasise the obvious: 'What is important is education' adds no rhetorical value because nothing is counterintuitive or precise. Use cleft sentences to highlight a specific cause within a broad field, a counterintuitive factor, or the precise focus of your argument — not a truism the reader already accepts.",
+              practice: "Rewrite this sentence as a cleft sentence to emphasise the underlined element: 'The widening digital divide is the most significant barrier to educational equality in developing nations.' Try both the 'What...' pattern and the 'It is...that' pattern. Which creates stronger emphasis?",
               examples: [
-                { label: "Writing Task 2 (emphasis)", sentence: "What makes this issue particularly complex is the extent to which economic growth and environmental protection appear to conflict." },
-                { label: "Writing Task 2 (thesis)", sentence: "It is the widening gap between urban and rural opportunity, rather than any single policy failure, that underpins persistent inequality." },
-                { label: "Speaking Part 3", sentence: "What I find most troubling about this trend is not the technology itself, but the speed at which society is being asked to adapt." },
+                { label: "Writing Task 2 (body — emphasis)", sentence: "What makes this issue particularly intractable is not the absence of policy solutions, but the absence of political will to implement them at a cost that incumbent governments are prepared to bear." },
+                { label: "Writing Task 2 (thesis)", sentence: "It is the widening gap between urban and rural opportunity, rather than any single policy failure, that underpins the persistent cycle of poverty in many developing nations." },
+                { label: "Speaking Part 3", sentence: "What I find most troubling about this trend is not the technology itself — it's the speed at which society is being asked to restructure around it without adequate public debate." },
               ],
             },
             {
               term: "Inversion: Rarely… / Not only… but also / Only by…",
+              why: "Inversion places a negative or restrictive adverbial at the front of the sentence and inverts the subject-auxiliary order, creating immediate rhetorical emphasis and a formal, authoritative register. It is the grammar equivalent of vocal stress in speech. 'This problem has rarely been more urgent' is descriptive; 'Rarely has this problem been more urgent' is emphatic and sophisticated. The Band 9 descriptor — 'uses a wide range of structures with full flexibility and accuracy' — specifically targets this kind of structural variation.",
+              pattern: "Rarely / Seldom / Never has [subject] [past participle]...\nNot only does / do [subject] [base verb phrase], but [subject] also [verb phrase]...\nOnly by [gerund phrase or noun phrase] can [subject] [base verb]...\nUnder no circumstances should [subject] [base verb]...",
+              mistake: "Inversion requires correct auxiliary placement. 'Rarely the government has addressed this' is wrong — the auxiliary must precede the subject: 'Rarely has the government addressed this.' The most common error is forgetting to invert entirely: 'Not only the policy has failed, but it has also...' should be 'Not only has the policy failed, but it has also...' Check every inversion by asking: 'Is the auxiliary before the subject?'",
+              practice: "Rewrite these two sentences using inversion. (1) 'The need for coordinated climate action has never been more urgent than it is today.' → Begin with 'Never...'. (2) 'Governments can only close the wealth gap by reforming both the tax system and the social safety net.' → Begin with 'Only by...'",
               examples: [
-                { label: "Writing Task 2 (introduction)", sentence: "Rarely has the need for international cooperation on climate change been more urgent than it is today." },
-                { label: "Writing Task 2 (body)", sentence: "Not only does this exacerbate wealth inequality, but it also creates a two-tier healthcare system that disadvantages the most vulnerable." },
-                { label: "Writing Task 2 (conclusion)", sentence: "Only by investing substantially in early childhood education can societies hope to break the cycle of intergenerational poverty." },
+                { label: "Writing Task 2 (introduction)", sentence: "Rarely has the need for international cooperation on climate and biodiversity loss been more urgent than it is today, yet rarely has the political will to act on that need been more conspicuously absent." },
+                { label: "Writing Task 2 (body)", sentence: "Not only does this level of income inequality exacerbate inter-generational poverty, but it also creates a two-tier healthcare and education system that entrenches rather than reduces social immobility." },
+                { label: "Writing Task 2 (conclusion)", sentence: "Only by investing substantially in early childhood education — the period in which cognitive development is most rapid and most malleable — can societies hope to break the cycle of intergenerational disadvantage." },
               ],
             },
             {
               term: "Participial clauses: Having… / Driven by… / Viewed from…",
+              why: "Participial clauses compress two clauses into one, making your writing analytically denser and more efficient. They also signal logical relationships — cause, background, sequence, perspective — without requiring the clunky conjunctions ('because', 'since', 'after') that Band 6 writers rely on. The Band 8 Grammatical Range criterion rewards the ability to express complex logical relationships through structural choice. Participial clauses are one of the clearest ways to demonstrate that ability.",
+              pattern: "Having [past participle phrase], [main clause with subject — 'it is clear that' / 'one can conclude that' / 'I believe that'].\nDriven by / Fuelled by / Shaped by [noun phrase], [subject] [verb phrase]...\nViewed from [perspective noun: a historical / an economic / a sociological], [claim about what that perspective reveals].\n[Present participle phrase], [subject] [verb]... (e.g. 'Acknowledging this complexity, policymakers should...')",
+              mistake: "Participial clauses must share their implied subject with the main clause. 'Having considered both sides, the essay will now conclude...' is a dangling modifier — the essay cannot consider sides; you (the writer) did. Write 'Having considered both sides, I conclude that...' or restructure the sentence to make the subject explicit. This is the most common error and the one most likely to cost marks under Grammatical Accuracy.",
+              practice: "Rewrite this pair of sentences as one sentence using a participial clause: 'Technological advancement has transformed every sector of the modern economy. It has left behind workers whose skills became obsolete faster than retraining programmes could respond.' Begin with 'Driven by...' and make the logical connection between the two ideas explicit.",
               examples: [
-                { label: "Writing Task 2 (body)", sentence: "Driven largely by technological disruption, the modern labour market demands a degree of adaptability that previous generations never faced." },
-                { label: "Writing Task 2 (conclusion)", sentence: "Having examined both the economic and social dimensions of this issue, it is clear that a balanced approach is the only viable solution." },
-                { label: "Writing Task 2 (body)", sentence: "Viewed from a long-term perspective, the short-term cost of renewable energy infrastructure represents a sound investment." },
+                { label: "Writing Task 2 (body — cause)", sentence: "Driven largely by the demands of a globalised, knowledge-based economy, the modern labour market requires a degree of cognitive adaptability and continuous relearning that previous generations were never asked to demonstrate." },
+                { label: "Writing Task 2 (conclusion)", sentence: "Having examined the economic, social, and environmental dimensions of this issue, it is difficult to avoid the conclusion that incremental reform is insufficient — structural change at the legislative level is what the evidence demands." },
+                { label: "Writing Task 2 (body — perspective)", sentence: "Viewed from a long-term fiscal perspective, the upfront cost of renewable energy infrastructure represents a sound investment rather than a budgetary burden, given the declining cost trajectory of solar and wind technologies over the past decade." },
               ],
             },
           ],
@@ -485,7 +583,7 @@ const POLISHING_PLAN: TierPlan = {
         {
           id: "p-w3-t2",
           label: "Writing Practice: Task 2 with 6+ Distinct Structures",
-          description: "Submit a Task 2 essay. Before submitting, underline each sentence and label its type. Aim for at least 6 distinct types: simple, complex, compound, cleft, inverted, participial, conditional, nominalized.",
+          description: "Submit a Task 2 essay. Before submitting, underline each sentence and label its structural type. Aim for at least 6 distinct types across the essay: simple, complex, compound, cleft, inverted, participial, conditional (advanced), nominalized. If you find fewer than 6, revise before submitting.",
           resourcePath: "/dashboard/writing",
           resourceLabel: "Open Writing Module",
           minutes: 50,
@@ -495,40 +593,56 @@ const POLISHING_PLAN: TierPlan = {
     {
       week: 4, theme: "Speaking + Full Mock", focus: "Speaking & Mock",
       color: "red",
-      rationale: "Your language should now sound effortlessly natural. This final week targets the fluency gap between Band 7 and Band 8 in Speaking, then a full timed mock under real exam conditions gives you a clear picture of where you stand.",
+      rationale: "Your language should now sound effortlessly natural. This final week targets the fluency gap between Band 7 and Band 8 in Speaking — specifically Part 3, where most Band 7 candidates either give short answers or use memorised academic phrases that sound rehearsed. Open the lesson to learn exactly when and how to deploy each opener, what mistake kills its effect, and a practice question to answer aloud before your session.",
       tasks: [
         {
           id: "p-w4-t1",
           label: "Speaking: Natural Part 3 Openers (Replace All Memorised Phrases)",
-          description: "Memorised openers like 'That's a very interesting question' are red flags for examiners and can cap your score. The phrases in the slideshow below are natural alternatives — each shown in a complete Part 3 response.",
-          minutes: 20,
+          description: "Memorised openers like 'That's a very interesting question' are Band 6 cap triggers — examiners are trained to notice them. Open the lesson to learn authentic alternatives, the exact context each one fits, what makes it sound natural rather than rehearsed, and a Part 3 practice question to answer aloud.",
+          minutes: 25,
           vocabList: [
             {
               term: "Right, so… / Well, I suppose…",
+              why: "Discourse particles like 'Right, so...' are the authentic mark of fluent real-time speech — they signal that you are organising your thought as you speak, which is exactly what native speakers do. They are completely appropriate in a formal speaking test and give you one or two natural seconds to formulate your response. 'Right' signals acknowledgement and redirection; 'Well, I suppose' signals tentative reasoning about something genuinely uncertain. Both sound authentic because they are authentic — they are not exam prep phrases.",
+              pattern: "Right, so [briefly reframe or acknowledge the question topic], [state your position and begin developing it].\nWell, I suppose [tentative framing of your position], [reason]. That said, [qualification or nuance].",
+              mistake: "Don't drop these particles mid-sentence — 'I think that, right, the government should...' is hesitation, not fluency. Use them only at the very opening of your response, before your first substantive clause, to signal that you are organising your thinking rather than reading from a script.",
+              practice: "Answer this Part 3 question aloud using 'Right, so...' as your opener: 'Do you think governments spend enough on public healthcare?' Aim for 4–5 sentences: opener + position + reason + evidence or example + 'That said...' concession.",
               examples: [
-                { label: "Speaking Part 3 (natural start)", sentence: "Right, so when it comes to climate change, I think what's often overlooked is the role of individual consumption habits rather than just government policy." },
-                { label: "Speaking Part 3 (thinking aloud)", sentence: "Well, I suppose the most significant factor driving urbanisation is economic opportunity — people simply follow the jobs." },
+                { label: "Speaking Part 3 (policy question)", sentence: "Right, so when it comes to climate policy, I think what's often overlooked is the role of individual consumption habits — governments tend to focus on industry regulation, but the demand side of the problem rarely gets the same attention." },
+                { label: "Speaking Part 3 (social question)", sentence: "Well, I suppose the most significant factor driving rapid urbanisation is economic opportunity — people follow the jobs, and jobs have concentrated in cities in ways that make it very difficult for rural economies to compete." },
               ],
             },
             {
               term: "What I find… is that / What strikes me is…",
+              why: "These cleft-style openers do two things simultaneously: they begin your Part 3 answer with a structurally advanced sentence type (a cleft sentence), AND they immediately signal your analytical angle before you explain it. 'What strikes me most about this issue' tells the examiner that you have identified a specific and perhaps counterintuitive aspect — which is exactly the depth of engagement the Band 8 Fluency and Coherence descriptor rewards in Part 3 responses.",
+              pattern: "What I find [adjective: interesting / troubling / significant / counterintuitive] about this is that [claim that matches the adjective].\nWhat strikes me most is that [surprising or underappreciated observation], [which / because / given that] [development of why it matters].",
+              mistake: "Don't add 'is' twice: 'What I find is that is...' is a grammatical error. The structure is 'What I find [adjective] about X is that [clause]' — the adjective and optional 'about X' go between 'find' and 'is'. The clause follows 'is'. Also don't use 'interesting' as your adjective — it's vague. Choose something specific: 'counterintuitive', 'troubling', 'underappreciated', 'consistently overlooked'.",
+              practice: "Answer this Part 3 question using 'What I find...' as your opener, followed by a PER structure (Position → Evidence → Reasoning): 'In what ways has technology changed the way people communicate?' Aim for 4–5 sentences and make sure your adjective in the opener is specific and matches what you actually say next.",
               examples: [
-                { label: "Speaking Part 3 (PER opener)", sentence: "What I find particularly interesting about this is that countries with the strongest social safety nets also tend to have the highest levels of entrepreneurship." },
-                { label: "Speaking Part 3 (position)", sentence: "What strikes me most is that the debate around education funding rarely centres on outcomes — it's almost always about budgets." },
+                { label: "Speaking Part 3 (analytical opener)", sentence: "What I find most counterintuitive about this is that countries with the strongest social safety nets also tend to have the highest levels of entrepreneurial activity — which suggests that security, not risk, is what enables people to take chances." },
+                { label: "Speaking Part 3 (critical observation)", sentence: "What strikes me most is that the debate around education funding almost never centres on outcomes — it's almost always framed in terms of budget constraints, which I think is why systemic improvement is so difficult to achieve." },
               ],
             },
             {
               term: "That said… / Having said that…",
+              why: "'That said' and 'Having said that' are discourse markers that signal a concession — you are acknowledging that your previous point has a real limit or a genuine exception. This is the single most important fluency technique for Band 8 Speaking Part 3: it allows you to present a balanced, nuanced view without making your answer feel structurally fragmented or contradictory. Critically, it sounds completely natural — unlike 'On the other hand', which many candidates overuse to the point where it sounds like a memorised structure.",
+              pattern: "[Main position + development]. That said, [concession or qualification that genuinely limits or nuances the first point without reversing it].\n[Position stated clearly]. Having said that, [the real-world exception or counterpoint], which means [implication or why your overall position still holds].",
+              mistake: "Don't use 'That said' to introduce a point that contradicts rather than qualifies your position — it should narrow or nuance, not reverse. If your answer completely changes direction after 'That said', the examiner will perceive it as inconsistency or weak critical thinking. The qualification should make your position more precise, not abandon it.",
+              practice: "Answer this Part 3 question aloud, using 'That said...' as a concession after stating and developing your position: 'Is it better for children to grow up in a city or in the countryside?' State your position in 2–3 sentences, then concede a genuine limitation using 'That said...' and explain why the concession doesn't change your overall view.",
               examples: [
-                { label: "Speaking Part 3 (concession)", sentence: "I do think technology has genuinely improved access to education. That said, the digital divide means millions of students are still being left behind." },
-                { label: "Speaking Part 3 (balanced view)", sentence: "Remote work clearly offers flexibility. Having said that, something important is lost when colleagues rarely meet face to face." },
+                { label: "Speaking Part 3 (balanced view)", sentence: "I do think technology has genuinely improved access to education in remarkable ways — the range of free, high-quality learning resources available today was unimaginable twenty years ago. That said, the digital divide means that millions of students in lower-income households still lack reliable internet access, which means the benefit is concentrated rather than universal." },
+                { label: "Speaking Part 3 (nuanced concession)", sentence: "Remote working has clearly improved work-life balance for a significant portion of the workforce, and the productivity data largely supports that. Having said that, there's a growing body of evidence that junior employees in particular are losing out on the informal mentoring and cultural transmission that happens naturally in shared workspaces — and that's a real cost that productivity metrics don't capture." },
               ],
             },
             {
               term: "I'd argue that… / I'm fairly convinced that…",
+              why: "'I'd argue that' is precisely the right epistemic stance for IELTS Speaking Part 3: it signals a personal but reasoned position — one you hold on the basis of logic or evidence, not mere preference. 'I'm fairly convinced that' goes one step further: the adverb 'fairly' signals appropriate intellectual humility (strong grounds, but open to counter-argument), which is exactly the nuanced certainty the Band 8 examiner is looking for. Both phrases also signal to the examiner that an argument — not just a statement — is about to follow.",
+              pattern: "I'd argue that [position], [particularly / especially] when one considers [specific evidence, example, or reasoning that supports the position].\nI'm fairly convinced that [claim], [given / based on / in light of] [supporting reason or observable trend].",
+              mistake: "Don't use 'I'd argue that' and then fail to provide an argument. If you open with this phrase, the examiner expects a reason, evidence, or logical development within the next one to two sentences. 'I'd argue that cities are better. Because they're fun.' — that 'because' clause fails to deliver an argument, and the mismatch between the sophisticated opener and the thin content will be noticed.",
+              practice: "Answer this Part 3 question using 'I'd argue that...' as your opener, a reason and example as your development, then a 'That said...' concession at the end: 'Do you think economic development should take priority over environmental protection?' Aim for 5–6 sentences total.",
               examples: [
-                { label: "Speaking Part 3 (clear position)", sentence: "I'd argue that the real driver behind rising inequality isn't globalisation itself, but the failure to redistribute the gains from it equitably." },
-                { label: "Speaking Part 3 (confident view)", sentence: "I'm fairly convinced that within two decades most routine cognitive work will be automated — the question is whether we're preparing people for that shift." },
+                { label: "Speaking Part 3 (clear evidenced position)", sentence: "I'd argue that the real driver behind rising inequality isn't globalisation itself — it's the consistent political failure to redistribute the gains from it equitably, particularly through progressive taxation and investment in public services for lower-income communities." },
+                { label: "Speaking Part 3 (forward-looking claim)", sentence: "I'm fairly convinced that within two decades, the majority of routine cognitive work — data entry, basic legal drafting, standard financial analysis — will be automated, and the question we should be asking right now is not whether that will happen, but whether our education systems are preparing people for the roles that will remain." },
               ],
             },
           ],
@@ -536,7 +650,7 @@ const POLISHING_PLAN: TierPlan = {
         {
           id: "p-w4-t2",
           label: "Speaking Practice: Full Session with Critical Self-Listen",
-          description: "Complete a full Part 1, 2, 3 session. Record yourself. Listen back and check: natural-sounding openers, varied vocabulary, at least one cleft sentence in Part 3, and at least one 'That said…' concession.",
+          description: "Complete a full Part 1, 2, 3 session and record yourself. Listen back critically: do your openers sound natural or rehearsed? Did you use at least one cleft structure in Part 3? Did you use 'That said...' at least once? Identify one specific thing to fix before your mock.",
           resourcePath: "/dashboard/speaking",
           resourceLabel: "Open Speaking Module",
           minutes: 35,
@@ -544,7 +658,7 @@ const POLISHING_PLAN: TierPlan = {
         {
           id: "p-w4-t3",
           label: "Elite Hub: Full Timed Mock (Strict Conditions)",
-          description: "Reading: 60 minutes. Listening: 30 minutes. Writing: 60 minutes (20 min Task 1 + 40 min Task 2). No pausing, no phone. After finishing, score each module against Band 8 descriptors and identify the single remaining gap.",
+          description: "Reading: 60 minutes. Listening: 30 minutes. Writing: 60 minutes (20 min Task 1 + 40 min Task 2). No pausing, no phone, no checking answers mid-test. After finishing, score each module against Band 8 descriptors and identify the single remaining gap to focus on before exam day.",
           resourcePath: "/dashboard/elite",
           resourceLabel: "Open Elite Hub",
           minutes: 150,
@@ -555,52 +669,177 @@ const POLISHING_PLAN: TierPlan = {
 };
 
 // ─────────────────────────────────────────────
-// VocabSlideshow
+// VocabSlideshow — fullscreen lesson viewer
 // ─────────────────────────────────────────────
 function VocabSlideshow({ items }: { items: VocabItem[] }) {
   const [idx, setIdx] = useState(0);
+  const [open, setOpen] = useState(false);
   const item = items[idx];
-  return (
-    <div className="mt-3 rounded-lg border border-border/30 bg-card/60 overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border/20 bg-card/40">
-        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Vocabulary Examples</span>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-muted-foreground">{idx + 1} / {items.length}</span>
-          <div className="flex gap-0.5">
+
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+      if (e.key === "ArrowLeft") setIdx(i => Math.max(0, i - 1));
+      if (e.key === "ArrowRight") setIdx(i => Math.min(items.length - 1, i + 1));
+    };
+    window.addEventListener("keydown", handler);
+    return () => {
+      window.removeEventListener("keydown", handler);
+      document.body.style.overflow = "";
+    };
+  }, [open, items.length]);
+
+  const fullscreen = open ? createPortal(
+    <div className="fixed inset-0 z-[200] bg-background flex flex-col">
+      {/* Top bar */}
+      <div className="flex-shrink-0 border-b border-border/30 px-4 py-3 flex items-center justify-between bg-background">
+        <button
+          onClick={() => setOpen(false)}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <X className="w-4 h-4" /> Close
+        </button>
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Vocabulary Lesson</span>
+        <span className="text-xs text-muted-foreground tabular-nums">{idx + 1} / {items.length}</span>
+      </div>
+
+      {/* Scrollable body */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto px-5 py-8 space-y-5">
+          {/* Term */}
+          <div>
+            <h2 className="text-2xl font-bold text-foreground leading-tight">{item.term}</h2>
+            {item.replaces && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Replaces: <span className="line-through opacity-70">{item.replaces}</span>
+              </p>
+            )}
+          </div>
+
+          {/* Why this matters */}
+          {item.why && (
+            <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 space-y-1.5">
+              <p className="text-[10px] font-bold text-green-400 uppercase tracking-widest">Why this matters</p>
+              <p className="text-sm text-foreground/90 leading-relaxed">{item.why}</p>
+            </div>
+          )}
+
+          {/* Usage pattern */}
+          {item.pattern && (
+            <div className="rounded-xl border border-accent/25 bg-accent/5 p-4 space-y-1.5">
+              <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Usage pattern</p>
+              <pre className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap font-mono">{item.pattern}</pre>
+            </div>
+          )}
+
+          {/* Examples */}
+          <div className="space-y-3">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">IELTS examples</p>
+            {item.examples.map((ex, i) => (
+              <div key={i} className="rounded-xl border border-border/30 bg-card/60 p-4">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-accent/15 text-accent border border-accent/25">
+                  {ex.label}
+                </span>
+                <p className="text-sm text-foreground/85 mt-2.5 leading-relaxed italic">"{ex.sentence}"</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Common mistake */}
+          {item.mistake && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4 space-y-1.5">
+              <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Common mistake</p>
+              <p className="text-sm text-foreground/90 leading-relaxed">{item.mistake}</p>
+            </div>
+          )}
+
+          {/* Practice prompt */}
+          {item.practice && (
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-1.5">
+              <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Try it yourself</p>
+              <p className="text-sm text-foreground/90 leading-relaxed">{item.practice}</p>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between pt-2 pb-10">
             <button
               onClick={() => setIdx(i => Math.max(0, i - 1))}
               disabled={idx === 0}
-              className="w-5 h-5 flex items-center justify-center rounded text-base leading-none text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
-            >‹</button>
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border/30 bg-card/40 text-sm text-muted-foreground hover:text-foreground hover:bg-card/80 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              ← Previous
+            </button>
+            <div className="flex gap-1.5 items-center">
+              {items.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setIdx(i)}
+                  className={cn(
+                    "rounded-full transition-all duration-200",
+                    i === idx ? "w-4 h-2 bg-accent" : "w-2 h-2 bg-border/50 hover:bg-border"
+                  )}
+                />
+              ))}
+            </div>
             <button
               onClick={() => setIdx(i => Math.min(items.length - 1, i + 1))}
               disabled={idx === items.length - 1}
-              className="w-5 h-5 flex items-center justify-center rounded text-base leading-none text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
-            >›</button>
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border/30 bg-card/40 text-sm text-muted-foreground hover:text-foreground hover:bg-card/80 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              Next →
+            </button>
           </div>
         </div>
       </div>
-      <div className="p-3 space-y-2.5">
-        <div>
-          <p className="text-sm font-semibold text-foreground">{item.term}</p>
-          {item.replaces && (
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              Replaces: <span className="line-through opacity-60">{item.replaces}</span>
-            </p>
-          )}
+    </div>,
+    document.body
+  ) : null;
+
+  return (
+    <>
+      {fullscreen}
+      {/* Compact inline teaser — list of terms, click any to open fullscreen */}
+      <div className="mt-3 rounded-lg border border-accent/20 bg-accent/5 overflow-hidden">
+        <div className="flex items-center justify-between px-3 py-2.5 bg-card/60 border-b border-border/20">
+          <div className="flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-accent" />
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+              Vocab lesson · {items.length} items
+            </span>
+          </div>
+          <button
+            onClick={() => { setIdx(0); setOpen(true); }}
+            className="flex items-center gap-1 text-[11px] font-semibold text-accent hover:text-accent/80 transition-colors"
+          >
+            <Maximize2 className="w-3 h-3" /> Open lesson
+          </button>
         </div>
-        <div className="space-y-2">
-          {item.examples.map((ex, i) => (
-            <div key={i} className="rounded-md bg-card/80 border border-border/20 p-2.5">
-              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-accent/15 text-accent border border-accent/20">
-                {ex.label}
+        <div className="p-2.5 space-y-0.5">
+          {items.map((it, i) => (
+            <button
+              key={i}
+              onClick={() => { setIdx(i); setOpen(true); }}
+              className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-left hover:bg-card/70 transition-colors group"
+            >
+              <span className="w-5 h-5 rounded-full border border-accent/30 text-accent text-[10px] font-bold flex items-center justify-center flex-shrink-0 group-hover:bg-accent/10 transition-colors">
+                {i + 1}
               </span>
-              <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed italic">"{ex.sentence}"</p>
-            </div>
+              <span className="text-xs text-foreground/80 group-hover:text-foreground transition-colors flex-1 leading-snug">
+                {it.term}
+              </span>
+              {it.replaces && (
+                <span className="text-[10px] text-muted-foreground/50 flex-shrink-0 hidden sm:block">
+                  replaces <span className="line-through">{it.replaces}</span>
+                </span>
+              )}
+            </button>
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
