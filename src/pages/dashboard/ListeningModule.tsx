@@ -300,7 +300,7 @@ const generatePartAudio = async (section: ListeningPart, signal: AbortSignal): P
         results[i] = await fetchTTSBuffer(ttsItems[i].text, ttsItems[i].voice, signal);
       }
     };
-    await Promise.all(Array.from({ length: 3 }, worker));
+    await Promise.all(Array.from({ length: 5 }, worker));
     return results;
   })();
   const audioCtx = new AudioContext();
@@ -646,20 +646,20 @@ export default function ListeningModule() {
     preloadAllParts(test);
   };
 
-  // Pre-generate audio for all parts sequentially in background
+  // Pre-generate audio for all 4 parts in parallel in background
   const preloadAllParts = useCallback((test: ListeningTest) => {
     preloadAbortRef.current?.abort();
     const abort = new AbortController();
     preloadAbortRef.current = abort;
     const run = async () => {
-      for (let i = 0; i < test.sections.length; i++) {
+      await Promise.all(test.sections.map(async (section, i) => {
         const partNum = i + 1;
-        if (abort.signal.aborted) break;
-        if (audioUrlsRef.current[partNum]) continue;
+        if (abort.signal.aborted) return;
+        if (audioUrlsRef.current[partNum]) return;
         setPreloadingParts((prev) => ({ ...prev, [partNum]: true }));
         try {
-          const url = await generatePartAudio(test.sections[i], abort.signal);
-          if (abort.signal.aborted) { URL.revokeObjectURL(url); break; }
+          const url = await generatePartAudio(section, abort.signal);
+          if (abort.signal.aborted) { URL.revokeObjectURL(url); return; }
           audioUrlsRef.current[partNum] = url;
           setPreloadedParts((prev) => ({ ...prev, [partNum]: true }));
         } catch {
@@ -667,7 +667,7 @@ export default function ListeningModule() {
         } finally {
           setPreloadingParts((prev) => ({ ...prev, [partNum]: false }));
         }
-      }
+      }));
     };
     run();
   }, []);
