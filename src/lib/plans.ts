@@ -1,5 +1,5 @@
 /**
- * Single source of truth for IELTSinAja pricing plans.
+ * Single source of truth for EngInAja pricing plans.
  *
  * Use this everywhere a price, period, or feature list is displayed:
  * - Landing-page pricing matrix

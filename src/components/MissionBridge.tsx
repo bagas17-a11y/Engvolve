@@ -75,7 +75,7 @@ export const MissionBridge = () => {
 
           <p className="text-base md:text-lg text-foreground/60 max-w-2xl mx-auto mb-16">
             Stop grinding through practice sets and hoping something sticks.
-            IELTSinAja pinpoints exactly what's capping your score — then launches
+            EngInAja pinpoints exactly what's capping your score — then launches
             you past it, band by band.
           </p>
         </div>

@@ -423,7 +423,7 @@ export default function RevisionNotesPage() {
                 <h1 className="text-lg font-semibold text-foreground truncate">
                   {showFormatsView
                     ? `IELTS Test Formats – ${currentFormat.charAt(0).toUpperCase() + currentFormat.slice(1)}`
-                    : `${getTopicTitle(currentTopic)} (IELTSInAja Grammar): Revision Note`}
+                    : `${getTopicTitle(currentTopic)} (EngInAja Grammar): Revision Note`}
                 </h1>
               )}
             </div>

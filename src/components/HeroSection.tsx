@@ -37,7 +37,7 @@ const PARTICLES = [
 ];
 
 const HEADLINE_1 = ["Learn,", "Practice,", "Repeat."];
-const HEADLINE_2 = ["IELTSinAja."];
+const HEADLINE_2 = ["EngInAja."];
 
 export const HeroSection = () => {
   const navigate = useNavigate();
