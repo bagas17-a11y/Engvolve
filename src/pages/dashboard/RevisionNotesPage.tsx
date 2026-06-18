@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { HumanPlusAILockScreen } from "@/components/HumanPlusAILockScreen";
@@ -84,6 +84,39 @@ export default function RevisionNotesPage() {
       : FIRST_TOPIC;
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(260);
+  const isDraggingRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragStartWidthRef = useRef(0);
+
+  const onDragHandleMouseDown = useCallback((e: React.MouseEvent) => {
+    isDraggingRef.current = true;
+    dragStartXRef.current = e.clientX;
+    dragStartWidthRef.current = sidebarWidth;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  }, [sidebarWidth]);
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+      const delta = e.clientX - dragStartXRef.current;
+      const next = Math.max(180, Math.min(480, dragStartWidthRef.current + delta));
+      setSidebarWidth(next);
+    };
+    const onMouseUp = () => {
+      if (!isDraggingRef.current) return;
+      isDraggingRef.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    return () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<string[]>([
     ...REVISION_NOTE_CATEGORIES.map((c) => c.id),
@@ -209,12 +242,12 @@ export default function RevisionNotesPage() {
         {/* Floating glass sidebar */}
         <aside
           className={cn(
-            "flex flex-col transition-[width] duration-200 z-10",
+            "flex flex-col z-10",
             "backdrop-blur-[12px] bg-background/90 border-r border-border",
-            sidebarCollapsed ? "w-14" : "w-[260px]",
             "hidden md:flex",
-            mobileMenuOpen && "!flex !absolute inset-y-0 left-0 z-50 w-[260px]"
+            mobileMenuOpen && "!flex !absolute inset-y-0 left-0 z-50"
           )}
+          style={{ width: sidebarCollapsed ? 56 : sidebarWidth }}
         >
           <div className="flex h-12 items-center justify-between border-b border-border px-3 shrink-0">
             {!sidebarCollapsed && (
@@ -361,6 +394,17 @@ export default function RevisionNotesPage() {
             onClick={() => setMobileMenuOpen(false)}
             aria-label="Close menu"
           />
+        )}
+
+        {/* Drag handle */}
+        {!sidebarCollapsed && (
+          <div
+            onMouseDown={onDragHandleMouseDown}
+            className="hidden md:flex w-1 cursor-col-resize items-center justify-center group hover:bg-blue-500/30 transition-colors z-20 shrink-0"
+            title="Drag to resize"
+          >
+            <div className="w-px h-full bg-border group-hover:bg-blue-500/60 transition-colors" />
+          </div>
         )}
 
         <div className="flex flex-1 flex-col min-w-0 bg-background">
