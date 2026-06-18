@@ -160,12 +160,18 @@ const parseTranscriptToTurns = (transcript: string): SpeakerTurn[] => {
 
 // ─── Module-level audio utilities ─────────────────────────────────────────────
 
-const fetchTTSBuffer = async (text: string, voice: string, signal: AbortSignal): Promise<ArrayBuffer> => {
+const fetchTTSBuffer = async (text: string, voice: string, signal: AbortSignal, attempt = 0): Promise<ArrayBuffer> => {
+  const key = import.meta.env.VITE_OPENAI_API_KEY;
+  if (!key) throw new Error("OpenAI API key not configured (VITE_OPENAI_API_KEY missing)");
   const res = await fetch("https://api.openai.com/v1/audio/speech", {
     method: "POST", signal,
-    headers: { Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "tts-1", input: text.slice(0, 4096), voice, speed: 0.88 }),
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ model: "tts-1-hd", input: text.slice(0, 4096), voice, speed: 0.88 }),
   });
+  if (res.status === 429 && attempt < 2) {
+    await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+    return fetchTTSBuffer(text, voice, signal, attempt + 1);
+  }
   if (!res.ok) { const err = await res.text().catch(() => ""); throw new Error(`TTS ${res.status}: ${err}`); }
   return res.arrayBuffer();
 };
@@ -276,7 +282,19 @@ const generatePartAudio = async (section: ListeningPart, signal: AbortSignal): P
   addPause(2);
   addTts(`That is the end of Part ${partWord}.`, "alloy");
 
-  const rawBuffers = await Promise.all(ttsItems.map((it) => fetchTTSBuffer(it.text, it.voice, signal)));
+  const rawBuffers = await (async () => {
+    const results: ArrayBuffer[] = new Array(ttsItems.length);
+    let idx = 0;
+    const worker = async () => {
+      while (idx < ttsItems.length) {
+        if (signal.aborted) throw new DOMException("Aborted", "AbortError");
+        const i = idx++;
+        results[i] = await fetchTTSBuffer(ttsItems[i].text, ttsItems[i].voice, signal);
+      }
+    };
+    await Promise.all(Array.from({ length: 3 }, worker));
+    return results;
+  })();
   const audioCtx = new AudioContext();
   const decoded = await Promise.all(rawBuffers.map((buf) => audioCtx.decodeAudioData(buf)));
   let ttsIdx = 0;
@@ -617,6 +635,7 @@ export default function ListeningModule() {
       }
     }
 
+    preloadAllParts(test);
   };
 
   // Pre-generate audio for all parts sequentially in background
