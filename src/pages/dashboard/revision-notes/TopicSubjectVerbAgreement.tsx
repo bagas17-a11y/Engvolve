@@ -9,6 +9,7 @@ import {
   MiniPractice,
   WorksheetBlock,
   WorksheetQuestion,
+  WorksheetContainer,
 } from "./RevisionNoteContent";
 
 export function TopicSubjectVerbAgreement() {
@@ -182,58 +183,101 @@ export function TopicSubjectVerbAgreement() {
       </DefinitionCard>
 
       <SectionTitle number={7} title="Worksheet — Subject-Verb Agreement Practice" />
+      <WorksheetContainer topicName="Subject-Verb Agreement">
 
-      <WorksheetBlock
-        title="Part A — Fix the SVA error"
-        instruction="Each sentence has one subject-verb agreement error. Rewrite the sentence with the correct verb form."
-      >
-        <WorksheetQuestion number={1}
-          question='The number of students who study abroad have increased significantly.'
-          modelAnswer='The number of students who study abroad has increased significantly. (Subject is "the number" — singular. "Of students" is a prepositional phrase that does not change the subject.)'
-          multiline
-        />
-        <WorksheetQuestion number={2}
-          question='Many people in the city believes that public transport should be free.'
-          modelAnswer='Many people in the city believe that public transport should be free. ("Many people" is plural — no "s" on the verb.)'
-          multiline
-        />
-        <WorksheetQuestion number={3}
-          question='The government have introduced stricter laws on pollution.'
-          modelAnswer='The government has introduced stricter laws on pollution. ("Government" is a singular collective noun in formal/academic writing.)'
-          multiline
-        />
-        <WorksheetQuestion number={4}
-          question='There is several reasons why renewable energy is gaining popularity.'
-          modelAnswer='There are several reasons why renewable energy is gaining popularity. ("Several reasons" is plural — use "are".)'
-          multiline
-        />
-      </WorksheetBlock>
+        <WorksheetBlock
+          title="Part A — Fix the SVA error"
+          instruction="Each sentence has one subject-verb agreement error. Rewrite the full corrected sentence, then click Check answer."
+        >
+          <WorksheetQuestion id="sva-a-1" number={1} multiline
+            question='The number of students who study abroad have increased significantly.'
+            modelAnswer='The number of students who study abroad has increased significantly. (Subject is "the number" — singular. "Of students" is a prepositional phrase.)'
+          />
+          <WorksheetQuestion id="sva-a-2" number={2} multiline
+            question='Many people in the city believes that public transport should be free.'
+            modelAnswer='Many people in the city believe that public transport should be free. ("Many people" is plural — no "s" on the verb.)'
+          />
+          <WorksheetQuestion id="sva-a-3" number={3} multiline
+            question='The government have introduced stricter laws on pollution.'
+            modelAnswer='The government has introduced stricter laws on pollution. ("Government" is a singular collective noun in formal writing.)'
+          />
+          <WorksheetQuestion id="sva-a-4" number={4} multiline
+            question='There is several reasons why renewable energy is gaining popularity.'
+            modelAnswer='There are several reasons why renewable energy is gaining popularity. ("Several reasons" is plural — use "are".)'
+          />
+          <WorksheetQuestion id="sva-a-5" number={5} multiline
+            question='Each of the countries have their own approach to healthcare.'
+            modelAnswer='Each of the countries has its own approach to healthcare. ("Each" is always singular, even followed by "of + plural noun".)'
+          />
+          <WorksheetQuestion id="sva-a-6" number={6} multiline
+            question='The quality of the essays submitted this year are very impressive.'
+            modelAnswer='The quality of the essays submitted this year is very impressive. (Subject is "the quality" — singular. "Of the essays" is a prepositional phrase.)'
+          />
+          <WorksheetQuestion id="sva-a-7" number={7} multiline
+            question='Everyone in the classrooms agree that the new policy is unfair.'
+            modelAnswer='Everyone in the classrooms agrees that the new policy is unfair. ("Everyone" is always singular — it takes a singular verb.)'
+          />
+          <WorksheetQuestion id="sva-a-8" number={8} multiline
+            question='Neither the teacher nor the students was aware of the schedule change.'
+            modelAnswer='Neither the teacher nor the students were aware of the schedule change. (With "neither…nor", the verb agrees with the closer subject — "students" is plural, so use "were".)'
+          />
+        </WorksheetBlock>
 
-      <WorksheetBlock
-        title="Part B — Choose the correct verb form"
-        instruction='Type the correct verb form (a or b) and click Check.'
-      >
-        <WorksheetQuestion number={1}
-          question='The quality of the reports ___ improved this year. (a) has  (b) have'
-          modelAnswer='"has" — the subject is "the quality" (singular), not "reports".'
-          accepted={["a", "(a)", "has"]}
-        />
-        <WorksheetQuestion number={2}
-          question='Both the teacher and the students ___ agreed on the new schedule. (a) has  (b) have'
-          modelAnswer='"have" — subjects joined by "and" are plural.'
-          accepted={["b", "(b)", "have"]}
-        />
-        <WorksheetQuestion number={3}
-          question='Each of the countries ___ its own approach to healthcare. (a) has  (b) have'
-          modelAnswer='"has" — "each" is always singular, even when followed by "of + plural noun".'
-          accepted={["a", "(a)", "has"]}
-        />
-        <WorksheetQuestion number={4}
-          question='The data ___ that pollution levels are rising. (a) shows  (b) show'
-          modelAnswer='"shows" — "data" is treated as singular in formal/academic English when used as an uncountable mass noun.'
-          accepted={["a", "(a)", "shows"]}
-        />
-      </WorksheetBlock>
+        <WorksheetBlock
+          title="Part B — Choose the correct verb form"
+          instruction="Click the correct option from the two boxes, then click Check answer."
+        >
+          <WorksheetQuestion id="sva-b-1" number={1}
+            question='The quality of the reports ___ improved significantly this year.'
+            choices={["has", "have"]}
+            accepted={["has"]}
+            modelAnswer='"has" — the subject is "the quality" (singular), not "reports".'
+          />
+          <WorksheetQuestion id="sva-b-2" number={2}
+            question='Both the teacher and the students ___ agreed on the new schedule.'
+            choices={["has", "have"]}
+            accepted={["have"]}
+            modelAnswer='"have" — subjects joined by "and" are always plural.'
+          />
+          <WorksheetQuestion id="sva-b-3" number={3}
+            question='Each of the countries ___ its own approach to healthcare policy.'
+            choices={["has", "have"]}
+            accepted={["has"]}
+            modelAnswer='"has" — "each" is always singular, even when followed by "of + plural noun".'
+          />
+          <WorksheetQuestion id="sva-b-4" number={4}
+            question='The data clearly ___ that pollution levels are rising.'
+            choices={["shows", "show"]}
+            accepted={["shows"]}
+            modelAnswer='"shows" — "data" used as an uncountable mass noun is treated as singular in formal academic English.'
+          />
+          <WorksheetQuestion id="sva-b-5" number={5}
+            question='A number of students ___ already submitted their final assignments.'
+            choices={["has", "have"]}
+            accepted={["have"]}
+            modelAnswer='"have" — "a number of" (meaning several) is always plural. Note: "the number of" (referring to a count) is singular.'
+          />
+          <WorksheetQuestion id="sva-b-6" number={6}
+            question='The committee ___ meeting tomorrow to discuss the annual budget.'
+            choices={["is", "are"]}
+            accepted={["is"]}
+            modelAnswer='"is" — "committee" is a singular collective noun in formal British/academic English.'
+          />
+          <WorksheetQuestion id="sva-b-7" number={7}
+            question='Neither the manager nor his colleagues ___ available for comment.'
+            choices={["was", "were"]}
+            accepted={["were"]}
+            modelAnswer='"were" — with "neither…nor", the verb agrees with the closer subject. "Colleagues" is plural, so use "were".'
+          />
+          <WorksheetQuestion id="sva-b-8" number={8}
+            question='The news about the new policies ___ spread quickly across the country.'
+            choices={["has", "have"]}
+            accepted={["has"]}
+            modelAnswer='"has" — "news" is an uncountable noun and always takes a singular verb.'
+          />
+        </WorksheetBlock>
+
+      </WorksheetContainer>
 
       <SectionTitle number={8} title="Mini practice – subject-verb agreement" />
       <MiniPractice

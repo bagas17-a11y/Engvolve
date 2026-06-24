@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   BarChart, Bar, LineChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label,
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -631,6 +631,7 @@ export default function WritingModule() {
     const title = data.title as string ?? "";
     const unit = data.unit as string ?? "";
     const yAxisLabel = data.y_axis as string ?? "";
+    const xAxisLabel = data.x_axis as string ?? "";
 
     // Pie / segment fallback
     if (segments.length > 0) {
@@ -674,17 +675,15 @@ export default function WritingModule() {
       color: "hsl(var(--foreground))",
     };
 
-    const yLabel = yAxisLabel
-      ? { value: yAxisLabel, angle: -90, position: "insideLeft" as const, style: { fontSize: 9, fill: "hsl(var(--muted-foreground))" }, offset: 14 }
-      : undefined;
+    const yAxisWidth = yAxisLabel ? 56 : 40;
 
     // ── Bar chart ──────────────────────────────────────────────
     if (visualType === "bar_chart") {
       return (
         <div className="space-y-2">
-          {title && <p className="text-xs font-medium text-accent">{title}</p>}
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={chartData} margin={{ top: 4, right: 8, left: yAxisLabel ? 16 : 4, bottom: 44 }}>
+          {title && <p className="text-xs font-semibold text-center text-foreground">{title}</p>}
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={chartData} margin={{ top: 16, right: 16, left: 8, bottom: xAxisLabel ? 56 : 48 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
               <XAxis
                 dataKey="name"
@@ -692,17 +691,23 @@ export default function WritingModule() {
                 angle={-35}
                 textAnchor="end"
                 interval={0}
-                height={60}
+                height={xAxisLabel ? 72 : 62}
+                label={xAxisLabel ? { value: xAxisLabel, position: "insideBottom", offset: -6, style: { fontSize: 10, fill: "hsl(var(--muted-foreground))" } } : undefined}
               />
-              <YAxis tick={tickStyle} width={yAxisLabel ? 78 : 48} label={yLabel} />
-              <Tooltip
-                contentStyle={tooltipStyle}
-                formatter={(value: number) => [`${value}${unit ? " " + unit : ""}`, undefined]}
-                cursor={{ fill: "hsl(var(--accent))", opacity: 0.08 }}
-              />
-              <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} />
+              <YAxis tick={tickStyle} width={yAxisWidth}>
+                {yAxisLabel && (
+                  <Label
+                    value={yAxisLabel}
+                    angle={-90}
+                    position="insideLeft"
+                    dx={-(yAxisWidth - 14)}
+                    style={{ fontSize: 9, fill: "hsl(var(--muted-foreground))", textAnchor: "middle" }}
+                  />
+                )}
+              </YAxis>
+              <Legend verticalAlign="top" align="left" wrapperStyle={{ fontSize: 10, paddingBottom: 4 }} />
               {series.map((s, i) => (
-                <Bar key={s.label} dataKey={s.label} fill={CHART_COLORS[i % CHART_COLORS.length]} radius={[2, 2, 0, 0]} />
+                <Bar key={s.label} dataKey={s.label} fill={CHART_COLORS[i % CHART_COLORS.length]} radius={[2, 2, 0, 0]} isAnimationActive={false} />
               ))}
             </BarChart>
           </ResponsiveContainer>
@@ -714,17 +719,31 @@ export default function WritingModule() {
     if (visualType === "line_graph") {
       return (
         <div className="space-y-2">
-          {title && <p className="text-xs font-medium text-accent">{title}</p>}
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={chartData} margin={{ top: 4, right: 16, left: yAxisLabel ? 16 : 4, bottom: 8 }}>
+          {title && <p className="text-xs font-semibold text-center text-foreground">{title}</p>}
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={chartData} margin={{ top: 16, right: 16, left: 8, bottom: xAxisLabel ? 32 : 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
-              <XAxis dataKey="name" tick={tickStyle} />
-              <YAxis tick={tickStyle} width={yAxisLabel ? 78 : 48} label={yLabel} />
+              <XAxis
+                dataKey="name"
+                tick={tickStyle}
+                label={xAxisLabel ? { value: xAxisLabel, position: "insideBottom", offset: -4, style: { fontSize: 10, fill: "hsl(var(--muted-foreground))" } } : undefined}
+              />
+              <YAxis tick={tickStyle} width={yAxisWidth}>
+                {yAxisLabel && (
+                  <Label
+                    value={yAxisLabel}
+                    angle={-90}
+                    position="insideLeft"
+                    dx={-(yAxisWidth - 14)}
+                    style={{ fontSize: 9, fill: "hsl(var(--muted-foreground))", textAnchor: "middle" }}
+                  />
+                )}
+              </YAxis>
               <Tooltip
                 contentStyle={tooltipStyle}
                 formatter={(value: number) => [`${value}${unit ? " " + unit : ""}`, undefined]}
               />
-              <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} />
+              <Legend verticalAlign="top" align="left" wrapperStyle={{ fontSize: 10, paddingBottom: 4 }} />
               {series.map((s, i) => (
                 <Line
                   key={s.label}
@@ -1192,7 +1211,8 @@ export default function WritingModule() {
 
               {/* Visual data for AI-generated Task 1 questions */}
               {!selectedQuestion.question_image_url && selectedQuestion.task_type.startsWith("Task 1") && (
-                <div className="p-4 bg-secondary/20 rounded-lg border border-border/50 mb-4">
+                <div className="overflow-x-auto bg-secondary/20 rounded-lg border border-border/50 mb-4">
+                  <div style={{ minWidth: 480 }} className="p-4">
                   {selectedQuestion.visual_data ? (
                     <VisualDataRenderer
                       visualType={selectedQuestion.visual_type ?? "bar_chart"}
@@ -1206,6 +1226,7 @@ export default function WritingModule() {
                       </div>
                     </div>
                   )}
+                  </div>
                 </div>
               )}
             </div>

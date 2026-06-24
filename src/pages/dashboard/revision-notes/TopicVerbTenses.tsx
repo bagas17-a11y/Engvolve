@@ -9,6 +9,7 @@ import {
   RevisionTable,
   WorksheetBlock,
   WorksheetQuestion,
+  WorksheetContainer,
 } from "./RevisionNoteContent";
 
 export function TopicVerbTenses() {
@@ -327,79 +328,123 @@ export function TopicVerbTenses() {
       </div>
 
       <SectionTitle number={8} title="Worksheet — Verb Tenses Practice" />
+      <WorksheetContainer topicName="Verb Tenses">
 
-      <WorksheetBlock
-        title="Part A — Identify and correct the tense error"
-        instruction="Each sentence has one verb tense error. Rewrite the sentence correctly in the input box, then click Check."
-      >
-        <WorksheetQuestion number={1}
-          question='Last year, the number of electric cars on the road increases by 40%.'
-          modelAnswer='Last year, the number of electric cars on the road increased by 40%. (Past simple — "last year" signals a finished past event.)'
-          multiline
-        />
-        <WorksheetQuestion number={2}
-          question='Scientists are discovering the vaccine in 2020.'
-          modelAnswer='Scientists discovered the vaccine in 2020. (Past simple — specific finished time, not an ongoing action.)'
-          multiline
-        />
-        <WorksheetQuestion number={3}
-          question='By the time she graduated, she already learns three languages.'
-          modelAnswer='By the time she graduated, she had already learned three languages. (Past perfect — action completed before another past action.)'
-          multiline
-        />
-        <WorksheetQuestion number={4}
-          question='Right now, the government consider a new policy on renewable energy.'
-          modelAnswer='Right now, the government is considering a new policy on renewable energy. (Present continuous — action happening at this moment.)'
-          multiline
-        />
-      </WorksheetBlock>
+        <WorksheetBlock
+          title="Part A — Identify and correct the tense error"
+          instruction="Each sentence has one verb tense error. Rewrite the full corrected sentence, then click Check answer."
+        >
+          <WorksheetQuestion id="vt-a-1" number={1} multiline
+            question='Last year, the number of electric cars on the road increases by 40%.'
+            modelAnswer='Last year, the number of electric cars on the road increased by 40%. (Past simple — "last year" signals a finished past event.)'
+          />
+          <WorksheetQuestion id="vt-a-2" number={2} multiline
+            question='Scientists are discovering the vaccine in 2020.'
+            modelAnswer='Scientists discovered the vaccine in 2020. (Past simple — specific finished time, not an ongoing action.)'
+          />
+          <WorksheetQuestion id="vt-a-3" number={3} multiline
+            question='By the time she graduated, she already learns three languages.'
+            modelAnswer='By the time she graduated, she had already learned three languages. (Past perfect — action completed before another past action.)'
+          />
+          <WorksheetQuestion id="vt-a-4" number={4} multiline
+            question='Right now, the government consider a new policy on renewable energy.'
+            modelAnswer='Right now, the government is considering a new policy on renewable energy. (Present continuous — action happening at this moment.)'
+          />
+          <WorksheetQuestion id="vt-a-5" number={5} multiline
+            question='Since the company was founded, it invests heavily in research and development.'
+            modelAnswer='Since the company was founded, it has invested heavily in research and development. (Present perfect — "since" + a past starting point requires present perfect.)'
+          />
+          <WorksheetQuestion id="vt-a-6" number={6} multiline
+            question='While she was reading the report, her phone rings.'
+            modelAnswer='While she was reading the report, her phone rang. (Past simple — the interrupting action uses past simple, not present simple.)'
+          />
+          <WorksheetQuestion id="vt-a-7" number={7} multiline
+            question='Before the invention of the internet, people are getting their news from newspapers.'
+            modelAnswer='Before the invention of the internet, people got their news from newspapers. (Past simple — general past habit/fact.)'
+          />
+          <WorksheetQuestion id="vt-a-8" number={8} multiline
+            question='They finish building the new hospital by next December.'
+            modelAnswer='They will have finished building the new hospital by next December. (Future perfect — an action completed before a specific future point.)'
+          />
+        </WorksheetBlock>
 
-      <WorksheetBlock
-        title="Part B — Choose the correct tense"
-        instruction='Type the letter of the correct option (a or b), then click Check.'
-      >
-        <WorksheetQuestion number={1}
-          question='Since 2010, the global temperature ___. (a) rises  (b) has risen'
-          modelAnswer='"has risen" — "since 2010" connects the past to now, which requires present perfect.'
-          accepted={["b", "(b)", "b) has risen", "has risen"]}
-        />
-        <WorksheetQuestion number={2}
-          question='If governments invest in clean energy, air quality ___. (a) will improve  (b) improves'
-          modelAnswer='"will improve" — first conditional: a real future possibility uses "will".'
-          accepted={["a", "(a)", "a) will improve", "will improve"]}
-        />
-        <WorksheetQuestion number={3}
-          question='She ___ her essay when the power went out. (a) was writing  (b) wrote'
-          modelAnswer='"was writing" — past continuous shows an ongoing action that was interrupted by another past event.'
-          accepted={["a", "(a)", "a) was writing", "was writing"]}
-        />
-        <WorksheetQuestion number={4}
-          question='Every day, millions of people ___ public transport. (a) are using  (b) use'
-          modelAnswer='"use" — present simple for regular habits and general facts.'
-          accepted={["b", "(b)", "b) use", "use"]}
-        />
-      </WorksheetBlock>
+        <WorksheetBlock
+          title="Part B — Choose the correct tense"
+          instruction="Click the correct option from the two boxes, then click Check answer."
+        >
+          <WorksheetQuestion id="vt-b-1" number={1}
+            question='Since 2010, the global temperature ___ significantly.'
+            choices={["rises", "has risen"]}
+            accepted={["has risen"]}
+            modelAnswer='"has risen" — "since 2010" connects the past to now, which requires present perfect.'
+          />
+          <WorksheetQuestion id="vt-b-2" number={2}
+            question='If governments invest in clean energy, air quality ___.'
+            choices={["will improve", "improves"]}
+            accepted={["will improve"]}
+            modelAnswer='"will improve" — first conditional: a real future possibility uses "will".'
+          />
+          <WorksheetQuestion id="vt-b-3" number={3}
+            question='She ___ her essay when the power went out.'
+            choices={["was writing", "wrote"]}
+            accepted={["was writing"]}
+            modelAnswer='"was writing" — past continuous shows an ongoing action interrupted by a past event.'
+          />
+          <WorksheetQuestion id="vt-b-4" number={4}
+            question='Every day, millions of people ___ public transport to commute.'
+            choices={["are using", "use"]}
+            accepted={["use"]}
+            modelAnswer='"use" — present simple for regular habits and general facts.'
+          />
+          <WorksheetQuestion id="vt-b-5" number={5}
+            question='The data shows that pollution levels ___ steadily since 2000.'
+            choices={["increased", "have increased"]}
+            accepted={["have increased"]}
+            modelAnswer='"have increased" — "since 2000" requires present perfect to connect past to present.'
+          />
+          <WorksheetQuestion id="vt-b-6" number={6}
+            question='By 2050, scientists predict that the global population ___ ten billion.'
+            choices={["will reach", "reaches"]}
+            accepted={["will reach"]}
+            modelAnswer='"will reach" — a future prediction uses "will + base verb".'
+          />
+          <WorksheetQuestion id="vt-b-7" number={7}
+            question='When the earthquake ___, people were still asleep.'
+            choices={["struck", "was striking"]}
+            accepted={["struck"]}
+            modelAnswer='"struck" — the earthquake is the short interrupting event, so past simple is used.'
+          />
+          <WorksheetQuestion id="vt-b-8" number={8}
+            question='She ___ for the company for five years before she got promoted.'
+            choices={["worked", "had worked"]}
+            accepted={["had worked"]}
+            modelAnswer='"had worked" — past perfect shows the action was completed before another past event (getting promoted).'
+          />
+        </WorksheetBlock>
 
-      <WorksheetBlock
-        title="Part C — Write your own sentences"
-        instruction="Write a sentence about technology using the tense shown. Try to write a full IELTS-style sentence (not just a short phrase)."
-      >
-        <WorksheetQuestion number={1}
-          question="Write one sentence using the present perfect tense."
-          modelAnswer='Example: "Artificial intelligence has transformed the way companies recruit employees." (present perfect = past action with present relevance)'
-          multiline
-        />
-        <WorksheetQuestion number={2}
-          question="Write one sentence using the past simple tense."
-          modelAnswer='Example: "In 2007, Apple launched the first iPhone, changing communication forever." (past simple = specific finished past event)'
-          multiline
-        />
-        <WorksheetQuestion number={3}
-          question="Write one sentence using the first conditional (if + present simple, will + verb)."
-          modelAnswer='Example: "If technology continues to advance, many jobs will be automated within a decade." (first conditional = real future possibility)'
-          multiline
-        />
-      </WorksheetBlock>
+        <WorksheetBlock
+          title="Part C — Write your own sentences"
+          instruction="Write a full IELTS-style sentence using the tense shown. Click Check answer to compare with the model."
+        >
+          <WorksheetQuestion id="vt-c-1" number={1} multiline
+            question="Write one sentence about technology using the present perfect tense."
+            modelAnswer='Example: "Artificial intelligence has transformed the way companies recruit employees." (past action with ongoing present relevance)'
+          />
+          <WorksheetQuestion id="vt-c-2" number={2} multiline
+            question="Write one sentence about a historical event using the past simple tense."
+            modelAnswer='Example: "In 2007, Apple launched the first iPhone, fundamentally changing how people communicate." (specific finished past event)'
+          />
+          <WorksheetQuestion id="vt-c-3" number={3} multiline
+            question="Write one sentence using the first conditional (if + present simple, will + verb)."
+            modelAnswer='Example: "If governments invest more in renewable energy, carbon emissions will fall significantly within a decade." (real future possibility)'
+          />
+          <WorksheetQuestion id="vt-c-4" number={4} multiline
+            question="Write one sentence using the past continuous to describe an interrupted action."
+            modelAnswer='Example: "Scientists were developing the treatment when the funding was suddenly cut." (ongoing past action interrupted by another past event)'
+          />
+        </WorksheetBlock>
+
+      </WorksheetContainer>
     </div>
   );
 }

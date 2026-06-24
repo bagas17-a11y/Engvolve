@@ -1,4 +1,4 @@
-import { ReactNode, useState, useRef } from "react";
+import { ReactNode, useState, useRef, useCallback, useContext, createContext, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -301,38 +301,174 @@ export function MistakeRow({
   );
 }
 
-// WorksheetQuestion — single question with input + check
+// ─── Worksheet context ────────────────────────────────────────────────────────
+
+interface WsAnswer {
+  questionText: string;
+  answer: string;
+  isCorrect?: boolean;
+  modelAnswer: string;
+  section: string;
+}
+
+const WsCtx = createContext<{
+  register: (id: string, q: string, model: string, section: string) => void;
+  report: (id: string, answer: string, isCorrect?: boolean) => void;
+} | null>(null);
+
+const WsSectionCtx = createContext<string>("");
+
+// WorksheetContainer — wraps all blocks, owns answers state, provides Download PDF
+export function WorksheetContainer({ topicName, children }: { topicName: string; children: ReactNode }) {
+  const answersRef = useRef<Map<string, WsAnswer>>(new Map());
+  const orderRef = useRef<string[]>([]);
+
+  const register = useCallback((id: string, q: string, model: string, section: string) => {
+    if (!answersRef.current.has(id)) orderRef.current.push(id);
+    if (!answersRef.current.get(id)?.answer) {
+      answersRef.current.set(id, { questionText: q, answer: "", modelAnswer: model, section, isCorrect: undefined });
+    }
+  }, []);
+
+  const report = useCallback((id: string, answer: string, isCorrect?: boolean) => {
+    const prev = answersRef.current.get(id);
+    if (prev) answersRef.current.set(id, { ...prev, answer, isCorrect });
+  }, []);
+
+  const handleDownload = () => {
+    const rows = orderRef.current.map(id => answersRef.current.get(id)!);
+    const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
+    // group by section
+    const sections: { title: string; items: (WsAnswer & { idx: number })[] }[] = [];
+    let globalIdx = 1;
+    rows.forEach(r => {
+      let sec = sections.find(s => s.title === r.section);
+      if (!sec) { sec = { title: r.section, items: [] }; sections.push(sec); }
+      sec.items.push({ ...r, idx: globalIdx++ });
+    });
+
+    const verdictColor = (r: WsAnswer) => r.isCorrect === true ? "#16a34a" : r.isCorrect === false ? "#dc2626" : "#94a3b8";
+    const verdictText = (r: WsAnswer) => r.isCorrect === true ? "✓ Correct" : r.isCorrect === false ? "✗ Incorrect" : "Not checked";
+    const answerBg = (r: WsAnswer) => r.isCorrect === true ? "#f0fdf4" : r.isCorrect === false ? "#fef2f2" : r.answer ? "#f8fafc" : "#f1f5f9";
+    const answerBorder = (r: WsAnswer) => r.isCorrect === true ? "#22c55e" : r.isCorrect === false ? "#ef4444" : "#cbd5e1";
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>${topicName} Worksheet</title>
+<style>
+  body{font-family:Arial,sans-serif;max-width:760px;margin:0 auto;padding:28px;color:#1e293b}
+  h1{font-size:20px;color:#1e40af;border-bottom:2px solid #1e40af;padding-bottom:8px;margin-bottom:4px}
+  .meta{color:#64748b;font-size:12px;margin-bottom:24px}
+  .section{margin-bottom:28px}
+  .sec-title{font-size:13px;font-weight:700;color:#1e40af;background:#eff6ff;padding:7px 12px;border-radius:6px;margin-bottom:12px;border-left:3px solid #3b82f6}
+  .qblock{margin-bottom:14px;padding:12px;border:1px solid #e2e8f0;border-radius:8px;page-break-inside:avoid}
+  .qnum{font-size:11px;font-weight:700;color:#94a3b8;margin-bottom:3px}
+  .qtext{font-size:14px;margin-bottom:8px;line-height:1.5}
+  .ans{padding:8px 12px;border-radius:6px;border-width:1px;border-style:solid;font-size:14px}
+  .verdict{font-size:11px;font-weight:700;margin-top:5px}
+  .model{font-size:12px;color:#64748b;margin-top:6px;line-height:1.4}
+  .model b{color:#475569}
+  @media print{button{display:none!important}}
+</style></head><body>
+<h1>${topicName} — Worksheet</h1>
+<div class="meta">Completed: ${date} &nbsp;|&nbsp; For manual grading by the EngInAja team</div>
+${sections.map(s => `
+<div class="section">
+  <div class="sec-title">${s.title}</div>
+  ${s.items.map(r => `
+  <div class="qblock">
+    <div class="qnum">Question ${r.idx}</div>
+    <div class="qtext">${r.questionText}</div>
+    <div class="ans" style="background:${answerBg(r)};border-color:${answerBorder(r)}">
+      ${r.answer || '<span style="color:#94a3b8;font-style:italic">No answer given</span>'}
+    </div>
+    <div class="verdict" style="color:${verdictColor(r)}">${verdictText(r)}</div>
+    <div class="model"><b>Model answer:</b> ${r.modelAnswer}</div>
+  </div>`).join("")}
+</div>`).join("")}
+</body></html>`;
+
+    const win = window.open("", "_blank");
+    if (win) { win.document.write(html); win.document.close(); setTimeout(() => win.print(), 400); }
+  };
+
+  return (
+    <WsCtx.Provider value={{ register, report }}>
+      <div className="space-y-4">
+        {children}
+        <button
+          onClick={handleDownload}
+          className="w-full flex items-center justify-center gap-2 rounded-xl border border-blue-500/40 bg-blue-500/10 px-4 py-3 text-sm font-semibold text-blue-400 hover:bg-blue-500/20 transition-colors"
+        >
+          <ClipboardList className="w-4 h-4" />
+          Download worksheet as PDF (for team grading)
+        </button>
+      </div>
+    </WsCtx.Provider>
+  );
+}
+
+// WorksheetBlock — section wrapper, provides title to questions
+export function WorksheetBlock({ title, instruction, children }: { title: string; instruction: string; children: ReactNode }) {
+  return (
+    <WsSectionCtx.Provider value={title}>
+      <div className="rounded-xl border border-border overflow-hidden bg-secondary/60">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-blue-500/10">
+          <ClipboardList className="h-4 w-4 text-blue-500" />
+          <span className="text-sm font-semibold text-blue-600">{title}</span>
+        </div>
+        <div className="p-4">
+          <p className="text-xs text-muted-foreground mb-4">{instruction}</p>
+          <div className="space-y-5">{children}</div>
+        </div>
+      </div>
+    </WsSectionCtx.Provider>
+  );
+}
+
+// WorksheetQuestion — text input OR choice buttons, with context reporting
 export function WorksheetQuestion({
+  id,
   number,
   question,
   modelAnswer,
   accepted,
+  choices,
   multiline = false,
 }: {
+  id: string;
   number: number;
   question: string;
   modelAnswer: string;
-  accepted?: string[];   // if provided, auto-checks the student's answer
+  accepted?: string[];
+  choices?: string[];   // renders clickable option boxes instead of text input
   multiline?: boolean;
 }) {
+  const ctx = useContext(WsCtx);
+  const section = useContext(WsSectionCtx);
   const [value, setValue] = useState("");
+  const [selected, setSelected] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement & HTMLInputElement>(null);
 
-  const isAutoCheck = accepted && accepted.length > 0;
+  useEffect(() => {
+    ctx?.register(id, question, modelAnswer, section);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const isChoiceMode = !!choices;
+  const answer = isChoiceMode ? (selected ?? "") : value;
+  const isAutoCheck = (accepted && accepted.length > 0);
   const normalise = (s: string) => s.trim().toLowerCase().replace(/[""]/g, '"').replace(/['']/g, "'");
-  const isCorrect = isAutoCheck
-    ? accepted!.some(a => normalise(a) === normalise(value))
-    : null;
+  const isCorrect = isAutoCheck ? accepted!.some(a => normalise(a) === normalise(answer)) : undefined;
 
   const handleCheck = () => {
-    if (!value.trim()) return;
+    if (!answer.trim()) return;
+    ctx?.report(id, answer, isAutoCheck ? isCorrect : undefined);
     setChecked(true);
   };
 
   const handleReset = () => {
-    setValue("");
-    setChecked(false);
+    setValue(""); setSelected(null); setChecked(false);
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
@@ -342,16 +478,34 @@ export function WorksheetQuestion({
         <span className="font-semibold text-muted-foreground mr-1.5">{number}.</span>
         {question}
       </p>
+
       {!checked ? (
-        <div className="flex gap-2 items-start">
-          {multiline ? (
+        <div className="space-y-2">
+          {isChoiceMode ? (
+            <div className="flex flex-wrap gap-2">
+              {choices!.map((opt, ci) => (
+                <button
+                  key={ci}
+                  onClick={() => setSelected(opt)}
+                  className={cn(
+                    "flex-1 min-w-[120px] rounded-lg border px-4 py-2.5 text-sm font-medium transition-all text-left",
+                    selected === opt
+                      ? "border-blue-500 bg-blue-500/20 text-blue-300 ring-1 ring-blue-500/40"
+                      : "border-border bg-background/60 text-foreground/70 hover:border-blue-500/50 hover:bg-blue-500/8"
+                  )}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          ) : multiline ? (
             <textarea
               ref={inputRef as React.RefObject<HTMLTextAreaElement>}
               value={value}
               onChange={e => setValue(e.target.value)}
               rows={2}
               placeholder="Type your answer here…"
-              className="flex-1 rounded-lg border border-border bg-background/80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-blue-500/50 resize-none"
+              className="w-full rounded-lg border border-border bg-background/80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-blue-500/50 resize-none"
             />
           ) : (
             <input
@@ -361,24 +515,22 @@ export function WorksheetQuestion({
               onChange={e => setValue(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleCheck()}
               placeholder="Type your answer…"
-              className="flex-1 rounded-lg border border-border bg-background/80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+              className="w-full rounded-lg border border-border bg-background/80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-blue-500/50"
             />
           )}
           <button
             onClick={handleCheck}
-            disabled={!value.trim()}
-            className="shrink-0 rounded-lg bg-blue-500/15 border border-blue-500/30 px-3 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            disabled={!answer.trim()}
+            className="rounded-lg bg-blue-500/15 border border-blue-500/30 px-4 py-1.5 text-xs font-semibold text-blue-400 hover:bg-blue-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            Check
+            Check answer
           </button>
         </div>
       ) : (
         <div className={cn(
           "rounded-lg border px-3 py-2.5 space-y-1.5",
           isAutoCheck
-            ? isCorrect
-              ? "border-emerald-500/30 bg-emerald-500/8"
-              : "border-red-500/30 bg-red-500/8"
+            ? isCorrect ? "border-emerald-500/30 bg-emerald-500/8" : "border-red-500/30 bg-red-500/8"
             : "border-blue-500/30 bg-blue-500/8"
         )}>
           {isAutoCheck && (
@@ -388,6 +540,9 @@ export function WorksheetQuestion({
                 : <><XCircle className="w-4 h-4 text-red-400" /><span className="text-xs font-semibold text-red-400">Not quite — see the answer below.</span></>
               }
             </div>
+          )}
+          {isChoiceMode && selected && (
+            <p className="text-xs text-muted-foreground">Your answer: <span className="font-medium text-foreground/80">{selected}</span></p>
           )}
           {(!isAutoCheck || !isCorrect) && (
             <>
@@ -400,30 +555,6 @@ export function WorksheetQuestion({
           </button>
         </div>
       )}
-    </div>
-  );
-}
-
-// WorksheetBlock — groups questions under a title + instruction
-export function WorksheetBlock({
-  title,
-  instruction,
-  children,
-}: {
-  title: string;
-  instruction: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="rounded-xl border border-border overflow-hidden bg-secondary/60">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-blue-500/10">
-        <ClipboardList className="h-4 w-4 text-blue-500" />
-        <span className="text-sm font-semibold text-blue-600">{title}</span>
-      </div>
-      <div className="p-4 space-y-1">
-        <p className="text-xs text-muted-foreground mb-4">{instruction}</p>
-        <div className="space-y-5">{children}</div>
-      </div>
     </div>
   );
 }
