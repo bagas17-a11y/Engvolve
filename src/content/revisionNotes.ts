@@ -113,6 +113,17 @@ export const REVISION_NOTE_TOPICS: RevisionNoteSection[] = [
     ],
   },
   {
+    id: "paragraph-structuring",
+    category: "writing-skills",
+    title: "Paragraph Structuring (PEEL)",
+    subItems: [
+      { id: "peel-overview", label: "The PEEL framework" },
+      { id: "peel-point", label: "Point — the topic sentence" },
+      { id: "peel-explanation", label: "Explanation — the analysis" },
+      { id: "peel-link", label: "Link — the wrap-up" },
+    ],
+  },
+  {
     id: "linking-words-coherence",
     category: "writing-skills",
     title: "Linking Words, Referencing & Coherence",
@@ -193,6 +204,7 @@ export const REVISION_NOTE_IDS = REVISION_NOTE_TOPICS.map((t) => t.id) as [
   "modal-verbs",
   "apostrophes",
   "punctuation",
+  "paragraph-structuring",
   "linking-words-coherence",
   "writing-formats",
   "text-types",
