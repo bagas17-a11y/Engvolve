@@ -9,6 +9,7 @@ import {
   ExaminerTip,
   WorksheetBlock,
   WorksheetQuestion,
+  WorksheetContainer,
 } from "./RevisionNoteContent";
 
 export function TopicLinkingWordsCoherence() {
@@ -131,58 +132,85 @@ export function TopicLinkingWordsCoherence() {
         ]}
       />
       <SectionTitle number={6} title="Worksheet — Conjunctions Practice" />
+      <WorksheetContainer topicName="Linking Words & Conjunctions">
 
-      <WorksheetBlock
-        title="Part A — Join the sentences using the conjunction shown"
-        instruction="Rewrite the two sentences as one, using the conjunction given. Pay attention to comma placement."
-      >
-        <WorksheetQuestion number={1}
-          question='Join with "and": "Public transport is cheap." + "It helps reduce traffic."'
-          modelAnswer='"Public transport is cheap, and it helps reduce traffic." — Comma before "and" when joining two independent clauses.'
-          multiline
-        />
-        <WorksheetQuestion number={2}
-          question='Join with "whereas": "Some students prefer online learning." + "Others focus better in a classroom."'
-          modelAnswer='"Some students prefer online learning, whereas others focus better in a classroom." — Comma before "whereas" mid-sentence.'
-          multiline
-        />
-        <WorksheetQuestion number={3}
-          question='Join with "although" (start the sentence with "Although"): "She studied hard." + "She did not pass the exam."'
-          modelAnswer='"Although she studied hard, she did not pass the exam." — Comma after the dependent clause when "although" starts the sentence.'
-          multiline
-        />
-        <WorksheetQuestion number={4}
-          question='Join with "so": "The city invested in clean energy." + "Air quality improved."'
-          modelAnswer='"The city invested in clean energy, so air quality improved." — Comma before "so" when joining two independent clauses.'
-          multiline
-        />
-      </WorksheetBlock>
+        <WorksheetBlock
+          title="Part A — Join the sentences using the conjunction shown"
+          instruction="Rewrite the two sentences as one, using the conjunction given. Pay attention to comma placement."
+        >
+          <WorksheetQuestion id="lw-a-1" number={1} multiline
+            question='Join with "and": "Public transport is cheap." + "It helps reduce traffic."'
+            modelAnswer='"Public transport is cheap, and it helps reduce traffic." — Comma before "and" when joining two independent clauses.'
+          />
+          <WorksheetQuestion id="lw-a-2" number={2} multiline
+            question='Join with "whereas": "Some students prefer online learning." + "Others focus better in a classroom."'
+            modelAnswer='"Some students prefer online learning, whereas others focus better in a classroom." — Comma before "whereas" mid-sentence.'
+          />
+          <WorksheetQuestion id="lw-a-3" number={3} multiline
+            question='Join with "although" (start with "Although"): "She studied hard." + "She did not pass the exam."'
+            modelAnswer='"Although she studied hard, she did not pass the exam." — Comma after the dependent clause when "although" starts the sentence.'
+          />
+          <WorksheetQuestion id="lw-a-4" number={4} multiline
+            question='Join with "so": "The city invested in clean energy." + "Air quality improved."'
+            modelAnswer='"The city invested in clean energy, so air quality improved." — Comma before "so" when joining two independent clauses.'
+          />
+          <WorksheetQuestion id="lw-a-5" number={5} multiline
+            question='Join with "but": "The policy was expensive." + "It produced excellent results."'
+            modelAnswer='"The policy was expensive, but it produced excellent results." — Comma before "but" when joining two independent clauses showing contrast.'
+          />
+          <WorksheetQuestion id="lw-a-6" number={6} multiline
+            question='Join with "because" (start with "Because"): "He missed the bus." + "He arrived late to work."'
+            modelAnswer='"Because he missed the bus, he arrived late to work." — Comma after the dependent clause when "because" starts the sentence.'
+          />
+          <WorksheetQuestion id="lw-a-7" number={7} multiline
+            question='Join with "nor": "The team did not prepare well." + "The team did not perform well."'
+            modelAnswer='"The team did not prepare well, nor did they perform well." — Invert subject and auxiliary after "nor". Comma before "nor".'
+          />
+          <WorksheetQuestion id="lw-a-8" number={8} multiline
+            question='Join with "unless": "You submit the form." + "Your application will not be processed."'
+            modelAnswer='"Your application will not be processed unless you submit the form." — No comma needed when "unless" comes in the middle of the sentence.'
+          />
+        </WorksheetBlock>
 
-      <WorksheetBlock
-        title="Part B — Find and fix the conjunction error"
-        instruction="Each sentence has one error (wrong conjunction, duplicate words, or punctuation). Rewrite the corrected sentence."
-      >
-        <WorksheetQuestion number={1}
-          question='"She loves travelling, but however, she rarely has time."'
-          modelAnswer='"She loves travelling; however, she rarely has time." OR "She loves travelling, but she rarely has time." — "but" and "however" cannot be used together; they both show contrast.'
-          multiline
-        />
-        <WorksheetQuestion number={2}
-          question='"Although the report was long but it was very clear."'
-          modelAnswer='"Although the report was long, it was very clear." — Remove "but". "Although" already expresses contrast; adding "but" creates a double conjunction error.'
-          multiline
-        />
-        <WorksheetQuestion number={3}
-          question='"I forgot my keys so, I had to call home."'
-          modelAnswer='"I forgot my keys, so I had to call home." — The comma goes before "so", not after it.'
-          multiline
-        />
-        <WorksheetQuestion number={4}
-          question='"Because of she was tired, she went home early."'
-          modelAnswer='"Because she was tired, she went home early." — "Because" is followed by a clause (subject + verb), not "because of" which is followed by a noun/noun phrase.'
-          multiline
-        />
-      </WorksheetBlock>
+        <WorksheetBlock
+          title="Part B — Find and fix the conjunction error"
+          instruction="Each sentence has one error (wrong conjunction, duplicate conjunctions, or punctuation). Rewrite the corrected sentence."
+        >
+          <WorksheetQuestion id="lw-b-1" number={1} multiline
+            question='"She loves travelling, but however, she rarely has time."'
+            modelAnswer='"She loves travelling; however, she rarely has time." OR "She loves travelling, but she rarely has time." — "but" and "however" cannot be used together; they both show contrast.'
+          />
+          <WorksheetQuestion id="lw-b-2" number={2} multiline
+            question='"Although the report was long but it was very clear."'
+            modelAnswer='"Although the report was long, it was very clear." — Remove "but". "Although" already expresses contrast; adding "but" creates a double conjunction error.'
+          />
+          <WorksheetQuestion id="lw-b-3" number={3} multiline
+            question='"I forgot my keys so, I had to call home."'
+            modelAnswer='"I forgot my keys, so I had to call home." — The comma goes before "so", not after it.'
+          />
+          <WorksheetQuestion id="lw-b-4" number={4} multiline
+            question='"Because of she was tired, she went home early."'
+            modelAnswer='"Because she was tired, she went home early." — "Because" is followed by a clause (subject + verb). "Because of" is followed by a noun/noun phrase only.'
+          />
+          <WorksheetQuestion id="lw-b-5" number={5} multiline
+            question='"Despite he worked hard, he did not get promoted."'
+            modelAnswer='"Despite working hard, he did not get promoted." OR "Although he worked hard, he did not get promoted." — "Despite" is followed by a noun or gerund (-ing), not a subject + verb clause.'
+          />
+          <WorksheetQuestion id="lw-b-6" number={6} multiline
+            question='"The government introduced new taxes, yet so the deficit remained high."'
+            modelAnswer='"The government introduced new taxes, yet the deficit remained high." — Remove "so". "Yet" and "so" cannot be used together; they express different relationships (contrast vs. result).'
+          />
+          <WorksheetQuestion id="lw-b-7" number={7} multiline
+            question='"While she prefers tea but her husband prefers coffee."'
+            modelAnswer='"While she prefers tea, her husband prefers coffee." — Remove "but". "While" already expresses contrast. Comma after the dependent clause.'
+          />
+          <WorksheetQuestion id="lw-b-8" number={8} multiline
+            question='"He studied every night since two weeks, and he finally passed the exam."'
+            modelAnswer='"He studied every night for two weeks, and he finally passed the exam." — Use "for" (duration of time), not "since" (a point in time). "Since" requires a specific starting point: "since Monday".'
+          />
+        </WorksheetBlock>
+
+      </WorksheetContainer>
     </div>
   );
 }
