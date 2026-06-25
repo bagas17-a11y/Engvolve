@@ -26,6 +26,7 @@ import { WritingCheatsheet } from "@/components/writing/WritingCheatsheet";
 import { SpeakingTutorial } from "@/components/speaking/SpeakingTutorial";
 import { ReadingTutorial } from "@/components/reading/ReadingTutorial";
 import { ListeningTutorial } from "@/components/listening/ListeningTutorial";
+import { HeroBackground } from "@/components/HeroBackground";
 import { useAuth } from "@/hooks/useAuth";
 
 const sectionPractice = [
@@ -39,12 +40,6 @@ const coaches = [
   { name: "Bagas H. Wicaksono", title: "Founder & lead coach", specialization: "Writing & Speaking strategy", score: "IELTS 8.5" },
 ];
 
-const eliteStats = [
-  { value: "8.5+",   label: "Coach band score" },
-  { value: "4",      label: "Full modules"     },
-  { value: "16+",    label: "Revision topics"  },
-  { value: "1-on-1", label: "Expert coaching"  },
-];
 
 export default function EliteHubPage() {
   const { profile } = useAuth();
@@ -89,31 +84,25 @@ export default function EliteHubPage() {
     <DashboardLayout>
       <div className="max-w-5xl mx-auto space-y-6">
 
-        {/* Premium banner */}
-        <div className="relative rounded-2xl overflow-hidden border border-elite-gold/15">
-          <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-[#1a1710] to-zinc-900" />
-          <div className="absolute inset-0 bg-gradient-to-br from-elite-gold/8 via-transparent to-transparent" />
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-elite-gold/40 to-transparent" />
+        {/* Atmospheric hero banner */}
+        <div className="relative rounded-2xl overflow-hidden bg-atmospheric" style={{ minHeight: "260px" }}>
+          <HeroBackground />
+          <div className="noise-overlay" />
 
-          <div className="relative z-10 p-7 md:p-10">
+          {/* Bottom fade so tabs don't clash */}
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background/80 to-transparent" />
+
+          <div className="relative z-10 flex flex-col justify-center px-8 py-12 md:px-12">
             <div className="flex items-center gap-2 mb-4">
               <Crown className="w-4 h-4 text-elite-gold" />
-              <span className="text-xs font-medium text-elite-gold uppercase tracking-[0.12em]">Elite Plan</span>
+              <span className="text-xs font-medium text-elite-gold uppercase tracking-[0.14em]">Elite Plan</span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-semibold text-white mb-2 tracking-tight">
-              Elite IELTS Preparation
+            <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tight leading-[0.95] text-white mb-4">
+              ELITE IELTS<br />PREPARATION.
             </h1>
-            <p className="text-sm text-white/50 max-w-xl leading-relaxed mb-7">
-              Full access to revision notes, flashcards, step-by-step tutorials, mock exams, and 1-on-1 coaching — all built by 8.5+ scorers for Indonesian students.
+            <p className="text-sm text-white/55 max-w-md leading-relaxed">
+              Revision notes, flashcards, step-by-step tutorials, mock exams, and 1-on-1 coaching — built by 8.5+ scorers for Indonesian students.
             </p>
-            <div className="flex flex-wrap gap-x-8 gap-y-3 pt-5 border-t border-white/8">
-              {eliteStats.map((s) => (
-                <div key={s.label}>
-                  <p className="text-lg font-semibold text-white">{s.value}</p>
-                  <p className="text-xs text-white/40">{s.label}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
