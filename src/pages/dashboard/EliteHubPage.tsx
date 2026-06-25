@@ -84,28 +84,6 @@ export default function EliteHubPage() {
     <DashboardLayout>
       <div className="max-w-5xl mx-auto space-y-6">
 
-        {/* Atmospheric hero banner */}
-        <div className="relative rounded-2xl overflow-hidden bg-atmospheric" style={{ minHeight: "260px" }}>
-          <HeroBackground />
-          <div className="noise-overlay" />
-
-          {/* Bottom fade so tabs don't clash */}
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background/80 to-transparent" />
-
-          <div className="relative z-10 flex flex-col justify-center px-8 py-12 md:px-12">
-            <div className="flex items-center gap-2 mb-4">
-              <Crown className="w-4 h-4 text-elite-gold" />
-              <span className="text-xs font-medium text-elite-gold uppercase tracking-[0.14em]">Elite Plan</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tight leading-[0.95] text-white mb-4">
-              ELITE IELTS<br />PREPARATION.
-            </h1>
-            <p className="text-sm text-white/55 max-w-md leading-relaxed">
-              Revision notes, flashcards, step-by-step tutorials, mock exams, and 1-on-1 coaching — built by 8.5+ scorers for Indonesian students.
-            </p>
-          </div>
-        </div>
-
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setMudahinajaModule(null); }} className="w-full">
           <TabsList className="w-full justify-start overflow-x-auto border-b border-border rounded-none bg-transparent p-0 h-auto gap-0">
@@ -326,6 +304,27 @@ export default function EliteHubPage() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Atmospheric hero banner — bottom */}
+        <div className="relative rounded-2xl overflow-hidden bg-atmospheric" style={{ minHeight: "340px" }}>
+          <HeroBackground />
+          <div className="noise-overlay" />
+          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-background/60 to-transparent" />
+
+          <div className="relative z-10 flex flex-col justify-center px-8 py-16 md:px-12">
+            <div className="flex items-center gap-2 mb-5">
+              <Crown className="w-4 h-4 text-elite-gold" />
+              <span className="text-xs font-medium text-elite-gold uppercase tracking-[0.14em]">Elite Plan</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-black uppercase tracking-tight leading-[0.92] text-white mb-5">
+              ELITE IELTS<br />PREPARATION.
+            </h2>
+            <p className="text-sm text-white/55 max-w-md leading-relaxed">
+              Revision notes, flashcards, step-by-step tutorials, mock exams, and 1-on-1 coaching — built by 8.5+ scorers for Indonesian students.
+            </p>
+          </div>
+        </div>
+
       </div>
     </DashboardLayout>
   );
