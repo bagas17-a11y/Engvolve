@@ -335,7 +335,7 @@ export function VocabularyPassageView() {
                   <span className="text-sm font-semibold text-white">{item.idiom}</span>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1e293b] border border-[#334155] text-slate-400 hidden sm:inline">{item.topic}</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-600/40 border border-slate-500/50 text-slate-200 hidden sm:inline">{item.topic}</span>
                   <span className={`text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>▾</span>
                 </div>
               </button>
