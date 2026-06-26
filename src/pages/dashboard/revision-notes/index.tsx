@@ -12,7 +12,6 @@ import { TopicModalVerbs } from "./TopicModalVerbs";
 import { TopicArticles } from "./TopicArticles";
 import { TopicReportingVerbs } from "./TopicReportingVerbs";
 import { TopicHedgingFormalStyle } from "./TopicHedgingFormalStyle";
-import { TopicWritingFormats } from "./TopicWritingFormats";
 import { TopicTextTypes } from "./TopicTextTypes";
 import { TopicParagraphStructuring } from "./TopicParagraphStructuring";
 import { VocabularyPassageView } from "./VocabularyPassageView";
@@ -33,7 +32,6 @@ export const REVISION_TOPIC_COMPONENTS: Record<
   punctuation: TopicPunctuation,
   "paragraph-structuring": TopicParagraphStructuring,
   "linking-words-coherence": TopicLinkingWordsCoherence,
-  "writing-formats": TopicWritingFormats,
   "text-types": TopicTextTypes,
   "reporting-verbs": TopicReportingVerbs,
   "hedging-formal-style": TopicHedgingFormalStyle,
@@ -57,7 +55,6 @@ export {
   TopicArticles,
   TopicReportingVerbs,
   TopicHedgingFormalStyle,
-  TopicWritingFormats,
   TopicTextTypes,
   VocabularyPassageView,
 };

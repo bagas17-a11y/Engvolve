@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { logActivity, setLastRoute } from "@/lib/activity";
 import { HumanPlusAILockScreen } from "@/components/HumanPlusAILockScreen";
 import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -45,7 +47,7 @@ function getTopicTitle(id: RevisionNoteTopicId): string {
 
 function loadCompletedTopics(): Set<string> {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return new Set();
     const arr = JSON.parse(raw) as unknown;
     if (!Array.isArray(arr)) return new Set();
@@ -56,16 +58,12 @@ function loadCompletedTopics(): Set<string> {
   }
 }
 
-function saveCompletedTopics(set: Set<string>) {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
-  } catch {
-    /* ignore */
-  }
+function saveCompletedTopicsLocal(set: Set<string>) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...set])); } catch { /* ignore */ }
 }
 
 export default function RevisionNotesPage() {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const isElite = profile?.subscription_tier === "elite";
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -129,18 +127,53 @@ export default function RevisionNotesPage() {
   const mainScrollRef = useRef<HTMLDivElement>(null);
   const topicEndSentinelRef = useRef<HTMLDivElement>(null);
 
-  const markCurrentTopicComplete = () => {
+  const persistTopicComplete = useCallback((topicId: string) => {
+    // localStorage
     setCompletedTopics((prev) => {
+      if (prev.has(topicId)) return prev;
       const next = new Set(prev);
-      next.add(currentTopic);
-      saveCompletedTopics(next);
+      next.add(topicId);
+      saveCompletedTopicsLocal(next);
       return next;
     });
-  };
+    // Supabase
+    if (!user?.id) return;
+    (supabase as any)
+      .from("user_completed_questions")
+      .upsert(
+        { user_id: user.id, module: "revision_notes", question_id: topicId },
+        { onConflict: "user_id,module,question_id", ignoreDuplicates: true },
+      )
+      .then(({ error }: any) => { if (error) console.error(error); });
+  }, [user?.id]);
+
+  // On mount: sync completed topics from Supabase
+  useEffect(() => {
+    if (!user?.id) return;
+    (supabase as any)
+      .from("user_completed_questions")
+      .select("question_id")
+      .eq("user_id", user.id)
+      .eq("module", "revision_notes")
+      .then(({ data }: { data: { question_id: string }[] | null }) => {
+        if (!data) return;
+        setCompletedTopics((prev) => {
+          const merged = new Set([...prev, ...data.map((r) => r.question_id)]);
+          saveCompletedTopicsLocal(merged);
+          return merged;
+        });
+      });
+  }, [user?.id]);
+
+  const markCurrentTopicComplete = useCallback(() => {
+    persistTopicComplete(currentTopic);
+  }, [currentTopic, persistTopicComplete]);
 
   const setTopic = (id: RevisionNoteTopicId) => {
-    // When navigating away, mark current topic as complete so checkmark stays green
     markCurrentTopicComplete();
+    const route = `/dashboard/revision-notes?topic=${id}`;
+    setLastRoute(route);
+    logActivity(user?.id, "revision_note", getTopicTitle(id), route);
     setSearchParams({ topic: id });
     setMobileMenuOpen(false);
   };
@@ -203,20 +236,14 @@ export default function RevisionNotesPage() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          setCompletedTopics((prev) => {
-            if (prev.has(currentTopic)) return prev;
-            const next = new Set(prev);
-            next.add(currentTopic);
-            saveCompletedTopics(next);
-            return next;
-          });
+          persistTopicComplete(currentTopic);
         }
       },
       { root: mainScrollRef.current, rootMargin: "0px", threshold: 0.5 }
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [currentTopic, showTopicList]);
+  }, [currentTopic, showTopicList, persistTopicComplete]);
 
   const nextId = getNextTopicId(currentTopic);
   const prevId = getPrevTopicId(currentTopic);

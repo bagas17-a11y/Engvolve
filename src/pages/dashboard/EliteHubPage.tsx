@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -21,13 +21,23 @@ import {
   Mic,
   BookMarked,
   Construction,
+  Play,
+  ClipboardList,
+  TrendingUp,
+  Activity,
 } from "lucide-react";
+import { RadialBarChart, RadialBar, ResponsiveContainer, Tooltip } from "recharts";
 import { WritingCheatsheet } from "@/components/writing/WritingCheatsheet";
 import { SpeakingTutorial } from "@/components/speaking/SpeakingTutorial";
 import { ReadingTutorial } from "@/components/reading/ReadingTutorial";
 import { ListeningTutorial } from "@/components/listening/ListeningTutorial";
 import { HeroBackground } from "@/components/HeroBackground";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { getRecentActivity, getLastRoute, type ActivityEntry } from "@/lib/activity";
+import { REVISION_NOTE_TOPICS } from "@/content/revisionNotes";
+
+const TOTAL_REVISION_TOPICS = REVISION_NOTE_TOPICS.length;
 
 const sectionPractice = [
   { id: "reading",   title: "Reading",   description: "AI-generated passages with answer-evidence highlighting.",          time: "60 min",     route: "/dashboard/reading",   icon: BookOpen   },
@@ -42,12 +52,69 @@ const coaches = [
 
 
 export default function EliteHubPage() {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("revision-notes");
+  const [activeTab, setActiveTab] = useState("overview");
   const [mudahinajaModule, setMudahinajaModule] = useState<string | null>(null);
 
+  // Overview state
+  const [recentActivity, setRecentActivity] = useState<ActivityEntry[]>([]);
+  const [lastRoute, setLastRouteState] = useState<string | null>(null);
+  const [progressStats, setProgressStats] = useState({
+    revisionNotes: 0,
+    studyPlan: 0,
+    practiceTotal: 0,
+    mudahinaja: 0,
+  });
+
   const isElite = profile?.subscription_tier === "elite";
+
+  // Load overview data
+  useEffect(() => {
+    setRecentActivity(getRecentActivity(3));
+    setLastRouteState(getLastRoute());
+    if (!user?.id) return;
+    const uid = user.id;
+
+    // Revision notes completed
+    (supabase as any)
+      .from("user_completed_questions")
+      .select("question_id", { count: "exact", head: true })
+      .eq("user_id", uid)
+      .eq("module", "revision_notes")
+      .then(({ count }: { count: number | null }) => {
+        if (count != null) setProgressStats(p => ({ ...p, revisionNotes: count }));
+      });
+
+    // Study plan completed
+    (supabase as any)
+      .from("user_completed_questions")
+      .select("question_id", { count: "exact", head: true })
+      .eq("user_id", uid)
+      .eq("module", "study_plan")
+      .then(({ count }: { count: number | null }) => {
+        if (count != null) setProgressStats(p => ({ ...p, studyPlan: count }));
+      });
+
+    // MudahinAja completed
+    (supabase as any)
+      .from("user_completed_questions")
+      .select("question_id", { count: "exact", head: true })
+      .eq("user_id", uid)
+      .eq("module", "mudahinaja")
+      .then(({ count }: { count: number | null }) => {
+        if (count != null) setProgressStats(p => ({ ...p, mudahinaja: count }));
+      });
+
+    // Practice sessions
+    (supabase as any)
+      .from("user_progress")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", uid)
+      .then(({ count }: { count: number | null }) => {
+        if (count != null) setProgressStats(p => ({ ...p, practiceTotal: count }));
+      });
+  }, [user?.id]);
 
   if (!isElite) {
     return (
@@ -88,6 +155,7 @@ export default function EliteHubPage() {
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setMudahinajaModule(null); }} className="w-full">
           <TabsList className="w-full justify-start overflow-x-auto border-b border-border rounded-none bg-transparent p-0 h-auto gap-0">
             {[
+              { value: "overview",       label: "Overview"       },
               { value: "revision-notes", label: "Revision Notes" },
               { value: "flashcards",     label: "Flashcards"     },
               { value: "mudahinaja",     label: "MudahinAja"     },
@@ -103,6 +171,146 @@ export default function EliteHubPage() {
               </TabsTrigger>
             ))}
           </TabsList>
+
+          {/* Overview */}
+          <TabsContent value="overview" className="mt-7 focus-visible:outline-none">
+            <div className="grid gap-5 md:grid-cols-2">
+
+              {/* Resume Study */}
+              <div className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Play className="w-4 h-4 text-elite-gold" />
+                  <p className="text-sm font-semibold text-foreground">Resume Study</p>
+                </div>
+                {lastRoute ? (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                      Pick up exactly where you left off.
+                    </p>
+                    <Button
+                      className="w-full bg-elite-gold/15 text-elite-gold border border-elite-gold/25 hover:bg-elite-gold/25 text-sm"
+                      onClick={() => navigate(lastRoute)}
+                    >
+                      Continue learning
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Start exploring a resource and your last position will be saved here.</p>
+                )}
+              </div>
+
+              {/* Daily Tasks */}
+              <div className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <ClipboardList className="w-4 h-4 text-elite-gold" />
+                  <p className="text-sm font-semibold text-foreground">Daily Tasks</p>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2 leading-relaxed">
+                  {progressStats.studyPlan} tasks completed from your study plan.
+                </p>
+                <div className="w-full h-1.5 rounded-full bg-muted/40 overflow-hidden mb-4">
+                  <div
+                    className="h-full rounded-full bg-elite-gold/60 transition-all duration-700"
+                    style={{ width: `${Math.min((progressStats.studyPlan / 40) * 100, 100)}%` }}
+                  />
+                </div>
+                <Button
+                  variant="ghost"
+                  className="w-full border border-border text-sm text-foreground/70 hover:text-foreground"
+                  onClick={() => navigate("/dashboard/study-plan")}
+                >
+                  Open Study Plan <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+
+              {/* Recent Activity */}
+              <div className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Activity className="w-4 h-4 text-elite-gold" />
+                  <p className="text-sm font-semibold text-foreground">Recent Activity</p>
+                </div>
+                {recentActivity.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">No activity yet — start a practice, revision note, or study plan task.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {recentActivity.map((a, i) => (
+                      <button
+                        key={i}
+                        onClick={() => navigate(a.route)}
+                        className="flex items-center gap-3 w-full text-left p-2.5 rounded-lg hover:bg-muted/30 transition-colors group"
+                      >
+                        <div className="w-7 h-7 rounded-lg bg-elite-gold/10 flex items-center justify-center shrink-0">
+                          {a.activity_type === "revision_note" && <BookOpen className="w-3.5 h-3.5 text-elite-gold" />}
+                          {a.activity_type === "practice"      && <TrendingUp className="w-3.5 h-3.5 text-elite-gold" />}
+                          {a.activity_type === "mudahinaja"    && <Sparkles className="w-3.5 h-3.5 text-elite-gold" />}
+                          {a.activity_type === "study_plan"    && <ClipboardList className="w-3.5 h-3.5 text-elite-gold" />}
+                          {a.activity_type === "flashcard"     && <Layers className="w-3.5 h-3.5 text-elite-gold" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-foreground truncate">{a.label}</p>
+                          <p className="text-[10px] text-muted-foreground capitalize">{a.activity_type.replace("_", " ")}</p>
+                        </div>
+                        <ChevronRight className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Progress Tracker */}
+              <div className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp className="w-4 h-4 text-elite-gold" />
+                  <p className="text-sm font-semibold text-foreground">Progress Tracker</p>
+                </div>
+                <div className="space-y-4">
+                  {[
+                    {
+                      label: "Revision Notes",
+                      done: progressStats.revisionNotes,
+                      total: TOTAL_REVISION_TOPICS,
+                      color: "#a78bfa",
+                    },
+                    {
+                      label: "MudahinAja",
+                      done: progressStats.mudahinaja,
+                      total: 4,
+                      color: "#60a5fa",
+                    },
+                    {
+                      label: "Practice Sessions",
+                      done: progressStats.practiceTotal,
+                      total: Math.max(progressStats.practiceTotal, 10),
+                      color: "#34d399",
+                    },
+                    {
+                      label: "Study Plan Tasks",
+                      done: progressStats.studyPlan,
+                      total: Math.max(progressStats.studyPlan, 40),
+                      color: "#fbbf24",
+                    },
+                  ].map(({ label, done, total, color }) => {
+                    const pct = total > 0 ? Math.min((done / total) * 100, 100) : 0;
+                    return (
+                      <div key={label}>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-xs text-foreground/70">{label}</span>
+                          <span className="text-xs font-medium text-foreground">{done}/{total}</span>
+                        </div>
+                        <div className="w-full h-2 rounded-full bg-muted/40 overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{ width: `${pct}%`, backgroundColor: color }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+            </div>
+          </TabsContent>
 
           {/* Revision Notes */}
           <TabsContent value="revision-notes" className="mt-7 focus-visible:outline-none">

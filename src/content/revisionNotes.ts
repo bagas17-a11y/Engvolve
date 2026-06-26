@@ -134,15 +134,6 @@ export const REVISION_NOTE_TOPICS: RevisionNoteSection[] = [
     ],
   },
   {
-    id: "writing-formats",
-    category: "writing-skills",
-    title: "Writing Formats",
-    subItems: [
-      { id: "task1-format", label: "Task 1 – Academic report" },
-      { id: "task2-format", label: "Task 2 – Academic essay" },
-    ],
-  },
-  {
     id: "text-types",
     category: "writing-skills",
     title: "Text Types",
@@ -206,7 +197,6 @@ export const REVISION_NOTE_IDS = REVISION_NOTE_TOPICS.map((t) => t.id) as [
   "punctuation",
   "paragraph-structuring",
   "linking-words-coherence",
-  "writing-formats",
   "text-types",
   "reporting-verbs",
   "hedging-formal-style",
