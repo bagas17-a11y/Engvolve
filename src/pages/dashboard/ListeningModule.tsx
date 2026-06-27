@@ -27,16 +27,6 @@ import { useUserProgress } from "@/hooks/useUserProgress";
 import { useCompletedQuestions } from "@/hooks/useCompletedQuestions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ListeningCheatsheet } from "@/components/listening/ListeningCheatsheet";
-import { useSidebar } from "@/components/ui/sidebar";
-
-// Rendered inside DashboardLayout (inside SidebarProvider) — safe to call useSidebar here
-function SidebarFocusController({ testActive }: { testActive: boolean }) {
-  const { setOpen, isMobile } = useSidebar();
-  useEffect(() => {
-    if (!isMobile) setOpen(!testActive);
-  }, [testActive, isMobile, setOpen]);
-  return null;
-}
 
 const NUMBER_WORDS: Record<string, string> = {
   "0": "zero", "1": "one", "2": "two", "3": "three", "4": "four",
@@ -1492,7 +1482,7 @@ export default function ListeningModule() {
 
     return (
       <DashboardLayout>
-        <SidebarFocusController testActive={false} />
+
         <div className="max-w-4xl">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
@@ -1520,7 +1510,7 @@ export default function ListeningModule() {
 
   return (
     <DashboardLayout>
-      <SidebarFocusController testActive={true} />
+
       <div className="flex flex-col gap-4 pb-12">
         {/* Header */}
         <div className="flex-shrink-0 flex items-center justify-between">

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "./AppSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
-import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { Loader2 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -31,24 +30,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        <SidebarInset className="flex-1">
-          <header className="h-12 flex items-center border-b border-border/30 px-4">
-            <SidebarTrigger className="-ml-1" />
-          </header>
-          <main className="p-6 pb-24 md:pb-6">
-            {children}
-          </main>
-        </SidebarInset>
+    <div className="min-h-screen flex w-full bg-background">
+      <AppSidebar />
+      <div className="flex-1 min-w-0 flex flex-col">
+        <main className="flex-1 p-6 pb-24 md:pb-6 overflow-x-hidden">
+          {children}
+        </main>
       </div>
       <MobileBottomNav />
-    </SidebarProvider>
+    </div>
   );
 }
