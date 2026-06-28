@@ -417,7 +417,7 @@ export default function SpeakingModule() {
     generationStore.startGen('speaking-analysis');
 
     try {
-      const currentQuestion = getCurrentQuestion();
+      const currentQuestion = selectedSpeakingQuestion ?? getCurrentQuestion();
       const rawContext = currentPart === 'part2'
         ? (currentQuestion as any).cueCard
         : currentPart === 'part3'
@@ -937,6 +937,11 @@ export default function SpeakingModule() {
                       </>
                     )}
                   </Button>
+                  {isAnalyzing && (
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      AI analysis takes 20–40 seconds — hang tight...
+                    </p>
+                  )}
                 </>
               )}
             </div>
