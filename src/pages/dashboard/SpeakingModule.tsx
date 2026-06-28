@@ -17,34 +17,55 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 // ── Fallback question banks ────────────────────────────────────────────────
 const FALLBACK = {
   part1: [
-    { topic: "Hometown",     question: "Where do you come from? Can you describe your hometown?" },
-    { topic: "Work/Studies", question: "Do you work or are you a student? What do you like most about it?" },
-    { topic: "Hobbies",      question: "What do you enjoy doing in your free time? How often do you do this?" },
-    { topic: "Music",        question: "What kind of music do you like? Do you prefer listening alone or with others?" },
-    { topic: "Reading",      question: "Do you like reading? What types of books or articles do you usually read?" },
-    { topic: "Travel",       question: "Do you like traveling? Where would you like to travel in the future?" },
-    { topic: "Food",         question: "What is your favorite type of food? Do you prefer eating at home or out?" },
-    { topic: "Weather",      question: "What's the weather like in your country? Does weather affect your mood?" },
-    { topic: "Technology",   question: "How often do you use the internet? What do you mainly use it for?" },
-    { topic: "Sports",       question: "Do you enjoy playing or watching sports? Which sport do you like most?" },
-    { topic: "Family",       question: "Tell me about your family. How much time do you spend with them?" },
-    { topic: "Friends",      question: "How important are friends to you? How do you usually spend time with friends?" },
+    { topic: "Hometown",       question: "Where do you come from? Can you describe your hometown?" },
+    { topic: "Work/Studies",   question: "Do you work or are you a student? What do you like most about it?" },
+    { topic: "Hobbies",        question: "What do you enjoy doing in your free time? How often do you do this?" },
+    { topic: "Music",          question: "What kind of music do you like? Do you prefer listening alone or with others?" },
+    { topic: "Reading",        question: "Do you like reading? What types of books or articles do you usually read?" },
+    { topic: "Travel",         question: "Do you like traveling? Where would you like to travel in the future?" },
+    { topic: "Food",           question: "What is your favourite type of food? Do you prefer eating at home or out?" },
+    { topic: "Weather",        question: "What's the weather like in your country? Does weather affect your mood?" },
+    { topic: "Technology",     question: "How often do you use the internet? What do you mainly use it for?" },
+    { topic: "Sports",         question: "Do you enjoy playing or watching sports? Which sport do you like most?" },
+    { topic: "Family",         question: "Tell me about your family. How much time do you spend with them?" },
+    { topic: "Friends",        question: "How important are friends to you? How do you usually spend time with them?" },
+    { topic: "Transport",      question: "How do you usually travel around your city? Do you prefer public transport or other means?" },
+    { topic: "Shopping",       question: "Do you enjoy shopping? Do you prefer buying things in stores or online?" },
+    { topic: "Morning routine",question: "Are you a morning person? What do you usually do first thing in the morning?" },
+    { topic: "Nature",         question: "Do you enjoy spending time outdoors? What activities do you like in nature?" },
+    { topic: "Sleep",          question: "How many hours of sleep do you usually get? Do you think that's enough?" },
+    { topic: "Celebrations",   question: "What is your favourite festival or celebration? How do you usually celebrate it?" },
+    { topic: "Colours",        question: "Do you have a favourite colour? Has your preference changed as you've grown older?" },
+    { topic: "Animals",        question: "Do you like animals? Have you ever had a pet?" },
+    { topic: "Photography",    question: "Do you enjoy taking photos? What do you usually take photos of?" },
+    { topic: "Art",            question: "Are you interested in art? Do you prefer traditional or modern art?" },
+    { topic: "Cooking",        question: "Do you enjoy cooking? How often do you cook at home?" },
+    { topic: "Languages",      question: "How many languages do you speak? Why did you decide to learn English?" },
+    { topic: "Social media",   question: "How much time do you spend on social media? How does it affect your life?" },
+    { topic: "Health",         question: "How do you try to stay healthy? Do you think people in your country live healthily?" },
+    { topic: "Films",          question: "Do you enjoy watching films? What kind of films do you prefer?" },
   ],
   part2: [
-    { topic: "A memorable trip",        cueCard: "Describe a memorable trip you took.\n\nYou should say:\n• Where you went\n• Who you went with\n• What you did there\n\nAnd explain why it was memorable.",               prepTime: "1 minute", speakTime: "1–2 minutes" },
-    { topic: "A person who influenced you", cueCard: "Describe a person who has influenced you.\n\nYou should say:\n• Who this person is\n• How you know them\n• What qualities they have\n\nAnd explain why they influenced you.", prepTime: "1 minute", speakTime: "1–2 minutes" },
-    { topic: "A skill you want to learn", cueCard: "Describe a skill you would like to learn.\n\nYou should say:\n• What the skill is\n• Why you want to learn it\n• How you would learn it\n\nAnd explain how it would benefit you.",  prepTime: "1 minute", speakTime: "1–2 minutes" },
-    { topic: "A time you helped someone", cueCard: "Describe a time you helped someone.\n\nYou should say:\n• Who you helped\n• What the situation was\n• How you helped them\n\nAnd explain how you felt afterwards.",            prepTime: "1 minute", speakTime: "1–2 minutes" },
-    { topic: "An important decision",    cueCard: "Describe an important decision you made.\n\nYou should say:\n• What the decision was\n• When you made it\n• What factors you considered\n\nAnd explain how it affected your life.",  prepTime: "1 minute", speakTime: "1–2 minutes" },
-    { topic: "A favourite place",        cueCard: "Describe a place you enjoy visiting.\n\nYou should say:\n• Where it is\n• How often you go there\n• What you do there\n\nAnd explain why you enjoy it.",                          prepTime: "1 minute", speakTime: "1–2 minutes" },
+    { topic: "A memorable trip",          cueCard: "Describe a memorable trip you took.\n\nYou should say:\n• Where you went\n• Who you went with\n• What you did there\n\nAnd explain why it was memorable.",                         prepTime: "1 minute", speakTime: "1–2 minutes" },
+    { topic: "A person who influenced you", cueCard: "Describe a person who has influenced you.\n\nYou should say:\n• Who this person is\n• How you know them\n• What qualities they have\n\nAnd explain why they influenced you.",     prepTime: "1 minute", speakTime: "1–2 minutes" },
+    { topic: "A skill you want to learn",  cueCard: "Describe a skill you would like to learn.\n\nYou should say:\n• What the skill is\n• Why you want to learn it\n• How you would learn it\n\nAnd explain how it would benefit you.", prepTime: "1 minute", speakTime: "1–2 minutes" },
+    { topic: "A time you helped someone",  cueCard: "Describe a time you helped someone.\n\nYou should say:\n• Who you helped\n• What the situation was\n• How you helped them\n\nAnd explain how you felt afterwards.",               prepTime: "1 minute", speakTime: "1–2 minutes" },
+    { topic: "An important decision",      cueCard: "Describe an important decision you made.\n\nYou should say:\n• What the decision was\n• When you made it\n• What factors you considered\n\nAnd explain how it affected your life.", prepTime: "1 minute", speakTime: "1–2 minutes" },
+    { topic: "A favourite place",          cueCard: "Describe a place you enjoy visiting.\n\nYou should say:\n• Where it is\n• How often you go there\n• What you do there\n\nAnd explain why you enjoy it.",                           prepTime: "1 minute", speakTime: "1–2 minutes" },
+    { topic: "A book or film you enjoyed", cueCard: "Describe a book or film that made a strong impression on you.\n\nYou should say:\n• What it was about\n• When you read/watched it\n• Who you would recommend it to\n\nAnd explain why it impressed you.", prepTime: "1 minute", speakTime: "1–2 minutes" },
+    { topic: "A place you want to visit",  cueCard: "Describe a place you would really like to visit in the future.\n\nYou should say:\n• Where it is\n• Why you want to go there\n• What you would do there\n\nAnd explain what makes it appealing to you.", prepTime: "1 minute", speakTime: "1–2 minutes" },
+    { topic: "A personal achievement",     cueCard: "Describe an achievement you are proud of.\n\nYou should say:\n• What you achieved\n• How long it took\n• What challenges you faced\n\nAnd explain why you are proud of it.",           prepTime: "1 minute", speakTime: "1–2 minutes" },
   ],
   part3: [
-    { topic: "Travel & Tourism",    questions: ["How has tourism changed in recent years?", "What are the pros and cons of mass tourism?", "Will people travel more or less in the future?"] },
-    { topic: "Influence & Role Models", questions: ["Why do people need role models?", "How do celebrities influence young people?", "Does the media present good role models?"] },
-    { topic: "Learning & Skills",   questions: ["How has the way people learn changed?", "What skills matter most in the modern world?", "Should schools teach more practical skills?"] },
-    { topic: "Helping Others",      questions: ["Why is it important to help others?", "How can governments encourage volunteering?", "Are people more or less helpful than in the past?"] },
-    { topic: "Decision Making",     questions: ["How do people make important life decisions?", "Should young people seek advice from elders?", "Does technology help or hinder decision-making?"] },
-    { topic: "Technology & Society",questions: ["How has technology changed communication?", "What are the downsides of depending on technology?", "What might daily life look like in 50 years?"] },
+    { topic: "Travel & Tourism",       questions: ["How has tourism changed in recent years?", "What are the pros and cons of mass tourism?", "Will people travel more or less in the future?"] },
+    { topic: "Influence & Role Models",questions: ["Why do people need role models?", "How do celebrities influence young people?", "Does the media present good role models?"] },
+    { topic: "Learning & Skills",      questions: ["How has the way people learn changed?", "What skills matter most in the modern world?", "Should schools teach more practical skills?"] },
+    { topic: "Helping Others",         questions: ["Why is it important to help others?", "How can governments encourage volunteering?", "Are people more or less helpful than in the past?"] },
+    { topic: "Decision Making",        questions: ["How do people make important life decisions?", "Should young people seek advice from elders?", "Does technology help or hinder decision-making?"] },
+    { topic: "Technology & Society",   questions: ["How has technology changed communication?", "What are the downsides of depending on technology?", "What might daily life look like in 50 years?"] },
+    { topic: "Environment & Conservation", questions: ["Why is it difficult for governments to address environmental problems?", "How can individuals contribute to protecting the environment?", "Do you think the situation will improve or worsen in future?"] },
+    { topic: "Work & Lifestyle",       questions: ["Why do some people find it hard to maintain a work-life balance?", "Should companies offer employees more flexible working hours?", "How has the concept of work changed over the past few decades?"] },
+    { topic: "Media & Information",    questions: ["How has the way people consume news changed?", "Should social media platforms be responsible for the accuracy of content?", "Do you think people today are better or worse informed than in the past?"] },
   ],
 };
 
@@ -76,14 +97,14 @@ const addDone = (uid: string, id: string) => {
 
 function buildTestSets(bank: typeof FALLBACK): TestSet[] {
   const numTests = Math.min(
-    Math.max(Math.floor(bank.part1.length / 4), bank.part2.length, bank.part3.length),
-    6
+    Math.max(Math.floor(bank.part1.length / 3), bank.part2.length, bank.part3.length),
+    9
   );
   return Array.from({ length: numTests }, (_, i) => ({
     id: `test-${i}`,
     label: `Test ${i + 1}`,
     theme: bank.part2[i % bank.part2.length].topic,
-    part1: [0, 1, 2, 3].map(j => bank.part1[(i * 4 + j) % bank.part1.length]),
+    part1: [0, 1, 2].map(j => bank.part1[(i * 3 + j) % bank.part1.length]),
     part2: bank.part2[i % bank.part2.length],
     part3: bank.part3[i % bank.part3.length],
   }));
@@ -194,7 +215,7 @@ export default function SpeakingModule() {
     const updated = [...p1Answers, { topic: q.topic, question: q.question, transcript: transcript.trim() }];
     setP1Answers(updated);
     resetTranscript();
-    if (p1Index < 3) { setP1Index(p1Index + 1); }
+    if (p1Index < 2) { setP1Index(p1Index + 1); }
     else { setPhase('part2'); }
   };
 
@@ -384,11 +405,11 @@ export default function SpeakingModule() {
 
           {/* Progress */}
           <div className="flex items-center gap-2">
-            {[0, 1, 2, 3].map(i => (
+            {[0, 1, 2].map(i => (
               <div key={i} className={cn("flex-1 h-1.5 rounded-full transition-colors",
                 i < p1Answers.length ? "bg-green-500" : i === p1Index ? "bg-accent" : "bg-border/40")} />
             ))}
-            <span className="text-xs text-muted-foreground shrink-0">Q{p1Index + 1}/4</span>
+            <span className="text-xs text-muted-foreground shrink-0">Q{p1Index + 1}/3</span>
           </div>
 
           {/* Saved answers */}
@@ -441,7 +462,7 @@ export default function SpeakingModule() {
                       <Button variant="glass" onClick={handleStart}><Mic className="w-5 h-5 mr-2" /> Re-record</Button>
                       <Button variant="neumorphicPrimary" onClick={saveP1}>
                         <ArrowRight className="w-5 h-5 mr-2" />
-                        {p1Index < 3 ? 'Save & Next' : 'Save & Part 2'}
+                        {p1Index < 2 ? 'Save & Next' : 'Save & Part 2'}
                       </Button>
                     </>
                   )}
