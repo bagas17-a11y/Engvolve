@@ -36,7 +36,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="min-h-screen flex w-full bg-background">
       <AppSidebar />
       <div className="flex-1 min-w-0 flex flex-col">
-        <main className="flex-1 p-6 pb-24 md:pb-6 overflow-x-hidden">
+        <main className="flex-1 p-6 pb-28 md:pb-6 overflow-x-hidden">
           {children}
         </main>
       </div>

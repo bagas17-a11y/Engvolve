@@ -180,7 +180,7 @@ export default function FlashcardsPage() {
 
   return (
     <DashboardLayout>
-      <div className="-m-6 flex h-[calc(100vh-3rem)] min-h-0 bg-background">
+      <div className="-m-6 flex h-[calc(100dvh-3rem)] min-h-0 bg-background">
         {/* Floating glass sidebar - resizable */}
         <aside
           className={cn(
@@ -371,7 +371,7 @@ export default function FlashcardsPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
-            <div className="p-6 max-w-4xl mx-auto">
+            <div className="p-6 pb-20 md:pb-6 max-w-4xl mx-auto">
               {showTopicList ? (
                 <>
                   <h1 className="text-2xl font-bold text-foreground mb-2">

@@ -278,7 +278,7 @@ export default function RevisionNotesPage() {
 
   return (
     <DashboardLayout>
-      <div className="-m-6 flex h-[calc(100vh-3rem)] min-h-0 bg-background">
+      <div className="-m-6 flex h-[calc(100dvh-3rem)] min-h-0 bg-background">
         {/* Floating glass sidebar */}
         <aside
           className={cn(
@@ -500,7 +500,7 @@ export default function RevisionNotesPage() {
             ref={mainScrollRef}
             className="flex-1 overflow-y-auto overflow-x-hidden"
           >
-            <div className="p-6 max-w-4xl mx-auto min-h-[400px] rounded-lg bg-background/60">
+            <div className="p-6 pb-20 md:pb-6 max-w-4xl mx-auto min-h-[400px] rounded-lg bg-background/60">
               {showTopicList ? (
                 <>
                   <h1 className="text-2xl font-bold text-foreground mb-2">
@@ -630,7 +630,7 @@ export default function RevisionNotesPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.2 }}
-                className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur-md px-4 py-3 flex items-center justify-between"
+                className="fixed bottom-14 md:bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-md px-4 py-3 flex items-center justify-between"
               >
                 <Button
                   variant="ghost"

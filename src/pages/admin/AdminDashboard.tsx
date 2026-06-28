@@ -361,7 +361,7 @@ export default function AdminDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

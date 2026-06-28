@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -179,6 +179,12 @@ export default function ReadingModule() {
   const questionRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const splitContainerRef = useRef<HTMLDivElement>(null);
   const [splitPercent, setSplitPercent] = useState(60);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+  useLayoutEffect(() => {
+    const update = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
   const { toast } = useToast();
   const { saveProgress } = useUserProgress();
   const { canAccess, refreshCounts, isLoading: isGatingLoading } = useFeatureGating();
@@ -719,7 +725,7 @@ export default function ReadingModule() {
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-2rem)] flex flex-col gap-3">
+      <div className="h-[calc(100dvh-2rem)] flex flex-col gap-3">
 
         {/* Test header */}
         <div className="flex items-center gap-3 flex-shrink-0">
@@ -827,10 +833,10 @@ export default function ReadingModule() {
 
         {/* Two-column body */}
         {currentSection && (
-          <div ref={splitContainerRef} className="flex-1 flex flex-row min-h-0 select-none">
+          <div ref={splitContainerRef} className="flex-1 flex flex-col md:flex-row min-h-0 select-none gap-3 md:gap-0">
 
             {/* ── Left: Passage ── */}
-            <div className="glass-card flex flex-col min-h-0 overflow-hidden flex-shrink-0" style={{ width: `${splitPercent}%` }}>
+            <div className="glass-card flex flex-col overflow-hidden md:flex-shrink-0 h-[45vh] md:h-auto md:min-h-0" style={isMobile ? {} : { width: `${splitPercent}%` }}>
               <div className="px-6 py-4 border-b border-border/30 flex-shrink-0">
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -870,14 +876,14 @@ export default function ReadingModule() {
             {/* ── Drag handle ── */}
             <div
               onMouseDown={handleSplitDrag}
-              className="w-3 flex-shrink-0 flex items-center justify-center cursor-col-resize group z-10 mx-0.5"
+              className="hidden md:flex w-3 flex-shrink-0 items-center justify-center cursor-col-resize group z-10 mx-0.5"
               title="Drag to resize"
             >
               <div className="w-0.5 h-10 rounded-full bg-border/50 group-hover:bg-accent group-hover:h-16 transition-all duration-150" />
             </div>
 
             {/* ── Right: Questions ── */}
-            <div className="glass-card flex flex-col min-h-0 overflow-hidden flex-1">
+            <div className="glass-card flex flex-col overflow-hidden flex-1 min-h-[50vh] md:min-h-0">
               <div className="px-5 py-4 border-b border-border/30 flex-shrink-0">
                 <h2 className="text-base font-bold">
                   Questions {currentSection.question_groups[0]?.question_range[0]}–
