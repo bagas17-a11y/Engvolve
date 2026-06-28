@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Brain, Target, ArrowRight, Trophy, Edit2, Crown, Map, Sparkles, CheckCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface FamiliarityQuestion {
   id: string;
@@ -22,10 +23,25 @@ interface Question {
   id: number;
   text: string;
   passage?: string;
-  options: string[];
-  correctAnswer: number;
+  options?: string[];
+  correctAnswer: number | string;
+  acceptedAnswers?: string[];
   band: 5 | 6 | 7 | 8;
   skill: string;
+  type?: 'mcq' | 'fill';
+}
+
+type SelectedAnswer = number | string | null;
+
+function isCorrect(question: Question, answer: SelectedAnswer): boolean {
+  if (answer === null) return false;
+  if (question.type === 'fill') {
+    const given = (answer as string).trim().toLowerCase();
+    const expected = (question.correctAnswer as string).toLowerCase();
+    if (given === expected) return true;
+    return question.acceptedAnswers?.some(a => given === a.toLowerCase()) ?? false;
+  }
+  return answer === question.correctAnswer;
 }
 
 const familiarityQuestions: FamiliarityQuestion[] = [
@@ -217,9 +233,9 @@ const quizQuestions: Question[] = [
   },
   {
     id: 13,
-    text: "The government introduced a series of ___ measures to address the housing crisis, covering tax incentives for developers, subsidies for buyers, and new planning regulations.",
-    options: ["comprehensive", "general", "common", "normal"],
-    correctAnswer: 0,
+    text: "The government introduced a series of ___ measures to address the housing crisis, covering tax incentives for developers, subsidies for buyers, and new planning regulations.\n\nType the single word that best completes the sentence.",
+    type: 'fill',
+    correctAnswer: "comprehensive",
     band: 7,
     skill: "Academic vocabulary — precision"
   },
@@ -238,9 +254,9 @@ const quizQuestions: Question[] = [
   },
   {
     id: 15,
-    text: "The research institute, ___ entire funding was withdrawn following the financial scandal, closed its doors permanently last year.",
-    options: ["that", "which", "whose", "who's"],
-    correctAnswer: 2,
+    text: "The research institute, ___ entire funding was withdrawn following the financial scandal, closed its doors permanently last year.\n\nType the single word that correctly fills the gap.",
+    type: 'fill',
+    correctAnswer: "whose",
     band: 7,
     skill: "Possessive relative clauses"
   },
@@ -275,9 +291,10 @@ const quizQuestions: Question[] = [
   },
   {
     id: 18,
-    text: "___ the research team secured additional funding at an earlier stage, the study could have been expanded to include a far more representative sample.",
-    options: ["Should", "If only", "Had", "Were"],
-    correctAnswer: 2,
+    text: "___ the research team secured additional funding at an earlier stage, the study could have been expanded to include a far more representative sample.\n\nType the single word that opens this sentence correctly (inverted conditional).",
+    type: 'fill',
+    correctAnswer: "had",
+    acceptedAnswers: ["Had"],
     band: 8,
     skill: "Third conditional — subject-auxiliary inversion"
   },
@@ -296,9 +313,9 @@ const quizQuestions: Question[] = [
   },
   {
     id: 20,
-    text: "The historian's analysis was criticised as ___: she had applied the moral standards of the present to evaluate decisions made in an entirely different social and political context.",
-    options: ["parochial", "reductive", "anachronistic", "ethnocentric"],
-    correctAnswer: 2,
+    text: "The historian's analysis was criticised as ___: she had applied the moral standards of the present to evaluate decisions made in an entirely different social and political context.\n\nType the single academic word that fits the definition given in the sentence.",
+    type: 'fill',
+    correctAnswer: "anachronistic",
     band: 8,
     skill: "Advanced academic vocabulary — precision"
   }
@@ -325,8 +342,8 @@ export default function DiagnosticQuiz() {
   const [familiarityIndex, setFamiliarityIndex] = useState(0);
   const [familiarityAnswers, setFamiliarityAnswers] = useState<Record<string, number>>({});
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [answers, setAnswers] = useState<(number | null)[]>(new Array(20).fill(null));
+  const [selectedAnswer, setSelectedAnswer] = useState<SelectedAnswer>(null);
+  const [answers, setAnswers] = useState<SelectedAnswer[]>(new Array(20).fill(null));
   const [result, setResult] = useState<QuizResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [targetScore, setTargetScore] = useState<number>(profile?.target_band_score || 7);
@@ -339,7 +356,7 @@ export default function DiagnosticQuiz() {
     : familiarityQuestions.length + currentQuestion + 1;
   const progress = (currentOverallIndex / totalQuestions) * 100;
 
-  const calculateResult = (finalAnswers: (number | null)[]): QuizResult => {
+  const calculateResult = (finalAnswers: SelectedAnswer[]): QuizResult => {
     let band5Correct = 0;
     let band6Correct = 0;
     let band7Correct = 0;
@@ -347,28 +364,28 @@ export default function DiagnosticQuiz() {
     const weakSkills: string[] = [];
 
     for (let i = 0; i < 5; i++) {
-      if (finalAnswers[i] === quizQuestions[i].correctAnswer) {
+      if (isCorrect(quizQuestions[i], finalAnswers[i])) {
         band5Correct++;
       } else {
         weakSkills.push(quizQuestions[i].skill);
       }
     }
     for (let i = 5; i < 10; i++) {
-      if (finalAnswers[i] === quizQuestions[i].correctAnswer) {
+      if (isCorrect(quizQuestions[i], finalAnswers[i])) {
         band6Correct++;
       } else {
         weakSkills.push(quizQuestions[i].skill);
       }
     }
     for (let i = 10; i < 15; i++) {
-      if (finalAnswers[i] === quizQuestions[i].correctAnswer) {
+      if (isCorrect(quizQuestions[i], finalAnswers[i])) {
         band7Correct++;
       } else {
         weakSkills.push(quizQuestions[i].skill);
       }
     }
     for (let i = 15; i < 20; i++) {
-      if (finalAnswers[i] === quizQuestions[i].correctAnswer) {
+      if (isCorrect(quizQuestions[i], finalAnswers[i])) {
         band8Correct++;
       } else {
         weakSkills.push(quizQuestions[i].skill);
@@ -401,7 +418,7 @@ export default function DiagnosticQuiz() {
   };
 
   const handleNext = () => {
-    if (selectedAnswer === null) return;
+    if (selectedAnswer === null || (typeof selectedAnswer === 'string' && selectedAnswer.trim() === '')) return;
 
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = selectedAnswer;
@@ -595,7 +612,8 @@ export default function DiagnosticQuiz() {
             <h2 className="text-xl font-light">{currentFamiliarityQ.text}</h2>
 
             <RadioGroup
-              value={selectedAnswer?.toString()}
+              key={familiarityIndex}
+              value={typeof selectedAnswer === 'number' ? selectedAnswer.toString() : ''}
               onValueChange={(value) => setSelectedAnswer(parseInt(value))}
               className="space-y-3"
             >
@@ -814,38 +832,58 @@ export default function DiagnosticQuiz() {
             </div>
           )}
 
-          <h2 className="text-xl font-light">{question.text}</h2>
+          <h2 className="text-xl font-light whitespace-pre-line">{question.text}</h2>
 
-          <RadioGroup
-            value={selectedAnswer?.toString()}
-            onValueChange={(value) => setSelectedAnswer(parseInt(value))}
-            className="space-y-3"
-          >
-            {question.options.map((option, index) => (
-              <div
-                key={index}
-                className={`flex items-center space-x-3 p-4 rounded-xl border transition-all cursor-pointer ${
-                  selectedAnswer === index
-                    ? "border-accent bg-accent/5"
-                    : "border-border hover:border-accent/50"
-                }`}
-                onClick={() => setSelectedAnswer(index)}
-              >
-                <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                <Label
-                  htmlFor={`option-${index}`}
-                  className="flex-1 cursor-pointer text-foreground"
+          {question.type === 'fill' ? (
+            <div className="space-y-2">
+              <Input
+                key={currentQuestion}
+                autoFocus
+                autoComplete="off"
+                spellCheck={false}
+                placeholder="Type your answer here..."
+                value={typeof selectedAnswer === 'string' ? selectedAnswer : ''}
+                onChange={(e) => setSelectedAnswer(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleNext(); }}
+                className="text-lg h-12 bg-muted/30 border-border focus:border-accent"
+              />
+            </div>
+          ) : (
+            <RadioGroup
+              key={currentQuestion}
+              value={typeof selectedAnswer === 'number' ? selectedAnswer.toString() : ''}
+              onValueChange={(value) => setSelectedAnswer(parseInt(value))}
+              className="space-y-3"
+            >
+              {question.options?.map((option, index) => (
+                <div
+                  key={index}
+                  className={`flex items-center space-x-3 p-4 rounded-xl border transition-all cursor-pointer ${
+                    selectedAnswer === index
+                      ? "border-accent bg-accent/5"
+                      : "border-border hover:border-accent/50"
+                  }`}
+                  onClick={() => setSelectedAnswer(index)}
                 >
-                  {option}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
+                  <RadioGroupItem value={index.toString()} id={`option-${index}`} />
+                  <Label
+                    htmlFor={`option-${index}`}
+                    className="flex-1 cursor-pointer text-foreground"
+                  >
+                    {option}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          )}
         </div>
 
         <Button
           onClick={handleNext}
-          disabled={selectedAnswer === null}
+          disabled={
+            selectedAnswer === null ||
+            (typeof selectedAnswer === 'string' && selectedAnswer.trim() === '')
+          }
           className="w-full btn-neumorphic-primary"
         >
           {currentQuestion < quizQuestions.length - 1 ? "Next Question" : "Finish Quiz"}
