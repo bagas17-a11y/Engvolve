@@ -2,7 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Loader2, Play, Square, Volume2, RefreshCw, ChevronRight, Download, CheckCircle } from "lucide-react";
+import {
+  Mic, MicOff, Loader2, Play, Square, Volume2, RefreshCw,
+  ChevronRight, Download, CheckCircle, ArrowRight,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useWhisperTranscription } from "@/hooks/useWhisperTranscription";
@@ -10,366 +13,138 @@ import { useUserProgress } from "@/hooks/useUserProgress";
 import { useAuth } from "@/hooks/useAuth";
 import { useFeatureGating } from "@/hooks/useFeatureGating";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { generationStore } from "@/stores/generationStore";
-import { useGenerationEntry } from "@/hooks/useGenerationEntry";
-import { useCompletedQuestions } from "@/hooks/useCompletedQuestions";
 
-// Fallback IELTS Speaking Questions (used when AI generation is unavailable)
-const FALLBACK_SPEAKING_QUESTIONS = {
+// ── Fallback question banks ────────────────────────────────────────────────
+const FALLBACK_QUESTIONS = {
   part1: [
-    { topic: "Hometown", question: "Where do you come from? Can you describe your hometown?" },
+    { topic: "Hometown",     question: "Where do you come from? Can you describe your hometown?" },
     { topic: "Work/Studies", question: "Do you work or are you a student? What do you like most about your job/studies?" },
-    { topic: "Hobbies", question: "What do you enjoy doing in your free time? How often do you do this activity?" },
-    { topic: "Music", question: "What kind of music do you like? Do you prefer listening to music alone or with others?" },
-    { topic: "Reading", question: "Do you like reading? What types of books or articles do you usually read?" },
-    { topic: "Travel", question: "Do you like traveling? Where would you like to travel in the future?" },
-    { topic: "Food", question: "What is your favorite type of food? Do you prefer eating at home or in restaurants?" },
-    { topic: "Weather", question: "What's the weather like in your country? Does the weather affect your mood?" },
+    { topic: "Hobbies",      question: "What do you enjoy doing in your free time? How often do you do this activity?" },
+    { topic: "Music",        question: "What kind of music do you like? Do you prefer listening to music alone or with others?" },
+    { topic: "Reading",      question: "Do you like reading? What types of books or articles do you usually read?" },
+    { topic: "Travel",       question: "Do you like traveling? Where would you like to travel in the future?" },
+    { topic: "Food",         question: "What is your favorite type of food? Do you prefer eating at home or in restaurants?" },
+    { topic: "Weather",      question: "What's the weather like in your country? Does the weather affect your mood?" },
   ],
   part2: [
-    {
-      topic: "A memorable trip",
-      cueCard: "Describe a memorable trip you took recently.\n\nYou should say:\n• Where you went\n• Who you went with\n• What you did there\n\nAnd explain why it was memorable.",
-      prepTime: "1 minute",
-      speakTime: "1-2 minutes"
-    },
-    {
-      topic: "A person who influenced you",
-      cueCard: "Describe a person who has influenced you.\n\nYou should say:\n• Who this person is\n• How you know them\n• What qualities they have\n\nAnd explain why they have influenced you.",
-      prepTime: "1 minute",
-      speakTime: "1-2 minutes"
-    },
-    {
-      topic: "A skill you learned",
-      cueCard: "Describe a skill you would like to learn.\n\nYou should say:\n• What the skill is\n• Why you want to learn it\n• How you would learn it\n\nAnd explain how this skill would benefit you.",
-      prepTime: "1 minute",
-      speakTime: "1-2 minutes"
-    },
-    {
-      topic: "A time you helped someone",
-      cueCard: "Describe a time you helped someone.\n\nYou should say:\n• Who you helped\n• What the situation was\n• How you helped them\n\nAnd explain how you felt afterwards.",
-      prepTime: "1 minute",
-      speakTime: "1-2 minutes"
-    },
-    {
-      topic: "An important decision",
-      cueCard: "Describe an important decision you made.\n\nYou should say:\n• What the decision was\n• When you made it\n• What factors you considered\n\nAnd explain how it affected your life.",
-      prepTime: "1 minute",
-      speakTime: "1-2 minutes"
-    },
+    { topic: "A memorable trip",       cueCard: "Describe a memorable trip you took recently.\n\nYou should say:\n• Where you went\n• Who you went with\n• What you did there\n\nAnd explain why it was memorable.",            prepTime: "1 minute", speakTime: "1–2 minutes" },
+    { topic: "A person who influenced you", cueCard: "Describe a person who has influenced you.\n\nYou should say:\n• Who this person is\n• How you know them\n• What qualities they have\n\nAnd explain why they have influenced you.", prepTime: "1 minute", speakTime: "1–2 minutes" },
+    { topic: "A skill you learned",    cueCard: "Describe a skill you would like to learn.\n\nYou should say:\n• What the skill is\n• Why you want to learn it\n• How you would learn it\n\nAnd explain how this skill would benefit you.",   prepTime: "1 minute", speakTime: "1–2 minutes" },
+    { topic: "A time you helped someone", cueCard: "Describe a time you helped someone.\n\nYou should say:\n• Who you helped\n• What the situation was\n• How you helped them\n\nAnd explain how you felt afterwards.",              prepTime: "1 minute", speakTime: "1–2 minutes" },
   ],
   part3: [
-    { topic: "Travel & Tourism", questions: [
-      "How has tourism changed in recent years?",
-      "What are the advantages and disadvantages of mass tourism?",
-      "Do you think people will travel more or less in the future?"
-    ]},
-    { topic: "Influence & Role Models", questions: [
-      "Why do people need role models?",
-      "How do celebrities influence young people?",
-      "Do you think the media presents good role models?"
-    ]},
-    { topic: "Learning & Skills", questions: [
-      "How has the way people learn changed over time?",
-      "What skills are most important for success in the modern world?",
-      "Should schools teach more practical skills?"
-    ]},
-    { topic: "Helping Others", questions: [
-      "Why is it important to help others?",
-      "How can governments encourage people to volunteer?",
-      "Do you think people are more or less helpful than in the past?"
-    ]},
-    { topic: "Decision Making", questions: [
-      "How do people make important life decisions?",
-      "Should young people seek advice from older generations?",
-      "Do you think technology helps or hinders decision-making?"
-    ]},
-  ]
+    { topic: "Travel & Tourism",    questions: ["How has tourism changed in recent years?", "What are the advantages and disadvantages of mass tourism?", "Do you think people will travel more or less in the future?"] },
+    { topic: "Learning & Skills",   questions: ["How has the way people learn changed over time?", "What skills are most important for success in the modern world?", "Should schools teach more practical skills?"] },
+    { topic: "Society & Community", questions: ["Why is it important for people to help each other?", "How can governments encourage community involvement?", "Do you think people are more or less socially connected than in the past?"] },
+    { topic: "Technology & Life",   questions: ["How has technology changed the way we communicate?", "Do you think technology makes life easier or more stressful?", "What might daily life look like in 50 years?"] },
+  ],
 };
 
-// Types for AI-generated speaking questions (matches generate-speaking edge function output)
-interface AISpeakingTest {
-  id: string;
-  topic: string;
-  difficulty: string;
-  part1: {
-    topics: Array<{ theme: string; questions: string[] }>;
-  };
-  part2: {
-    cue_card: string;
-    bullet_points: string[];
-    final_instruction: string;
-    prep_time: string;
-    speak_time: string;
-    rounding_off_questions: string[];
-  };
-  part3: {
-    theme: string;
-    questions: string[];
-  };
+// ── Types ─────────────────────────────────────────────────────────────────
+type TestPhase = 'intro' | 'part1' | 'part2' | 'part3' | 'results';
+
+interface P1Answer { topic: string; question: string; transcript: string; }
+
+interface TestSet {
+  part1: Array<{ topic: string; question: string }>;
+  part2: { topic: string; cueCard: string; prepTime: string; speakTime: string };
+  part3: { topic: string; questions: string[] };
 }
 
-// Map AI response to the legacy question format used by the component
-function mapAIToLegacy(ai: AISpeakingTest) {
-  const p1topics = ai.part1?.topics ?? [];
-  const part1Questions = p1topics.flatMap(t =>
-    (t.questions ?? []).map(q => ({ topic: t.theme, question: q }))
-  );
-
-  const p2 = ai.part2;
-  const cueCardText = p2
-    ? `${p2.cue_card}\n\nYou should say:\n${(p2.bullet_points ?? []).map(b => `• ${b}`).join('\n')}\n\n${p2.final_instruction}`
-    : "";
-
-  const part2Questions = p2 ? [{
-    topic: ai.topic ?? "AI Generated",
-    cueCard: cueCardText,
-    prepTime: p2.prep_time ?? "1 minute",
-    speakTime: p2.speak_time ?? "1–2 minutes",
-  }] : [];
-
-  const p3 = ai.part3;
-  const part3Questions = p3 ? [{
-    topic: p3.theme ?? ai.topic ?? "Discussion",
-    questions: p3.questions ?? [],
-  }] : [];
-
-  return { part1: part1Questions, part2: part2Questions, part3: part3Questions };
+interface QuestionBank {
+  part1: typeof FALLBACK_QUESTIONS.part1;
+  part2: typeof FALLBACK_QUESTIONS.part2;
+  part3: typeof FALLBACK_QUESTIONS.part3;
 }
 
-type SpeakingPart = 'part1' | 'part2' | 'part3';
-
-interface CachedSpeakingState {
-  activeQuestions: typeof FALLBACK_SPEAKING_QUESTIONS;
-  currentPart: SpeakingPart;
-  currentQuestionIndex: number;
-  feedback: any;
-}
-
+// ── Component ─────────────────────────────────────────────────────────────
 export default function SpeakingModule() {
-  // useAuth MUST be called before any useState that references user?.id
   const { user } = useAuth();
-
-  // isMountedRef: tracks whether component is currently mounted
-  const isMountedRef = useRef(true);
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => { isMountedRef.current = false; };
-  }, []);
-
-  // Background generation store — survives component unmount/remount
-  const genEntry = useGenerationEntry('speaking');
-  const isGenerating = genEntry.isGenerating;
-
-  const [currentPart, setCurrentPart] = useState<SpeakingPart>(() => {
-    if (typeof window !== "undefined") {
-      const stored = sessionStorage.getItem(`ielts-speaking-active-part-${user?.id || 'guest'}`);
-      if (stored === "part1" || stored === "part2" || stored === "part3") return stored as SpeakingPart;
-    }
-    return "part1";
-  });
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [feedback, setFeedback] = useState<any>(null);
-
-  // Background analysis store — persists isAnalyzing across module navigation
-  const analysisEntry = useGenerationEntry('speaking-analysis');
-  const isAnalyzing = analysisEntry.isGenerating;
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const { completedIds: completedTopics, markCompleted: _markCompleted } = useCompletedQuestions("speaking");
-  // Part 1 cards share topic names, so key on the unique question text instead
-  const getSpeakingKey = (part: string, q: any): string => {
-    const text = part === "part1" ? (q.question ?? q.topic) : q.topic;
-    return `${part}-${text}`;
-  };
-  const markSpeakingCompleted = (part: string, q: any) => _markCompleted(getSpeakingKey(part, q));
-  const [speakingView, setSpeakingView] = useState<"library" | "practice">("library");
-  const [selectedSpeakingQuestion, setSelectedSpeakingQuestion] = useState<any>(null);
-  const [selectedSpeakingPart, setSelectedSpeakingPart] = useState<SpeakingPart>("part1");
-  const [doneFilter, setDoneFilter] = useState<"all" | "done" | "not-done">("all");
-
-  const [activeQuestions, setActiveQuestions] = useState(FALLBACK_SPEAKING_QUESTIONS);
-  const [dbQuestionsLoaded, setDbQuestionsLoaded] = useState(false);
   const { toast } = useToast();
   const { saveProgress } = useUserProgress();
-  const { canAccess, refreshCounts, isLoading: isGatingLoading } = useFeatureGating();
+  const { canAccess, refreshCounts } = useFeatureGating();
+  const isMountedRef = useRef(true);
+  useEffect(() => { isMountedRef.current = true; return () => { isMountedRef.current = false; }; }, []);
+
+  const [bank, setBank] = useState<QuestionBank>(FALLBACK_QUESTIONS);
+  const [phase, setPhase] = useState<TestPhase>('intro');
+  const [p1Index, setP1Index] = useState(0);
+  const [testSet, setTestSet] = useState<TestSet | null>(null);
+  const [p1Answers, setP1Answers] = useState<P1Answer[]>([]);
+  const [p2Transcript, setP2Transcript] = useState('');
+  const [p3Transcript, setP3Transcript] = useState('');
+  const [feedback, setFeedback] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [speakingDuration, setSpeakingDuration] = useState<number | null>(null);
   const recordingStartRef = useRef<number | null>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  useEffect(() => {
-    if (!user?.id) return;
-    try {
-      const stored = sessionStorage.getItem(`ielts-speaking-cache-${user.id}`);
-      if (stored) {
-        const state = JSON.parse(stored) as CachedSpeakingState;
-        if (state.activeQuestions) setActiveQuestions(state.activeQuestions);
-        if (state.currentPart) setCurrentPart(state.currentPart);
-        if (state.currentQuestionIndex !== undefined) setCurrentQuestionIndex(state.currentQuestionIndex);
-        if (state.feedback) setFeedback(state.feedback);
-      }
-    } catch (err) { console.error("Cache load error:", err); }
-  }, [user?.id]);
+  const {
+    isListening, isTranscribing, transcript, startListening, stopListening,
+    resetTranscript, isSupported, audioLevel, audioUrl,
+  } = useWhisperTranscription();
 
-  // Fetch pre-generated questions from the speaking_library table on mount
+  // Load questions from DB on mount
   useEffect(() => {
-    const fetchDBQuestions = async () => {
+    const load = async () => {
       try {
         const { data, error } = await supabase
           .from("speaking_library")
           .select("part, topic, question, follow_up_questions, prep_time, speak_time")
           .eq("is_active", true)
           .order("topic", { ascending: true });
-
         if (error || !data || data.length === 0) return;
 
-        const part1 = data
-          .filter((r) => r.part === 1)
-          .map((r) => ({ topic: r.topic, question: r.question }));
-
-        const part2 = data
-          .filter((r) => r.part === 2)
-          .map((r) => ({
-            topic: r.topic,
-            cueCard: r.question,
-            prepTime: r.prep_time ?? "1 minute",
-            speakTime: r.speak_time ?? "1-2 minutes",
-          }));
-
-        const part3 = data
-          .filter((r) => r.part === 3)
-          .map((r) => ({
-            topic: r.topic,
-            questions: Array.isArray(r.follow_up_questions) ? (r.follow_up_questions as string[]) : [],
-          }));
-
-        const merged = {
-          part1: part1.length > 0 ? part1 : FALLBACK_SPEAKING_QUESTIONS.part1,
-          part2: part2.length > 0 ? part2 : FALLBACK_SPEAKING_QUESTIONS.part2,
-          part3: part3.length > 0 ? part3 : FALLBACK_SPEAKING_QUESTIONS.part3,
-        };
-
-        setActiveQuestions(merged as typeof FALLBACK_SPEAKING_QUESTIONS);
-        setDbQuestionsLoaded(true);
-      } catch (err) {
-        console.error("Failed to load speaking questions from DB:", err);
-      }
+        const p1 = data.filter(r => r.part === 1).map(r => ({ topic: r.topic, question: r.question }));
+        const p2 = data.filter(r => r.part === 2).map(r => ({
+          topic: r.topic, cueCard: r.question,
+          prepTime: r.prep_time ?? "1 minute", speakTime: r.speak_time ?? "1–2 minutes",
+        }));
+        const p3 = data.filter(r => r.part === 3).map(r => ({
+          topic: r.topic,
+          questions: Array.isArray(r.follow_up_questions) ? (r.follow_up_questions as string[]) : [],
+        }));
+        setBank({
+          part1: p1.length ? p1 : FALLBACK_QUESTIONS.part1,
+          part2: p2.length ? p2 : FALLBACK_QUESTIONS.part2,
+          part3: p3.length ? p3 : FALLBACK_QUESTIONS.part3,
+        });
+      } catch { /* use fallback */ }
     };
-
-    fetchDBQuestions();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    load();
+  }, []);
 
   useEffect(() => {
-    if (!user?.id) return;
-    const state: CachedSpeakingState = {
-      activeQuestions,
-      currentPart,
-      currentQuestionIndex,
-      feedback
-    };
-    sessionStorage.setItem(`ielts-speaking-cache-${user.id}`, JSON.stringify(state));
-    sessionStorage.setItem(`ielts-speaking-active-part-${user.id}`, currentPart);
-  }, [user?.id, activeQuestions, currentPart, currentQuestionIndex, feedback]);
-
-  // Apply generation results that arrived while this component was unmounted
-  useEffect(() => {
-    if (genEntry.isGenerating) return;
-    if (genEntry.result) {
-      const { mapped } = genEntry.result;
-      generationStore.clearEntry('speaking');
-      if (isMountedRef.current) {
-        setActiveQuestions(mapped);
-        setCurrentPart('part1');
-        setCurrentQuestionIndex(0);
-        toast({ title: "Test Generated", description: "Your AI speaking practice is ready!" });
-      }
-    } else if (genEntry.error) {
-      generationStore.clearEntry('speaking');
-      if (isMountedRef.current) {
-        toast({ title: "Generation failed", description: genEntry.error, variant: "destructive" });
-      }
+    if (feedback && feedbackRef.current) {
+      setTimeout(() => feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     }
-  }, [genEntry]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [feedback]);
 
-  // Apply analysis results that arrived while this component was unmounted
-  useEffect(() => {
-    if (analysisEntry.isGenerating) return;
-    if (analysisEntry.result) {
-      const { feedbackData } = analysisEntry.result;
-      generationStore.clearEntry('speaking-analysis');
-      if (isMountedRef.current) {
-        setFeedback(feedbackData);
-      }
-    } else if (analysisEntry.error) {
-      generationStore.clearEntry('speaking-analysis');
-      if (isMountedRef.current) {
-        toast({ title: "Analysis failed", description: analysisEntry.error, variant: "destructive" });
-      }
-    }
-  }, [analysisEntry]); // eslint-disable-line react-hooks/exhaustive-deps
+  // ── Helpers ───────────────────────────────────────────────────────────
+  const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
 
-  const {
-    isListening,
-    isTranscribing,
-    transcript,
-    interimTranscript,
-    startListening,
-    stopListening,
-    resetTranscript,
-    isSupported,
-    audioLevel,
-    audioUrl,
-  } = useWhisperTranscription();
-
-  const getCurrentQuestion = () => {
-    switch (currentPart) {
-      case 'part1':
-        return activeQuestions.part1[currentQuestionIndex % activeQuestions.part1.length];
-      case 'part2':
-        return activeQuestions.part2[currentQuestionIndex % activeQuestions.part2.length];
-      case 'part3':
-        return activeQuestions.part3[currentQuestionIndex % activeQuestions.part3.length];
-    }
-  };
-
-  const generateNewQuestion = () => {
-    if (!canAccess("speaking")) {
-      setShowUpgradeModal(true);
-      return;
-    }
-
-    resetTranscript();
+  const startTest = () => {
+    const p1 = shuffle(bank.part1).slice(0, 4);
+    const p2 = bank.part2[Math.floor(Math.random() * bank.part2.length)];
+    const p3 = bank.part3[Math.floor(Math.random() * bank.part3.length)];
+    setTestSet({ part1: p1, part2: p2, part3: p3 });
+    setP1Answers([]);
+    setP2Transcript('');
+    setP3Transcript('');
+    setP1Index(0);
     setFeedback(null);
     setSpeakingDuration(null);
-    setSelectedSpeakingQuestion(null);
-    const bank = activeQuestions[currentPart];
-    setCurrentQuestionIndex((prev) => (prev + 1) % bank.length);
-  };
-
-  const handleRestartPractice = () => {
     resetTranscript();
-    setFeedback(null);
-    setSpeakingDuration(null);
-  };
-
-  const handlePartChange = (part: SpeakingPart) => {
-    setCurrentPart(part);
-    setCurrentQuestionIndex(0);
-    setSelectedSpeakingQuestion(null);
-    resetTranscript();
-    setFeedback(null);
-    setSpeakingDuration(null);
+    setPhase('part1');
   };
 
   const handleStartRecording = async () => {
     if (!isSupported) {
-      toast({
-        title: "Microphone not available",
-        description: "Please allow microphone access and use a modern browser (Chrome, Edge, Safari 14+, Firefox).",
-        variant: "destructive",
-      });
+      toast({ title: "Microphone not available", description: "Please allow microphone access.", variant: "destructive" });
       return;
     }
     resetTranscript();
-    setFeedback(null);
     setSpeakingDuration(null);
     recordingStartRef.current = Date.now();
     await startListening();
@@ -380,596 +155,480 @@ export default function SpeakingModule() {
       setSpeakingDuration(Math.round((Date.now() - recordingStartRef.current) / 1000));
       recordingStartRef.current = null;
     }
-    stopListening(); // triggers Whisper transcription in the hook
+    stopListening();
   };
 
-  const analyzeTranscript = async () => {
-    // Check feature gating before analyzing
-    if (!canAccess("speaking")) {
-      setShowUpgradeModal(true);
+  const saveP1Answer = () => {
+    if (!testSet || !transcript.trim()) return;
+    const q = testSet.part1[p1Index];
+    const newAnswers = [...p1Answers, { topic: q.topic, question: q.question, transcript: transcript.trim() }];
+    setP1Answers(newAnswers);
+    resetTranscript();
+    setSpeakingDuration(null);
+    if (p1Index < 3) {
+      setP1Index(prev => prev + 1);
+    } else {
+      setPhase('part2');
+    }
+  };
+
+  const saveP2Answer = () => {
+    setP2Transcript(transcript.trim());
+    resetTranscript();
+    setSpeakingDuration(null);
+    setPhase('part3');
+  };
+
+  const saveP3Answer = () => {
+    setP3Transcript(transcript.trim());
+    resetTranscript();
+    setSpeakingDuration(null);
+  };
+
+  const analyzeFullTest = async () => {
+    if (!canAccess("speaking")) { setShowUpgradeModal(true); return; }
+    if (!testSet) return;
+    const finalP3 = p3Transcript || transcript.trim();
+    if (!finalP3) {
+      toast({ title: "No response for Part 3", description: "Please record your Part 3 response first.", variant: "destructive" });
       return;
     }
 
-    const finalTranscript = transcript.trim();
-    if (!finalTranscript) {
-      toast({
-        title: "No speech detected",
-        description: "Please record your response first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Refresh session so the JWT is valid when invoking the edge function
     let currentSession;
     try {
       const { data: { session: refreshed } } = await supabase.auth.refreshSession();
       currentSession = refreshed ?? (await supabase.auth.getSession()).data.session;
-    } catch (e) {
-      console.error("Session refresh error:", e);
-    }
-
+    } catch { /* ignore */ }
     if (!currentSession) {
       toast({ title: "Authentication required", description: "Please sign in again.", variant: "destructive" });
       return;
     }
 
-    generationStore.startGen('speaking-analysis');
+    setIsAnalyzing(true);
+
+    const combined = [
+      '[PART 1 — Introduction]',
+      ...p1Answers.map((a, i) => `Q${i + 1} (${a.topic}): ${a.question}\nA: ${a.transcript}`),
+      '',
+      '[PART 2 — Long Turn]',
+      `Cue Card: ${testSet.part2.cueCard}`,
+      `A: ${p2Transcript}`,
+      '',
+      '[PART 3 — Discussion]',
+      `Topic: ${testSet.part3.topic}`,
+      `Questions: ${testSet.part3.questions.join(' / ')}`,
+      `A: ${finalP3}`,
+    ].join('\n');
 
     try {
-      const currentQuestion = selectedSpeakingQuestion ?? getCurrentQuestion();
-      const rawContext = currentPart === 'part2'
-        ? (currentQuestion as any).cueCard
-        : currentPart === 'part3'
-        ? (currentQuestion as any).questions?.join('\n') ?? ''
-        : (currentQuestion as any).question ?? '';
-
-      // Zod schema limits question to 2000 chars — truncate to be safe
-      const questionContext = typeof rawContext === 'string'
-        ? rawContext.slice(0, 1900)
-        : '';
-
       const { data, error } = await supabase.functions.invoke("ai-analyze", {
-        body: {
-          type: "speaking",
-          content: finalTranscript,
-          speakingPart: currentPart,
-          question: questionContext || undefined,
-        },
-        headers: {
-          Authorization: `Bearer ${currentSession.access_token}`,
-        },
+        body: { type: "speaking", content: combined, speakingPart: "full_test" },
+        headers: { Authorization: `Bearer ${currentSession.access_token}` },
       });
+      if (error) throw error;
 
-      if (error) {
-        console.error("Speaking analysis invoke error:", error);
-        throw error;
-      }
-
-      // Unwrap response: supabase.functions.invoke returns {success, data} wrapper
-      const unwrappedData = data?.success ? data.data : data;
-
-      // Save progress regardless of mount state
-      if (unwrappedData?.overallBand && user) {
+      const result = data?.success ? data.data : data;
+      if (result?.overallBand && user) {
         try {
           await saveProgress({
-            exam_type: "speaking",
-            score: null,
-            band_score: unwrappedData.overallBand,
-            total_questions: null,
-            correct_answers: null,
-            feedback: `${currentPart.toUpperCase()}: ${(currentQuestion as any).topic || 'Practice'}`,
-            completed_at: new Date().toISOString(),
-            time_taken: null,
-            errors_log: [],
-            metadata: {
-              speakingPart: currentPart,
-              topic: (currentQuestion as any).topic,
-              wordCount: finalTranscript.split(/\s+/).filter(Boolean).length,
-            },
+            exam_type: "speaking", score: null, band_score: result.overallBand,
+            total_questions: null, correct_answers: null,
+            feedback: `Full Test: ${testSet.part2.topic}`,
+            completed_at: new Date().toISOString(), time_taken: null, errors_log: [],
+            metadata: { speakingPart: "full_test", topic: testSet.part2.topic },
           });
           await refreshCounts();
-        } catch (err) {
-          console.error("Failed to save speaking progress:", err);
-        }
+        } catch { /* non-critical */ }
       }
-
-      // Save feedback to sessionStorage so it survives navigation
-      try {
-        if (user?.id) {
-          const existingRaw = sessionStorage.getItem(`ielts-speaking-cache-${user.id}`);
-          const existing = existingRaw ? JSON.parse(existingRaw) : {};
-          sessionStorage.setItem(`ielts-speaking-cache-${user.id}`, JSON.stringify({ ...existing, feedback: unwrappedData }));
-        }
-      } catch { /* non-critical sessionStorage write */ }
-
-      if (isMountedRef.current) {
-        generationStore.clearEntry('speaking-analysis');
-        setFeedback(unwrappedData);
-        markSpeakingCompleted(currentPart, selectedSpeakingQuestion ?? currentQuestion);
-      } else {
-        // Component unmounted — store result for remount to apply
-        generationStore.finishGen('speaking-analysis', { feedbackData: unwrappedData });
-      }
-    } catch (error: any) {
-      console.error("Analysis error:", error);
-      const msg = error.message || "Please try again later.";
-      if (isMountedRef.current) {
-        generationStore.clearEntry('speaking-analysis');
-        toast({ title: "Analysis failed", description: msg, variant: "destructive" });
-      } else {
-        generationStore.failGen('speaking-analysis', msg);
-      }
+      if (isMountedRef.current) { setFeedback(result); setPhase('results'); }
+    } catch (err: any) {
+      toast({ title: "Analysis failed", description: err.message || "Please try again.", variant: "destructive" });
+    } finally {
+      if (isMountedRef.current) setIsAnalyzing(false);
     }
   };
 
-  const currentQuestion = getCurrentQuestion();
-  const feedbackRef = useRef<HTMLDivElement>(null);
-
-  // Split a paragraph of feedback into bullet-point sentences
-  const toBullets = (text: string | undefined): string[] => {
-    if (!text) return [];
-    return text
-      .split(/(?<=[.!?])\s+/)
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
-  };
-
-  // Auto-scroll to feedback when it appears
-  useEffect(() => {
-    if (feedback && feedbackRef.current) {
-      setTimeout(() => {
-        feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-    }
-  }, [feedback]);
-
-  // Generate waveform bars based on audio level
+  // ── Utility components ────────────────────────────────────────────────
   const waveformBars = Array.from({ length: 12 }, (_, i) => {
-    const baseHeight = 8;
-    const maxHeight = 40;
     const variation = Math.sin((i + Date.now() / 100) * 0.5) * 0.3 + 0.7;
-    const height = isListening
-      ? baseHeight + (maxHeight - baseHeight) * audioLevel * variation
-      : baseHeight;
-    return height;
+    return isListening ? 8 + (40 - 8) * audioLevel * variation : 8;
   });
 
-  // ── Utility: Web Speech TTS ────────────────────────────────────────────────
-  const speakText = (text: string, gender: 'male' | 'female') => {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.95;
-    const voices = window.speechSynthesis.getVoices();
-    const enVoices = voices.filter(v => v.lang.startsWith('en'));
-    if (gender === 'male') {
-      utterance.voice = enVoices.find(v => /david|guy|aaron|james|male/i.test(v.name)) ?? enVoices[0] ?? null;
-    } else {
-      utterance.voice = enVoices.find(v => /samantha|aria|zira|female|google us english/i.test(v.name)) ?? enVoices[1] ?? null;
-    }
-    window.speechSynthesis.speak(utterance);
-  };
+  const getScoreColor = (score?: number) =>
+    !score ? 'text-muted-foreground' : score >= 7 ? 'text-green-500' : score >= 5.5 ? 'text-elite-gold' : 'text-destructive';
 
-  // ── Utility: Word diff ────────────────────────────────────────────────────
-  // ── Utility: Export result ────────────────────────────────────────────────
-  const exportResult = () => {
-    if (!feedback) return;
-    const q = getCurrentQuestion();
-    const question = (q as any).question ?? (q as any).cueCard ?? '';
-    const lines = [
-      'IELTS Speaking Practice — Analysis Report',
-      '==========================================',
-      '',
-      `Question: ${question}`,
-      `Speaking Part: ${currentPart.toUpperCase()}`,
-      speakingDuration ? `Speaking Time: ${speakingDuration}s` : '',
-      '',
-      `OVERALL BAND SCORE: ${feedback.overallBand} (${feedback.bandScoreRange ?? '+/- 0.5'})`,
-      `Accuracy: ${feedback.accuracyScore ?? '—'}%`,
-      '',
-      '--- CRITERION SCORES ---',
-      `Pronunciation:              ${feedback.pronunciation?.score ?? '—'}`,
-      `Task Response:              ${feedback.taskResponse?.score ?? '—'}`,
-      `Fluency & Coherence:        ${feedback.fluencyCoherence?.score ?? '—'}`,
-      `Lexical Resource:           ${feedback.lexicalResource?.score ?? '—'}`,
-      `Grammatical Range & Acc.:   ${feedback.grammaticalRange?.score ?? '—'}`,
-      '',
-      '--- POLISHED TRANSCRIPT ---',
-      feedback.polishedTranscript ?? '',
-      '',
-      '--- HOW YOU COULD SAY IT ---',
-      feedback.enhancedSpeech ?? '',
-      '',
-      '--- IMPROVEMENTS TO FOCUS ON ---',
-      ...(feedback.improvements ?? []).map((s: string, i: number) => `${i + 1}. ${s}`),
-    ].filter(l => l !== undefined).join('\n');
-
-    const blob = new Blob([lines], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `ielts-speaking-${currentPart}-${Date.now()}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  // ── Utility: confidence color ─────────────────────────────────────────────
-  const getScoreColor = (score: number | undefined): string => {
-    if (!score) return 'text-muted-foreground';
-    if (score >= 7) return 'text-green-500';
-    if (score >= 5.5) return 'text-elite-gold';
-    return 'text-destructive';
-  };
-
-  // ── Inline component: Accuracy Circle ────────────────────────────────────
   const AccuracyCircle = ({ score }: { score: number }) => {
-    const r = 42;
-    const circ = 2 * Math.PI * r;
-    const offset = circ - (score / 100) * circ;
+    const r = 42; const circ = 2 * Math.PI * r;
     const color = score >= 80 ? '#22c55e' : score >= 60 ? '#f59e0b' : '#ef4444';
     return (
       <svg width={100} height={100} viewBox="0 0 100 100">
         <circle cx="50" cy="50" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="7" />
-        <circle
-          cx="50" cy="50" r={r} fill="none" stroke={color} strokeWidth="7"
-          strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
-          transform="rotate(-90 50 50)"
-          style={{ transition: 'stroke-dashoffset 1s ease' }}
-        />
-        <text x="50" y="50" textAnchor="middle" dominantBaseline="middle" fontSize="17" fontWeight="300" fill={color}>
-          {score}%
-        </text>
+        <circle cx="50" cy="50" r={r} fill="none" stroke={color} strokeWidth="7"
+          strokeDasharray={circ} strokeDashoffset={circ - (score / 100) * circ}
+          strokeLinecap="round" transform="rotate(-90 50 50)"
+          style={{ transition: 'stroke-dashoffset 1s ease' }} />
+        <text x="50" y="50" textAnchor="middle" dominantBaseline="middle" fontSize="17" fontWeight="300" fill={color}>{score}%</text>
       </svg>
     );
   };
 
-  // ── Inline component: Comparison Panel ───────────────────────────────────
+  const speakText = (text: string, gender: 'male' | 'female') => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = 0.95;
+    const voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+    u.voice = gender === 'male'
+      ? voices.find(v => /david|guy|aaron|james|male/i.test(v.name)) ?? voices[0] ?? null
+      : voices.find(v => /samantha|aria|zira|female|google us english/i.test(v.name)) ?? voices[1] ?? null;
+    window.speechSynthesis.speak(u);
+  };
 
-  // ── Library view ──────────────────────────────────────────────────────────
-  if (speakingView === "library") {
-    const bankQuestions = activeQuestions[selectedSpeakingPart] as any[];
-    const filteredBank = bankQuestions.filter(q =>
-      doneFilter === "all" || (doneFilter === "done"
-        ? completedTopics.has(getSpeakingKey(selectedSpeakingPart, q))
-        : !completedTopics.has(getSpeakingKey(selectedSpeakingPart, q)))
-    );
+  const exportResult = () => {
+    if (!feedback || !testSet) return;
+    const lines = [
+      'IELTS Speaking — Full Test Analysis',
+      '=====================================',
+      '',
+      `Overall Band: ${feedback.overallBand?.toFixed(1)}`,
+      '',
+      '--- CRITERION SCORES ---',
+      `Pronunciation:            ${feedback.pronunciation?.score ?? '—'}`,
+      `Task Response:            ${feedback.taskResponse?.score ?? '—'}`,
+      `Fluency & Coherence:      ${feedback.fluencyCoherence?.score ?? '—'}`,
+      `Lexical Resource:         ${feedback.lexicalResource?.score ?? '—'}`,
+      `Grammatical Range & Acc.: ${feedback.grammaticalRange?.score ?? '—'}`,
+      '',
+      '--- WHAT TO FOCUS ON ---',
+      ...(feedback.improvements ?? []).map((s: string, i: number) => `${i + 1}. ${s}`),
+    ].join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([lines], { type: 'text/plain' }));
+    a.download = `ielts-speaking-full-${Date.now()}.txt`;
+    a.click();
+  };
+
+  // ── Recording controls (shared across parts) ──────────────────────────
+  const RecordingControls = ({
+    onSave, saveLabel, saving = false,
+  }: { onSave: () => void; saveLabel: string; saving?: boolean }) => (
+    <div className="glass-card p-8">
+      <div className="flex flex-col items-center">
+        {/* Waveform */}
+        <div className={cn(
+          "w-full max-w-md h-24 flex items-center justify-center gap-1 mb-6 rounded-xl transition-all duration-300",
+          isListening ? "bg-destructive/10" : isTranscribing ? "bg-accent/10" : transcript ? "bg-green-500/10" : "bg-secondary/30"
+        )}>
+          {isListening ? (
+            waveformBars.map((h, i) => <div key={i} className="w-2 bg-destructive rounded-full transition-all duration-75" style={{ height: `${h}px` }} />)
+          ) : isTranscribing ? (
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="w-8 h-8 text-accent animate-spin" />
+              <span className="text-xs text-muted-foreground">Transcribing…</span>
+            </div>
+          ) : transcript ? (
+            <Volume2 className="w-12 h-12 text-green-500" />
+          ) : (
+            <Mic className="w-12 h-12 text-muted-foreground" />
+          )}
+        </div>
+
+        {!isSupported && (
+          <p className="text-xs text-amber-400 mb-4">Microphone unavailable — allow access and reload.</p>
+        )}
+
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center gap-4">
+            {!isListening && !isTranscribing && !transcript && (
+              <Button variant="neumorphicPrimary" size="lg" onClick={handleStartRecording} disabled={!isSupported}>
+                <Mic className="w-5 h-5 mr-2" /> Start Speaking
+              </Button>
+            )}
+            {isListening && (
+              <Button variant="destructive" size="lg" onClick={handleStopRecording}>
+                <Square className="w-5 h-5 mr-2" /> Stop Recording
+              </Button>
+            )}
+            {isTranscribing && (
+              <Button variant="outline" size="lg" disabled>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Transcribing…
+              </Button>
+            )}
+            {transcript && !isListening && !isTranscribing && (
+              <>
+                <Button variant="glass" onClick={handleStartRecording}>
+                  <Mic className="w-5 h-5 mr-2" /> Re-record
+                </Button>
+                <Button variant="neumorphicPrimary" onClick={onSave} disabled={saving}>
+                  {saving ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <ArrowRight className="w-5 h-5 mr-2" />}
+                  {saveLabel}
+                </Button>
+              </>
+            )}
+          </div>
+          {isListening && <p className="text-sm text-destructive animate-pulse">Recording… speak naturally, then press Stop</p>}
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── Progress bar for Part 1 ───────────────────────────────────────────
+  const P1Progress = () => (
+    <div className="flex items-center gap-2 mb-4">
+      {[0, 1, 2, 3].map(i => (
+        <div key={i} className={cn(
+          "flex-1 h-1.5 rounded-full transition-colors",
+          i < p1Answers.length ? "bg-green-500" : i === p1Index ? "bg-accent" : "bg-border/40"
+        )} />
+      ))}
+      <span className="text-xs text-muted-foreground shrink-0">Q{p1Index + 1}/4</span>
+    </div>
+  );
+
+  // ── Page header ────────────────────────────────────────────────────────
+  const Header = ({ subtitle }: { subtitle: string }) => (
+    <div className="flex items-center gap-3 mb-8">
+      <div className="w-12 h-12 rounded-xl bg-elite-gold/10 flex items-center justify-center">
+        <Mic className="w-6 h-6 text-elite-gold" />
+      </div>
+      <div>
+        <h1 className="text-2xl font-light">Speaking Practice</h1>
+        <p className="text-sm text-muted-foreground">{subtitle}</p>
+      </div>
+    </div>
+  );
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE: Intro
+  // ══════════════════════════════════════════════════════════════════════
+  if (phase === 'intro') {
     return (
       <DashboardLayout>
-        <div className="max-w-4xl space-y-6">
-          {/* Header */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-elite-gold/10 flex items-center justify-center shrink-0">
-              <Mic className="w-5 h-5 text-elite-gold" />
-            </div>
+        <div className="max-w-2xl">
+          <Header subtitle="Full IELTS speaking simulation — Parts 1, 2 & 3" />
+
+          <div className="glass-card p-8 space-y-6">
             <div>
-              <h1 className="text-xl font-light">Speaking Practice</h1>
-              <p className="text-xs text-muted-foreground">Real-time voice transcription with AI analysis</p>
-            </div>
-          </div>
-
-          {/* Part tabs */}
-          <div className="flex gap-2">
-            {(['part1', 'part2', 'part3'] as const).map(part => {
-              const partQs = activeQuestions[part] as Array<{topic: string}>;
-              const doneCount = partQs.filter(q => completedTopics.has(getSpeakingKey(part, q))).length;
-              return (
-                <Button key={part}
-                  variant={selectedSpeakingPart === part ? "default" : "outline"}
-                  onClick={() => setSelectedSpeakingPart(part)}
-                  className="flex-1">
-                  Part {part.slice(-1)}
-                  <span className="ml-1.5 text-xs opacity-70">
-                    {part === 'part1' ? 'Introduction' : part === 'part2' ? 'Cue Card' : 'Discussion'}
-                  </span>
-                  {doneCount > 0 && <span className="ml-1.5 text-xs text-green-400">· {doneCount} done</span>}
-                </Button>
-              );
-            })}
-          </div>
-
-          {/* Done filter */}
-          <div className="flex items-center gap-2">
-            {(["all", "done", "not-done"] as const).map(f => (
-              <button key={f} onClick={() => setDoneFilter(f)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                  doneFilter === f ? "bg-accent text-accent-foreground border-accent" : "border-border/50 text-muted-foreground hover:border-accent/50 hover:text-foreground"
-                }`}>
-                {f === "all" ? "All" : f === "done" ? "Done" : "Not Done"}
-              </button>
-            ))}
-            <span className="ml-auto text-sm text-muted-foreground">{filteredBank.length} questions</span>
-          </div>
-
-          {/* Question grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {filteredBank.map((q: any, i: number) => {
-              const isDone = completedTopics.has(getSpeakingKey(selectedSpeakingPart, q));
-              return (
-                <div key={i}
-                  onClick={() => {
-                    setSelectedSpeakingQuestion(q);
-                    setCurrentPart(selectedSpeakingPart);
-                    setCurrentQuestionIndex(bankQuestions.indexOf(q));
-                    resetTranscript();
-                    setFeedback(null);
-                    setSpeakingView("practice");
-                  }}
-                  className={cn(
-                    "glass-card p-5 flex flex-col gap-3 cursor-pointer hover:border-accent/40 transition-colors group border",
-                    isDone ? "border-green-500/30 bg-green-500/5" : "border-border/50"
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="text-sm font-semibold group-hover:text-accent transition-colors">
-                      {q.topic}
-                    </span>
-                    {isDone && (
-                      <span className="text-xs px-2 py-0.5 rounded flex items-center gap-1 bg-green-500/15 text-green-500 shrink-0">
-                        <CheckCircle className="w-3 h-3" />
-                        Done
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground line-clamp-3">
-                    {selectedSpeakingPart === 'part1'
-                      ? q.question
-                      : selectedSpeakingPart === 'part2'
-                      ? q.cueCard
-                      : (q.questions as string[]).join(' · ')}
-                  </p>
-                  {selectedSpeakingPart === 'part2' && (
-                    <p className="text-[10px] text-muted-foreground/70">Prep: {q.prepTime} · Speak: {q.speakTime}</p>
-                  )}
-                  <Button variant="outline" size="sm" className="mt-auto w-full group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
-                    <Play className="w-3.5 h-3.5 mr-1.5" />
-                    Start Practice
-                  </Button>
+              <h2 className="text-lg font-medium mb-2">How it works</h2>
+              <div className="space-y-3 text-sm text-muted-foreground">
+                <div className="flex gap-3">
+                  <span className="w-6 h-6 rounded-full bg-accent/20 text-accent text-xs flex items-center justify-center shrink-0 font-medium">1</span>
+                  <p><span className="text-foreground font-medium">Part 1 — Introduction:</span> Answer 4 questions on familiar topics. Each response is individually transcribed.</p>
                 </div>
-              );
-            })}
-          </div>
+                <div className="flex gap-3">
+                  <span className="w-6 h-6 rounded-full bg-accent/20 text-accent text-xs flex items-center justify-center shrink-0 font-medium">2</span>
+                  <p><span className="text-foreground font-medium">Part 2 — Long Turn:</span> Read a cue card, take a moment to prepare, then speak for 1–2 minutes.</p>
+                </div>
+                <div className="flex gap-3">
+                  <span className="w-6 h-6 rounded-full bg-accent/20 text-accent text-xs flex items-center justify-center shrink-0 font-medium">3</span>
+                  <p><span className="text-foreground font-medium">Part 3 — Discussion:</span> Answer abstract follow-up questions linked to your Part 2 topic.</p>
+                </div>
+                <div className="flex gap-3">
+                  <span className="w-6 h-6 rounded-full bg-elite-gold/20 text-elite-gold text-xs flex items-center justify-center shrink-0 font-medium">✓</span>
+                  <p><span className="text-foreground font-medium">One AI analysis:</span> After Part 3, all your responses are analyzed together for a full band score.</p>
+                </div>
+              </div>
+            </div>
 
-          <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} featureName="Speaking" />
+            <Button variant="neumorphicPrimary" size="lg" className="w-full" onClick={startTest}>
+              <Mic className="w-5 h-5 mr-2" /> Start Full Speaking Test
+            </Button>
+          </div>
         </div>
+        <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} featureName="Speaking" />
       </DashboardLayout>
     );
   }
 
-  // ── Practice view ─────────────────────────────────────────────────────────
-  const activeQ = selectedSpeakingQuestion ?? currentQuestion;
-  return (
-    <DashboardLayout>
-      <div className="max-w-4xl">
-        {/* Back button + Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <Button variant="ghost" size="sm" onClick={() => { setSpeakingView("library"); resetTranscript(); setFeedback(null); }} className="gap-1.5 text-muted-foreground hover:text-foreground shrink-0">
-            ← Back to Questions
-          </Button>
-        </div>
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-elite-gold/10 flex items-center justify-center">
-            <Mic className="w-6 h-6 text-elite-gold" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-light">Speaking Practice</h1>
-            <p className="text-sm text-muted-foreground">Real-time voice transcription with AI analysis</p>
-          </div>
-        </div>
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE: Part 1
+  // ══════════════════════════════════════════════════════════════════════
+  if (phase === 'part1' && testSet) {
+    const q = testSet.part1[p1Index];
+    return (
+      <DashboardLayout>
+        <div className="max-w-2xl space-y-6">
+          <Header subtitle="Part 1 — Introduction" />
+          <P1Progress />
 
-        {/* Part Selection */}
-        <div className="flex gap-2 mb-6">
-          {(['part1', 'part2', 'part3'] as const).map((part) => {
-            const partQuestions = activeQuestions[part] as Array<{ topic: string }>;
-            const doneCount = partQuestions.filter(q => completedTopics.has(getSpeakingKey(part, q))).length;
-            return (
-              <Button
-                key={part}
-                variant={currentPart === part ? "default" : "outline"}
-                onClick={() => handlePartChange(part)}
-                className="flex-1"
-              >
-                Part {part.slice(-1)}
-                <span className="ml-2 text-xs opacity-70">
-                  {part === 'part1' ? 'Introduction' : part === 'part2' ? 'Cue Card' : 'Discussion'}
-                </span>
-                {doneCount > 0 && (
-                  <span className="ml-2 text-xs text-green-400">·{doneCount} done</span>
-                )}
-              </Button>
-            );
-          })}
-        </div>
-
-        {/* Question Card */}
-        <div className="glass-card p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                {(activeQ as any).topic}
-              </span>
-              {completedTopics.has(getSpeakingKey(currentPart, activeQ)) && (
-                <span className="flex items-center gap-1 text-xs text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full">
-                  <CheckCircle className="w-3 h-3" />
-                  Done
-                </span>
-              )}
-              {currentPart === 'part2' && (
-                <span className="text-xs text-muted-foreground">
-                  Prep: {(activeQ as any).prepTime} | Speak: {(activeQ as any).speakTime}
-                </span>
-              )}
-            </div>
-            <Button variant="ghost" size="sm" onClick={generateNewQuestion}>
-              <RefreshCw className="w-4 h-4 mr-2" />Next Question
-            </Button>
-          </div>
-
-          {currentPart === 'part1' && (
-            <p className="text-foreground/80 leading-relaxed text-lg">
-              {(activeQ as any).question}
-            </p>
-          )}
-
-          {currentPart === 'part2' && (
-            <div className="bg-secondary/30 rounded-xl p-4">
-              <pre className="whitespace-pre-wrap text-foreground/80 leading-relaxed font-sans">
-                {(activeQ as any).cueCard}
-              </pre>
-            </div>
-          )}
-
-          {currentPart === 'part3' && (
-            <div className="space-y-3">
-              {(activeQ as any).questions.map((q: string, i: number) => (
-                <div key={i} className="flex items-start gap-2">
-                  <ChevronRight className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
-                  <p className="text-foreground/80 leading-relaxed">{q}</p>
+          {/* Saved answers so far */}
+          {p1Answers.length > 0 && (
+            <div className="space-y-2">
+              {p1Answers.map((a, i) => (
+                <div key={i} className="glass-card p-4 flex items-start gap-3 border-green-500/20">
+                  <CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground mb-1">Q{i + 1}: {a.question}</p>
+                    <p className="text-sm text-foreground/80 truncate">{a.transcript}</p>
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
-          <p className="text-xs text-muted-foreground mt-4">
-            {currentPart === 'part1' 
-              ? "Answer in 2-3 sentences. This simulates the examiner's introductory questions."
-              : currentPart === 'part2'
-              ? "You have 1 minute to prepare, then speak for 1-2 minutes on this topic."
-              : "Discuss these abstract questions related to the topic. Aim for detailed, analytical responses."}
-          </p>
-        </div>
+          {/* Current question */}
+          <div className="glass-card p-6">
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">{q.topic}</span>
+            <p className="text-lg text-foreground/90 leading-relaxed mt-2">{q.question}</p>
+            <p className="text-xs text-muted-foreground mt-3">Answer in 2–3 sentences.</p>
+          </div>
 
-        {/* Recording Controls */}
-        <div className="glass-card p-8 mb-6">
-          <div className="flex flex-col items-center">
-            {/* Waveform Visualization */}
-            <div className={`w-full max-w-md h-24 flex items-center justify-center gap-1 mb-6 rounded-xl transition-all duration-300 ${
-              isListening
-                ? "bg-destructive/10"
-                : isTranscribing
-                ? "bg-accent/10"
-                : transcript
-                ? "bg-green-500/10"
-                : "bg-secondary/30"
-            }`}>
-              {isListening ? (
-                waveformBars.map((height, i) => (
-                  <div
-                    key={i}
-                    className="w-2 bg-destructive rounded-full transition-all duration-75"
-                    style={{ height: `${height}px` }}
-                  />
-                ))
-              ) : isTranscribing ? (
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-8 h-8 text-accent animate-spin" />
-                  <span className="text-xs text-muted-foreground">Transcribing with Whisper…</span>
+          <RecordingControls
+            onSave={saveP1Answer}
+            saveLabel={p1Index < 3 ? "Save & Next Question" : "Save & Go to Part 2"}
+          />
+
+          {transcript && !isListening && !isTranscribing && (
+            <div className="glass-card p-5">
+              <p className="text-xs text-muted-foreground mb-2">Your response:</p>
+              <p className="text-sm text-foreground/80 leading-relaxed">{transcript}</p>
+            </div>
+          )}
+        </div>
+        <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} featureName="Speaking" />
+      </DashboardLayout>
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE: Part 2
+  // ══════════════════════════════════════════════════════════════════════
+  if (phase === 'part2' && testSet) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-2xl space-y-6">
+          <Header subtitle="Part 2 — Long Turn" />
+
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex-1 h-1.5 rounded-full bg-green-500" />
+            <div className="flex-1 h-1.5 rounded-full bg-accent" />
+            <div className="flex-1 h-1.5 rounded-full bg-border/40" />
+            <span className="text-xs text-muted-foreground shrink-0">Part 2/3</span>
+          </div>
+
+          <div className="glass-card p-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs uppercase tracking-widest text-muted-foreground">{testSet.part2.topic}</span>
+              <span className="text-xs text-muted-foreground">Prep: {testSet.part2.prepTime} · Speak: {testSet.part2.speakTime}</span>
+            </div>
+            <div className="bg-secondary/30 rounded-xl p-4">
+              <pre className="whitespace-pre-wrap text-foreground/80 leading-relaxed font-sans text-sm">
+                {testSet.part2.cueCard}
+              </pre>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">Take a moment to prepare, then speak for 1–2 minutes.</p>
+          </div>
+
+          <RecordingControls onSave={saveP2Answer} saveLabel="Save & Go to Part 3" />
+
+          {transcript && !isListening && !isTranscribing && (
+            <div className="glass-card p-5">
+              <p className="text-xs text-muted-foreground mb-2">Your response:</p>
+              <p className="text-sm text-foreground/80 leading-relaxed">{transcript}</p>
+            </div>
+          )}
+        </div>
+        <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} featureName="Speaking" />
+      </DashboardLayout>
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE: Part 3
+  // ══════════════════════════════════════════════════════════════════════
+  if (phase === 'part3' && testSet) {
+    const finalTranscriptReady = !!(p3Transcript || (transcript && !isListening && !isTranscribing));
+    return (
+      <DashboardLayout>
+        <div className="max-w-2xl space-y-6">
+          <Header subtitle="Part 3 — Discussion" />
+
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex-1 h-1.5 rounded-full bg-green-500" />
+            <div className="flex-1 h-1.5 rounded-full bg-green-500" />
+            <div className="flex-1 h-1.5 rounded-full bg-accent" />
+            <span className="text-xs text-muted-foreground shrink-0">Part 3/3</span>
+          </div>
+
+          <div className="glass-card p-6">
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">{testSet.part3.topic}</span>
+            <div className="space-y-3 mt-3">
+              {testSet.part3.questions.map((q, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <ChevronRight className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                  <p className="text-sm text-foreground/80">{q}</p>
                 </div>
-              ) : transcript ? (
-                <Volume2 className="w-12 h-12 text-green-500" />
-              ) : (
-                <Mic className="w-12 h-12 text-muted-foreground" />
-              )}
+              ))}
             </div>
-
-            {/* Browser Support Warning */}
-            {!isSupported && (
-              <div className="w-full max-w-md mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-foreground/80">
-                <p className="font-medium text-foreground mb-1">
-                  Microphone access unavailable
-                </p>
-                <p className="text-xs">
-                  Please allow microphone permissions in your browser settings and reload the page.
-                  Whisper transcription works on Chrome, Edge, Firefox, and Safari 14+.
-                </p>
-              </div>
-            )}
-
-            {/* Controls */}
-            <div className="flex items-center gap-4">
-              {!isListening && !isTranscribing && !transcript && (
-                <Button
-                  variant="neumorphicPrimary"
-                  size="lg"
-                  onClick={handleStartRecording}
-                  disabled={!isSupported}
-                >
-                  <Mic className="w-5 h-5 mr-2" />
-                  Start Speaking
-                </Button>
-              )}
-
-              {isListening && (
-                <Button variant="destructive" size="lg" onClick={handleStopRecording}>
-                  <Square className="w-5 h-5 mr-2" />
-                  Stop Recording
-                </Button>
-              )}
-
-              {isTranscribing && (
-                <Button variant="outline" size="lg" disabled>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Transcribing…
-                </Button>
-              )}
-
-              {transcript && !isListening && !isTranscribing && (
-                <>
-                  <Button variant="glass" onClick={handleStartRecording}>
-                    <Mic className="w-5 h-5 mr-2" />
-                    Re-record
-                  </Button>
-                  <Button
-                    variant="neumorphicPrimary"
-                    onClick={analyzeTranscript}
-                    disabled={isAnalyzing}
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-5 h-5 mr-2" />
-                        Analyze Response
-                      </>
-                    )}
-                  </Button>
-                  {isAnalyzing && (
-                    <p className="text-xs text-muted-foreground text-center mt-2">
-                      AI analysis takes 20–40 seconds — hang tight...
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
-
-            {isListening && (
-              <p className="text-sm text-destructive mt-4 animate-pulse">
-                🎤 Recording… speak naturally, then press Stop
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground mt-3">Discuss these abstract questions. Aim for detailed, analytical responses.</p>
           </div>
+
+          {!p3Transcript ? (
+            <RecordingControls onSave={saveP3Answer} saveLabel="Save Response" />
+          ) : (
+            <div className="glass-card p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <p className="text-xs text-muted-foreground">Response saved</p>
+              </div>
+              <p className="text-sm text-foreground/80 leading-relaxed">{p3Transcript}</p>
+              <button onClick={() => { setP3Transcript(''); resetTranscript(); }}
+                className="text-xs text-muted-foreground hover:text-foreground mt-3 underline">
+                Re-record
+              </button>
+            </div>
+          )}
+
+          {transcript && !isListening && !isTranscribing && !p3Transcript && (
+            <div className="glass-card p-5">
+              <p className="text-xs text-muted-foreground mb-2">Your response:</p>
+              <p className="text-sm text-foreground/80 leading-relaxed">{transcript}</p>
+            </div>
+          )}
+
+          {finalTranscriptReady && (
+            <div className="glass-card p-6 border border-elite-gold/30">
+              <p className="text-sm text-muted-foreground mb-4">
+                All three parts complete. Submit for a full AI analysis across Part 1, 2 &amp; 3.
+              </p>
+              <Button
+                variant="neumorphicPrimary" className="w-full" size="lg"
+                onClick={analyzeFullTest} disabled={isAnalyzing}
+              >
+                {isAnalyzing ? (
+                  <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Analyzing Full Test…</>
+                ) : (
+                  <><Play className="w-5 h-5 mr-2" /> Analyze Full Test</>
+                )}
+              </Button>
+              {isAnalyzing && (
+                <p className="text-xs text-muted-foreground text-center mt-3">
+                  AI analysis takes 20–40 seconds — hang tight…
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+        <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} featureName="Speaking" />
+      </DashboardLayout>
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE: Results
+  // ══════════════════════════════════════════════════════════════════════
+  return (
+    <DashboardLayout>
+      <div className="max-w-2xl" ref={feedbackRef}>
+        <div className="flex items-center gap-3 mb-8">
+          <Button variant="ghost" size="sm" onClick={() => setPhase('intro')} className="text-muted-foreground hover:text-foreground">
+            ← Start New Test
+          </Button>
         </div>
 
-        {/* Live Transcription */}
-        {transcript && (
-          <div className="glass-card p-6 mb-6">
-            <h2 className="text-lg font-light mb-4 flex items-center gap-2">
-              Transcription
-              <span className="text-xs text-muted-foreground font-normal ml-1">via Whisper</span>
-            </h2>
-            <p className="text-foreground/80 leading-relaxed">{transcript}</p>
-          </div>
-        )}
-
-        {/* AI Feedback */}
         {feedback && (
-          <div ref={feedbackRef} className="space-y-4">
-
-            {/* ── 1. Accuracy + Band Score ───────────────────────────── */}
+          <div className="space-y-4">
+            {/* Band Score */}
             <div className="glass-card p-6">
               <div className="flex flex-wrap items-center justify-between gap-6">
                 <div className="flex flex-col items-center gap-1">
@@ -987,32 +646,26 @@ export default function SpeakingModule() {
                 </div>
                 <div className="flex flex-col gap-2 items-end">
                   <Button variant="outline" size="sm" onClick={exportResult}>
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Result to Word
+                    <Download className="w-4 h-4 mr-2" /> Export Result
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleRestartPractice}>
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    New Response
+                  <Button variant="ghost" size="sm" onClick={() => setPhase('intro')}>
+                    <RefreshCw className="w-4 h-4 mr-2" /> New Test
                   </Button>
                 </div>
               </div>
             </div>
 
-            {/* ── 2. Polished Transcript ─────────────────────────────── */}
+            {/* Polished transcript */}
             {feedback.polishedTranscript && (
               <div className="glass-card p-6">
                 <div className="flex items-center gap-3 mb-3 flex-wrap">
                   <span className="text-sm font-semibold">Polished transcript:</span>
-                  <button
-                    onClick={() => speakText(feedback.polishedTranscript, 'male')}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/40 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
+                  <button onClick={() => speakText(feedback.polishedTranscript, 'male')}
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/40 text-xs text-muted-foreground hover:text-foreground">
                     <Volume2 className="w-3 h-3" /> Male
                   </button>
-                  <button
-                    onClick={() => speakText(feedback.polishedTranscript, 'female')}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/40 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
+                  <button onClick={() => speakText(feedback.polishedTranscript, 'female')}
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/40 text-xs text-muted-foreground hover:text-foreground">
                     <Volume2 className="w-3 h-3" /> Female
                   </button>
                 </div>
@@ -1020,46 +673,41 @@ export default function SpeakingModule() {
               </div>
             )}
 
-
-            {/* ── 4. Criterion Cards ────────────────────────────────── */}
+            {/* Criterion cards */}
             {[
-              { label: "Pronunciation",              data: feedback.pronunciation },
-              { label: "Task Response",              data: feedback.taskResponse },
-              { label: "Fluency & Coherence",        data: feedback.fluencyCoherence },
-              { label: "Lexical Resource",           data: feedback.lexicalResource },
+              { label: "Pronunciation",                data: feedback.pronunciation },
+              { label: "Task Response",                data: feedback.taskResponse },
+              { label: "Fluency & Coherence",          data: feedback.fluencyCoherence },
+              { label: "Lexical Resource",             data: feedback.lexicalResource },
               { label: "Grammatical Range & Accuracy", data: feedback.grammaticalRange },
-            ].filter(c => c.data).map(criterion => (
-              <div key={criterion.label} className="glass-card p-6 text-center">
-                <h3 className="text-base font-semibold mb-2">{criterion.label}</h3>
-                <p className={`text-4xl font-light mb-4 ${getScoreColor(criterion.data.score)}`}>
-                  {criterion.data.score?.toFixed(1) ?? "—"}
+            ].filter(c => c.data).map(c => (
+              <div key={c.label} className="glass-card p-6 text-center">
+                <h3 className="text-base font-semibold mb-2">{c.label}</h3>
+                <p className={`text-4xl font-light mb-4 ${getScoreColor(c.data.score)}`}>
+                  {c.data.score?.toFixed(1) ?? "—"}
                 </p>
-                {/* Feedback: array → bullet list, string → paragraph (legacy cache) */}
-                {Array.isArray(criterion.data.feedback) ? (
+                {Array.isArray(c.data.feedback) ? (
                   <ul className="text-sm text-muted-foreground text-left max-w-xl mx-auto space-y-1.5">
-                    {criterion.data.feedback.map((point: string, i: number) => (
+                    {c.data.feedback.map((pt: string, i: number) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-accent mt-0.5 shrink-0">•</span>
-                        <span className="leading-relaxed">{point}</span>
+                        <span className="leading-relaxed">{pt}</span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mx-auto">
-                    {criterion.data.feedback}
-                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mx-auto">{c.data.feedback}</p>
                 )}
-                {/* Extra detail for specific criteria */}
-                {criterion.label === "Lexical Resource" && criterion.data.suggestions?.length > 0 && (
+                {c.label === "Lexical Resource" && c.data.suggestions?.length > 0 && (
                   <div className="mt-3 flex flex-wrap justify-center gap-2">
-                    {criterion.data.suggestions.slice(0, 3).map((s: string, i: number) => (
+                    {c.data.suggestions.slice(0, 3).map((s: string, i: number) => (
                       <span key={i} className="px-2 py-0.5 rounded-full bg-accent/10 text-accent text-xs">{s}</span>
                     ))}
                   </div>
                 )}
-                {criterion.label === "Grammatical Range & Accuracy" && criterion.data.errorsFound?.length > 0 && (
+                {c.label === "Grammatical Range & Accuracy" && c.data.errorsFound?.length > 0 && (
                   <ul className="mt-3 space-y-1">
-                    {criterion.data.errorsFound.slice(0, 3).map((e: string, i: number) => (
+                    {c.data.errorsFound.slice(0, 3).map((e: string, i: number) => (
                       <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5 text-left max-w-md mx-auto">
                         <span className="text-destructive mt-0.5 shrink-0">×</span>{e}
                       </li>
@@ -1069,12 +717,10 @@ export default function SpeakingModule() {
               </div>
             ))}
 
-            {/* ── 5. Priority Actions ───────────────────────────────── */}
-            {feedback.improvements && feedback.improvements.length > 0 && (
+            {/* Priority actions */}
+            {feedback.improvements?.length > 0 && (
               <div className="glass-card p-6 border border-elite-gold/20">
-                <h3 className="text-sm font-semibold text-elite-gold uppercase tracking-wide mb-4">
-                  What to focus on next
-                </h3>
+                <h3 className="text-sm font-semibold text-elite-gold uppercase tracking-wide mb-4">What to focus on next</h3>
                 <ol className="space-y-3">
                   {feedback.improvements.slice(0, 3).map((item: string, i: number) => (
                     <li key={i} className="flex items-start gap-3">
@@ -1088,22 +734,7 @@ export default function SpeakingModule() {
               </div>
             )}
 
-            {/* ── 6. Audio Playback */}
-            {(audioUrl || speakingDuration) && (
-              <div className="glass-card p-6">
-                {audioUrl && (
-                  <div className="mb-2">
-                    <p className="text-xs text-muted-foreground mb-2">Your recording:</p>
-                    <audio src={audioUrl} controls className="w-full h-10" />
-                  </div>
-                )}
-                {speakingDuration && (
-                  <p className="text-sm text-muted-foreground">Speaking Time: {speakingDuration}s</p>
-                )}
-              </div>
-            )}
-
-            {/* ── 7. How you could say it — two versions */}
+            {/* How you could say it */}
             {(feedback.enhancedSpeechNextBand || feedback.enhancedSpeech) && (
               <div className="glass-card p-6 border border-blue-500/20">
                 <div className="flex items-center gap-2 mb-1">
@@ -1112,23 +743,24 @@ export default function SpeakingModule() {
                     +1 Band ({((feedback.overallBand ?? 6) + 1).toFixed(1)})
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground mb-3">Same ideas — just smoother flow and better word choices</p>
+                <p className="text-xs text-muted-foreground mb-3">Same ideas — smoother flow and better word choices</p>
                 <p className="text-sm text-foreground/80 leading-relaxed">
                   {feedback.enhancedSpeechNextBand ?? feedback.enhancedSpeech}
                 </p>
               </div>
             )}
 
-
+            {/* Audio playback */}
+            {audioUrl && (
+              <div className="glass-card p-6">
+                <p className="text-xs text-muted-foreground mb-2">Your last recording:</p>
+                <audio src={audioUrl} controls className="w-full h-10" />
+              </div>
+            )}
           </div>
         )}
       </div>
-
-      <UpgradeModal
-        isOpen={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        featureName="Speaking"
-      />
+      <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} featureName="Speaking" />
     </DashboardLayout>
   );
 }

@@ -866,15 +866,28 @@ IMPORTANT: overallBand MUST equal the mathematically averaged and IELTS-rounded 
 
       const partLabel = speakingPart === 'part1' ? 'Part 1 (Introduction & Interview — familiar topics, 4-5 min)'
         : speakingPart === 'part3' ? 'Part 3 (Discussion — abstract/analytical, 4-5 min)'
+        : speakingPart === 'full_test' ? 'Full Test Simulation (Parts 1, 2 & 3 combined)'
         : 'Part 2 (Long Turn — cue card, 1-2 min monologue)';
 
-      userPrompt = `Analyze this IELTS Speaking transcription.
+      const isFullTest = speakingPart === 'full_test';
+
+      const speakingIntro = isFullTest
+        ? `Analyze this IELTS Speaking FULL TEST simulation.
+
+The student completed all three parts in sequence. Responses from Parts 1, 2, and 3 are below.
+Evaluate holistically across all three parts. For polishedTranscript and enhancedSpeechNextBand, focus on the Part 3 response.
+
+FULL TEST TRANSCRIPTION:
+${content}`
+        : `Analyze this IELTS Speaking transcription.
 
 SPEAKING PART: ${partLabel}
 QUESTION/CUE CARD: ${question || 'General speaking practice'}
 
 TRANSCRIPTION (with [pause] markers for silences > 1.5 seconds):
-${content}
+${content}`;
+
+      userPrompt = `${speakingIntro}
 
 === ANALYSIS INSTRUCTIONS ===
 1. Count all [pause] markers - these indicate hesitation
