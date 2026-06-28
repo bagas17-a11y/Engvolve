@@ -496,31 +496,34 @@ function Slide5HeadingsStrategy({ onComplete }: { onComplete: () => void }) {
 // SLIDE 6 — Matching Headings Practice
 // ─────────────────────────────────────────────
 const HEADINGS_OPTIONS = [
-  "The climate-regulating function of ocean currents",
-  "Evidence of weakening current systems",
-  "Possible impacts of changes to ocean circulation",
-  "Historical patterns of ocean temperature change",
+  "Why cities encourage the use of public transport",
+  "Reasons why many people still prefer private cars",
+  "A real example of free public transport working",
+  "The negative effects of car manufacturing on the environment",
 ];
 const HEADINGS_CORRECT = [0, 1, 2]; // indices into HEADINGS_OPTIONS for paragraphs A, B, C
 
 const HEADINGS_PARAGRAPHS = [
   {
     label: "Paragraph A",
-    text: "Ocean currents act as a global conveyor belt, transporting warm water from the equator towards the poles and returning cold, dense water to the tropics. This system plays a fundamental role in regulating the Earth's climate by distributing heat around the planet.",
-    firstSentenceHint: "First sentence: 'Ocean currents act as a global conveyor belt…'",
-    lastSentenceHint: "Last sentence: '…role in regulating the Earth's climate by distributing heat.'",
+    text: "Many cities around the world are investing heavily in public transport systems such as trains, buses, and trams. Governments believe that encouraging residents to use public transport can significantly reduce traffic congestion and lower carbon emissions.",
+    firstSentenceHint: "First sentence: cities are 'investing heavily in public transport' — why?",
+    lastSentenceHint: "Last sentence: gives the government's reason — reduce congestion and emissions.",
+    keyIdea: "The paragraph is about WHY cities promote public transport, not about problems or examples.",
   },
   {
     label: "Paragraph B",
-    text: "In recent decades, scientists have detected a measurable slowdown in the Atlantic Meridional Overturning Circulation (AMOC), a key component of ocean current systems. The primary driver appears to be the influx of freshwater from melting Greenland ice sheets, which reduces the salinity — and therefore the density — of surface water.",
-    firstSentenceHint: "First sentence: 'scientists have detected a measurable slowdown in…AMOC'",
-    lastSentenceHint: "Last sentence: 'melting ice sheets reduce salinity of surface water.'",
+    text: "Despite increased investment in public transport, many commuters still prefer to travel by car. Research shows that convenience, flexibility, and the ability to travel door-to-door make private vehicles more attractive than buses or trains for many everyday journeys.",
+    firstSentenceHint: "First sentence: 'many commuters still prefer to travel by car' — this is the main idea.",
+    lastSentenceHint: "Last sentence: lists specific reasons — convenience, flexibility, door-to-door.",
+    keyIdea: "The paragraph explains the reasons people choose cars, not statistics or solutions.",
   },
   {
     label: "Paragraph C",
-    text: "A significant weakening of the AMOC could have far-reaching consequences, including more frequent extreme weather events in Europe, disrupted monsoon seasons in South Asia, and accelerated sea-level rise along the eastern coast of North America.",
-    firstSentenceHint: "First sentence: 'A significant weakening of the AMOC could have far-reaching consequences…'",
-    lastSentenceHint: "Last sentence: lists specific impacts on Europe, South Asia, North America.",
+    text: "Several European cities have successfully reduced car use by making public transport completely free of charge. In Tallinn, Estonia, the introduction of free buses and trams led to a significant increase in public transport usage and a measurable decline in private car journeys.",
+    firstSentenceHint: "First sentence: 'successfully reduced car use' — this signals a real success story.",
+    lastSentenceHint: "Last sentence: gives the specific city (Tallinn) and the concrete results.",
+    keyIdea: "The paragraph gives a specific real-world example — look for the city name and outcome.",
   },
 ];
 
@@ -573,15 +576,16 @@ function Slide6HeadingsPractice({ onComplete }: { onComplete: () => void }) {
 
               <button onClick={() => setShowHints(h => { const n = [...h]; n[pi] = !n[pi]; return n; })}
                 className="text-[10px] text-accent hover:underline flex items-center gap-1">
-                {showHints[pi] ? "Hide" : "Show"} first/last sentence hint
+                {showHints[pi] ? "Hide" : "Show"} hints
               </button>
               <AnimatePresence>
                 {showHints[pi] && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }}
-                    className="rounded-lg bg-blue-50 border border-blue-200 p-2.5 space-y-1 overflow-hidden">
-                    <p className="text-[11px] text-blue-700 italic">{para.firstSentenceHint}</p>
+                    className="rounded-lg bg-blue-50 border border-blue-200 p-2.5 space-y-1.5 overflow-hidden">
+                    <p className="text-[11px] text-blue-700 italic">First/last sentence: {para.firstSentenceHint}</p>
                     <p className="text-[11px] text-blue-700 italic">{para.lastSentenceHint}</p>
+                    {'keyIdea' in para && <p className="text-[11px] font-semibold text-blue-800">Key idea: {(para as typeof para & { keyIdea: string }).keyIdea}</p>}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -633,22 +637,22 @@ function Slide6HeadingsPractice({ onComplete }: { onComplete: () => void }) {
 // ─────────────────────────────────────────────
 const SC_QUESTIONS = [
   {
-    sentence: "The cost of producing solar electricity fell by ____% between 2010 and 2020.",
-    answer: "89",
-    hint: "Look for a percentage related to solar electricity cost changes.",
-    passageKey: "fell by 89%",
+    sentence: "Regular exercise can help people ____ their stress levels.",
+    answer: "reduce",
+    hint: "The passage says exercise has a positive effect on stress — what verb fits?",
+    passageKey: "reduce stress levels",
   },
   {
-    sentence: "Offshore wind energy costs declined by ____% over the same decade.",
-    answer: "71",
-    hint: "Find the figure for offshore wind cost reduction.",
-    passageKey: "declining by 71%",
+    sentence: "Adults should aim to do at least ____ minutes of moderate exercise every day.",
+    answer: "30",
+    hint: "Look for a specific number in the passage related to daily exercise time.",
+    passageKey: "30 minutes",
   },
   {
-    sentence: "In some regions, solar has become the ____ source of electricity ever recorded.",
-    answer: "cheapest",
-    hint: "The answer is a superlative adjective — it describes solar's status in history.",
-    passageKey: "the cheapest source of electricity in history",
+    sentence: "People who exercise regularly tend to ____ better at night.",
+    answer: "sleep",
+    hint: "The passage links exercise to a nighttime benefit — what do people do better?",
+    passageKey: "sleep better",
   },
 ];
 
@@ -679,13 +683,13 @@ function Slide7SentenceCompletion({ onComplete }: { onComplete: () => void }) {
       </div>
 
       <Passage>
-        Solar energy has become increasingly cost-competitive with fossil fuels. The cost of producing one megawatt-hour of solar electricity{" "}
-        <Highlight color={revealed >= 1 ? "green" : "yellow"}>fell by 89%</Highlight>{" "}
-        between 2010 and 2020, making it{" "}
-        <Highlight color={revealed >= 3 ? "green" : revealed >= 1 ? "yellow" : "yellow"}>the cheapest source of electricity in history</Highlight>{" "}
-        in many regions. Wind energy has followed a similar trajectory, with offshore wind costs{" "}
-        <Highlight color={revealed >= 2 ? "green" : "yellow"}>declining by 71%</Highlight>{" "}
-        over the same period.
+        Exercise has many well-known benefits for the body and mind. Studies show that physical activity can{" "}
+        <Highlight color={revealed >= 1 ? "green" : "yellow"}>reduce stress levels</Highlight>{" "}
+        significantly, helping people to feel calmer and more focused throughout the day. Health experts recommend that adults aim to complete at least{" "}
+        <Highlight color={revealed >= 2 ? "green" : "yellow"}>30 minutes</Highlight>{" "}
+        of moderate exercise every day. In addition, people who exercise regularly tend to{" "}
+        <Highlight color={revealed >= 3 ? "green" : "yellow"}>sleep better</Highlight>{" "}
+        at night, which further improves their overall wellbeing.
       </Passage>
 
       <div className="space-y-3">

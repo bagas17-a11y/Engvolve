@@ -391,7 +391,18 @@ function Slide4Introduction({ onComplete }: { onComplete: () => void }) {
 // ─────────────────────────────────────────────
 // Sentence highlight helper (reused from Task 1)
 // ─────────────────────────────────────────────
-type SentenceData = { text: string; highlights: { phrase: string; tag: string; color: string }[] };
+type SentenceData = {
+  text: string;
+  highlights: { phrase: string; tag: string; color: string }[];
+  role?: 'T' | 'E-explain' | 'E-example';
+  roleLabel?: string;
+};
+
+const ROLE_STYLES: Record<string, { badge: string; border: string; label: string }> = {
+  'T':         { badge: "bg-purple-100 text-purple-700 border-purple-300", border: "border-l-purple-400", label: "T" },
+  'E-explain': { badge: "bg-blue-100 text-blue-700 border-blue-300",       border: "border-l-blue-400",   label: "E" },
+  'E-example': { badge: "bg-rose-100 text-rose-700 border-rose-300",       border: "border-l-rose-400",   label: "E" },
+};
 
 function SentenceWithHighlights({ sentence }: { sentence: SentenceData }) {
   const parts: React.ReactNode[] = [];
@@ -406,7 +417,24 @@ function SentenceWithHighlights({ sentence }: { sentence: SentenceData }) {
     remaining = remaining.slice(idx + h.phrase.length);
   });
   if (remaining) parts.push(<span key="rest">{remaining}</span>);
-  return <p className="text-sm text-gray-800 leading-relaxed">{parts}</p>;
+
+  const roleStyle = sentence.role ? ROLE_STYLES[sentence.role] : null;
+
+  return (
+    <div className={`flex gap-3 items-start pl-2 border-l-[3px] ${roleStyle?.border ?? "border-l-gray-200"}`}>
+      {roleStyle && (
+        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border shrink-0 mt-0.5 ${roleStyle.badge}`}>
+          {roleStyle.label}
+        </span>
+      )}
+      <div className="flex-1">
+        <p className="text-sm text-gray-800 leading-relaxed">{parts}</p>
+        {sentence.highlights.length > 0 && (
+          <p className="text-[10px] text-gray-400 mt-0.5 italic">{sentence.highlights[0].tag}</p>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // ─────────────────────────────────────────────
@@ -414,31 +442,35 @@ function SentenceWithHighlights({ sentence }: { sentence: SentenceData }) {
 // ─────────────────────────────────────────────
 const BODY1_SENTENCES: SentenceData[] = [
   {
+    role: 'T',
+    roleLabel: 'Topic',
     text: "Proponents of longer prison sentences argue that stricter punishments act as a powerful deterrent to potential offenders.",
     highlights: [
-      { phrase: "Proponents of", tag: "TOPIC SENTENCE — introduces View A", color: "text-purple-700 bg-purple-100" },
-      { phrase: "act as a powerful deterrent", tag: "EXPLAIN — states the mechanism", color: "text-blue-700 bg-blue-100" },
+      { phrase: "act as a powerful deterrent to potential offenders", tag: "The main claim of the whole paragraph — introduces View A's core argument", color: "text-purple-700 bg-purple-100" },
     ],
   },
   {
+    role: 'E-explain',
+    roleLabel: 'Explain',
     text: "When individuals know they face extended imprisonment for breaking the law, they may be far less likely to engage in criminal behaviour.",
     highlights: [
-      { phrase: "When individuals know", tag: "EXPLAIN — develops the logic", color: "text-blue-700 bg-blue-100" },
-      { phrase: "may be far less likely", tag: "HEDGING — avoids over-claiming", color: "text-cyan-700 bg-cyan-100" },
+      { phrase: "far less likely to engage in criminal behaviour", tag: "Explains HOW the deterrent works — the fear of prison changes behaviour", color: "text-blue-700 bg-blue-100" },
     ],
   },
   {
+    role: 'E-explain',
+    roleLabel: 'Explain',
     text: "Furthermore, keeping convicted criminals incarcerated for longer periods protects the wider public from repeat offending.",
     highlights: [
-      { phrase: "Furthermore,", tag: "LINKER — adds a second reason", color: "text-green-700 bg-green-100" },
-      { phrase: "protects the wider public", tag: "SECOND BENEFIT — shows breadth", color: "text-amber-700 bg-amber-100" },
+      { phrase: "protects the wider public from repeat offending", tag: "A second benefit — extends the explanation to show breadth of argument", color: "text-blue-700 bg-blue-100" },
     ],
   },
   {
+    role: 'E-example',
+    roleLabel: 'Example',
     text: "For example, countries that adopted mandatory minimum sentencing in the 1990s, such as the United States, initially reported short-term reductions in certain violent crimes.",
     highlights: [
-      { phrase: "For example,", tag: "EXAMPLE — concrete evidence", color: "text-rose-700 bg-rose-100" },
-      { phrase: "initially reported short-term", tag: "CAREFUL QUALIFIER — honest scope", color: "text-cyan-700 bg-cyan-100" },
+      { phrase: "countries that adopted mandatory minimum sentencing in the 1990s, such as the United States", tag: "Real-world evidence that illustrates the Topic claim — this is your invented-or-general example", color: "text-rose-700 bg-rose-100" },
     ],
   },
 ];
@@ -456,14 +488,23 @@ function Slide5Body1({ onComplete }: { onComplete: () => void }) {
       </motion.div>
 
       <motion.div variants={fadeUp(0.1)} initial="hidden" animate="visible"
-        className="p-3 rounded-xl bg-gray-50 border border-gray-200 flex flex-wrap gap-1.5">
-        {[
-          { tag: "T", label: "Topic", color: "bg-purple-100 text-purple-700" },
-          { tag: "E", label: "Explain", color: "bg-blue-100 text-blue-700" },
-          { tag: "E", label: "Example", color: "bg-rose-100 text-rose-700" },
-        ].map((item, i) => (
-          <span key={i} className={`text-xs font-semibold px-2 py-1 rounded-lg ${item.color}`}>{item.tag} — {item.label}</span>
-        ))}
+        className="p-3 rounded-xl bg-gray-50 border border-gray-200 space-y-2">
+        <p className="text-[10px] uppercase tracking-wide text-gray-400 font-medium">TEE Pattern — each coloured label shows which part is which</p>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { tag: "T", label: "Topic sentence", desc: "1 sentence — states the paragraph's main claim", color: "bg-purple-100 text-purple-700 border-purple-300" },
+            { tag: "E", label: "Explain", desc: "1–2 sentences — develops the logic of the claim", color: "bg-blue-100 text-blue-700 border-blue-300" },
+            { tag: "E", label: "Example", desc: "1 sentence — real or illustrative evidence", color: "bg-rose-100 text-rose-700 border-rose-300" },
+          ].map((item, i) => (
+            <div key={i} className={`flex items-start gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs ${item.color}`}>
+              <span className="font-bold shrink-0">{item.tag}</span>
+              <div>
+                <span className="font-semibold">{item.label}</span>
+                <span className="opacity-70 ml-1">— {item.desc}</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </motion.div>
 
       <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-3 min-h-[120px]">
@@ -487,6 +528,13 @@ function Slide5Body1({ onComplete }: { onComplete: () => void }) {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
           <p className="text-xs text-center text-green-600 font-medium">Body Paragraph 1 complete!</p>
           <Tip>You presented View A honestly and with evidence — even if it's not your personal position. This is crucial for Task Response: examiners want to see that you understand both sides.</Tip>
+          <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 space-y-2">
+            <p className="text-xs font-semibold text-blue-900">Can you make up examples in Task 2?</p>
+            <div className="space-y-1.5 text-xs text-blue-800 leading-relaxed">
+              <p><span className="font-semibold text-green-700">✓ You CAN invent personal examples</span> — "In my country, many young people..." or "A friend of mine once experienced..." These are illustrative, and examiners expect them.</p>
+              <p><span className="font-semibold text-red-600">✗ You CANNOT invent specific factual data</span> — Never fabricate statistics ("Studies show that 73% of criminals...") or fake research findings. If you want to cite data, keep it vague: "Research suggests..." or "Statistics indicate..."</p>
+            </div>
+          </div>
         </motion.div>
       )}
     </div>
