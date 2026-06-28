@@ -371,7 +371,7 @@ export default function FlashcardsPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
-            <div className="p-6 max-w-4xl">
+            <div className="p-6 max-w-4xl mx-auto">
               {showTopicList ? (
                 <>
                   <h1 className="text-2xl font-bold text-foreground mb-2">

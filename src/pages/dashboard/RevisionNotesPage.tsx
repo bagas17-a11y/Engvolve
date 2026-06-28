@@ -500,7 +500,7 @@ export default function RevisionNotesPage() {
             ref={mainScrollRef}
             className="flex-1 overflow-y-auto overflow-x-hidden"
           >
-            <div className="p-6 max-w-4xl min-h-[400px] rounded-lg bg-background/60">
+            <div className="p-6 max-w-4xl mx-auto min-h-[400px] rounded-lg bg-background/60">
               {showTopicList ? (
                 <>
                   <h1 className="text-2xl font-bold text-foreground mb-2">

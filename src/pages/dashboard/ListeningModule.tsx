@@ -1483,7 +1483,7 @@ export default function ListeningModule() {
     return (
       <DashboardLayout>
 
-        <div className="max-w-4xl">
+        <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
               <Headphones className="w-6 h-6 text-accent" />

@@ -574,7 +574,7 @@ export default function ReadingModule() {
 
     return (
       <DashboardLayout>
-        <div className="space-y-6 max-w-5xl">
+        <div className="space-y-6 max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-3">

@@ -306,7 +306,7 @@ export default function SpeakingModule() {
   if (phase === 'library') {
     return (
       <DashboardLayout>
-        <div className="max-w-4xl space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-elite-gold/10 flex items-center justify-center shrink-0">
               <Mic className="w-5 h-5 text-elite-gold" />
@@ -362,7 +362,7 @@ export default function SpeakingModule() {
     const q = activeTest.part1[p1Index];
     return (
       <DashboardLayout>
-        <div className="max-w-2xl space-y-5">
+        <div className="max-w-2xl mx-auto space-y-5">
           {/* Header */}
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => { setPhase('library'); resetTranscript(); }}
@@ -460,7 +460,7 @@ export default function SpeakingModule() {
   if (phase === 'part2' && activeTest) {
     return (
       <DashboardLayout>
-        <div className="max-w-2xl space-y-5">
+        <div className="max-w-2xl mx-auto space-y-5">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => { setPhase('part1'); setP1Index(3); resetTranscript(); }}
               className="text-muted-foreground hover:text-foreground shrink-0">← Part 1</Button>
@@ -546,7 +546,7 @@ export default function SpeakingModule() {
     const p3Done = p3Transcript || (transcript && !isListening && !isTranscribing);
     return (
       <DashboardLayout>
-        <div className="max-w-2xl space-y-5">
+        <div className="max-w-2xl mx-auto space-y-5">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => { setPhase('part2'); resetTranscript(); }}
               className="text-muted-foreground hover:text-foreground shrink-0">← Part 2</Button>
@@ -679,7 +679,7 @@ export default function SpeakingModule() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-2xl" ref={feedbackRef}>
+      <div className="max-w-2xl mx-auto" ref={feedbackRef}>
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="sm" onClick={() => setPhase('library')} className="text-muted-foreground hover:text-foreground">← Back to Tests</Button>
         </div>
