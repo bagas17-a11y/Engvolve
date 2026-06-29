@@ -116,7 +116,7 @@ export default function PricingSelection() {
       await registerPaidPlanRequest(plan);
 
       // Wait up to 5 s for the DB trigger to create the profile row.
-      // Without this, WaitingRoom sees profile=null and signs the user out.
+      // Without this, profile=null downstream.
       for (let i = 0; i < 5; i++) {
         const { data } = await supabase
           .from("profiles")
@@ -126,6 +126,14 @@ export default function PricingSelection() {
         if (data) break;
         await new Promise((r) => setTimeout(r, 1000));
       }
+
+      // Provisional access: grant the tier immediately so the user can start.
+      // Admin reverts to free if payment is rejected.
+      await supabase
+        .from("profiles")
+        .update({ subscription_tier: plan.tier, is_verified: true })
+        .eq("user_id", user.id);
+
       await refreshProfile();
 
       const waMessage = planSignupWhatsAppMessage({
@@ -139,11 +147,11 @@ export default function PricingSelection() {
       window.open(buildWhatsAppLink(waMessage), "_blank", "noopener,noreferrer");
 
       toast.success(
-        "Opening WhatsApp — send us your payment proof and we'll activate your account shortly!",
+        "You have provisional access — send us payment proof on WhatsApp to confirm.",
         { duration: 8000 }
       );
 
-      navigate("/waiting-room");
+      navigate("/dashboard");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Something went wrong";
       console.error("Plan selection error:", error);

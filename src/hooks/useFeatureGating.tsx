@@ -14,7 +14,7 @@ interface FeatureGatingResult {
   isSubscriptionExpired: boolean;
 }
 
-const FREE_PRACTICE_LIMIT = 1;
+const FREE_PRACTICE_LIMIT = 5;
 
 export function useFeatureGating(): FeatureGatingResult {
   const { user, profile, isLoading: isAuthLoading } = useAuth();
@@ -39,17 +39,10 @@ export function useFeatureGating(): FeatureGatingResult {
     }
 
     try {
-      let sessionStart = sessionStorage.getItem('ielts-session-start');
-      if (!sessionStart) {
-        sessionStart = new Date().toISOString();
-        sessionStorage.setItem('ielts-session-start', sessionStart);
-      }
-
       const { data, error } = await supabase
         .from("user_progress")
         .select("exam_type")
-        .eq("user_id", user.id)
-        .gte("completed_at", sessionStart);
+        .eq("user_id", user.id);
 
       if (error) {
         console.error("Error fetching practice counts:", error);

@@ -14,7 +14,7 @@ export function SubscriptionBanner() {
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user || isAdmin || profile?.is_verified) {
+    if (!user || isAdmin) {
       setPendingPlan(null);
       return;
     }
@@ -40,9 +40,9 @@ export function SubscriptionBanner() {
             : data.plan_type;
         setPendingPlan(label);
       });
-  }, [user, profile?.is_verified, isAdmin]);
+  }, [user, isAdmin]);
 
-  if (pendingPlan && !profile?.is_verified) {
+  if (pendingPlan) {
     return (
       <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 mb-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -50,11 +50,10 @@ export function SubscriptionBanner() {
             <MessageCircle className="w-5 h-5 text-accent" />
             <div>
               <p className="font-medium text-foreground">
-                Waiting for {pendingPlan} activation
+                Payment under review — you have provisional {pendingPlan} access
               </p>
               <p className="text-sm text-muted-foreground">
-                You have Free access while we confirm your payment on WhatsApp.
-                We&apos;ll unlock {pendingPlan} as soon as it&apos;s verified.
+                Send your payment proof on WhatsApp to confirm. Access is maintained until we verify.
               </p>
             </div>
           </div>
@@ -64,7 +63,7 @@ export function SubscriptionBanner() {
             rel="noopener noreferrer"
           >
             <Button variant="outline" size="sm">
-              Message us on WhatsApp
+              Send payment proof
             </Button>
           </a>
         </div>

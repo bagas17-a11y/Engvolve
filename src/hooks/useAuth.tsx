@@ -17,6 +17,7 @@ interface Profile {
   current_writing_score: number | null;
   current_speaking_score: number | null;
   is_verified: boolean;
+  exam_date: string | null;
 }
 
 interface AuthContextType {

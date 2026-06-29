@@ -37,7 +37,7 @@ export function UpgradeModal({ isOpen, onClose, featureName }: UpgradeModalProps
             Upgrade to keep practising
           </DialogTitle>
           <DialogDescription className="text-base">
-            You've used your free {featureName} practice. Upgrade for unlimited AI-graded
+            You've used all 5 free {featureName} practices. Upgrade for unlimited AI-graded
             practice across every module.
           </DialogDescription>
         </DialogHeader>

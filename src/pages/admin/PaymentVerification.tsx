@@ -267,7 +267,16 @@ export default function PaymentVerification() {
         .update({ admin_notes: rejectReason })
         .eq("id", paymentId);
 
-      toast.success("Payment rejected.");
+      // Revert provisional access granted at checkout
+      const rejected = payments.find((p) => p.id === paymentId);
+      if (rejected) {
+        await supabase
+          .from("profiles")
+          .update({ subscription_tier: "free", is_verified: false })
+          .eq("user_id", rejected.user_id);
+      }
+
+      toast.success("Payment rejected and access reverted to Free.");
       setRejectingId(null);
       setRejectReason("");
       fetchData();

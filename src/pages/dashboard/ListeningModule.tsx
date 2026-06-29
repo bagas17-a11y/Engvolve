@@ -334,6 +334,10 @@ export default function ListeningModule() {
   const [audioCurrentTime, setAudioCurrentTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(() => {
+    const stored = localStorage.getItem("ielts-listening-speed");
+    return stored ? parseFloat(stored) : 1;
+  });
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -521,6 +525,12 @@ export default function ListeningModule() {
       el.removeEventListener("ended", onEnded);
     };
   }, [isSeeking, playingPart]);
+
+  // Sync playback speed to audio element and persist to localStorage
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.playbackRate = playbackSpeed;
+    localStorage.setItem("ielts-listening-speed", String(playbackSpeed));
+  }, [playbackSpeed]);
 
   // Measure sticky audio player height so notes top offset stays accurate
   useEffect(() => {
@@ -1643,6 +1653,23 @@ export default function ListeningModule() {
               <span className="text-xs text-muted-foreground font-mono flex-shrink-0 w-24 text-right">
                 {formatTime(Math.floor(audioCurrentTime))} / {formatTime(Math.floor(audioDuration || 0))}
               </span>
+            </div>
+
+            {/* Speed toggle */}
+            <div className="flex items-center gap-0.5 flex-shrink-0">
+              {([0.75, 1, 1.25] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setPlaybackSpeed(s)}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    playbackSpeed === s
+                      ? "bg-accent/20 text-accent font-medium"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {s}x
+                </button>
+              ))}
             </div>
           </div>
 

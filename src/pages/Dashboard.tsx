@@ -5,6 +5,7 @@ import { useUserProgress } from "@/hooks/useUserProgress";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { SubscriptionBanner } from "@/components/dashboard/SubscriptionBanner";
 import { BridgeToSuccess } from "@/components/dashboard/BridgeToSuccess";
+import { ExamCountdown } from "@/components/dashboard/ExamCountdown";
 import { Button } from "@/components/ui/button";
 import {
   BookOpen,
@@ -93,7 +94,7 @@ export default function Dashboard() {
       <SubscriptionBanner />
 
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-3xl font-light mb-2">
           {diagnosticTaken ? "Welcome back" : "Welcome"},{" "}
           <span className="text-accent">{firstName || "Student"}</span>
@@ -104,6 +105,9 @@ export default function Dashboard() {
             : "Start by taking the 5-minute diagnostic so we can tailor your path."}
         </p>
       </div>
+
+      {/* Exam countdown / date setter */}
+      <ExamCountdown />
 
       {/* First-action highlight for new users */}
       {!diagnosticTaken && (
