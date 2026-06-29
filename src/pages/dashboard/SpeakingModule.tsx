@@ -277,7 +277,15 @@ export default function SpeakingModule() {
           await saveProgress({ exam_type: "speaking", score: null, band_score: result.overallBand,
             total_questions: null, correct_answers: null, feedback: `Full Test: ${activeTest.theme}`,
             completed_at: new Date().toISOString(), time_taken: null, errors_log: [],
-            metadata: { speakingPart: "full_test", topic: activeTest.theme } });
+            metadata: {
+              speakingPart: "full_test", topic: activeTest.theme,
+              criteriaScores: result.criteria ? {
+                fluencyCoherence: result.criteria.fluencyCoherence?.band ?? null,
+                lexicalResource: result.criteria.lexicalResource?.band ?? null,
+                grammaticalRange: result.criteria.grammaticalRange?.band ?? null,
+                pronunciation: result.criteria.pronunciation?.band ?? null,
+              } : undefined,
+            } });
           await refreshCounts();
         } catch { /* non-critical */ }
         if (user.id) {
@@ -693,23 +701,34 @@ export default function SpeakingModule() {
   // ════════════════════════════════════════════════════════════════════════
   const exportResult = () => {
     if (!feedback || !activeTest) return;
-    const lines = [
-      `IELTS Speaking — ${activeTest.label} Analysis`,
-      '='.repeat(40), '',
-      `Overall Band: ${feedback.overallBand?.toFixed(1)}`,
-      '', '--- CRITERION SCORES ---',
-      `Pronunciation:            ${feedback.pronunciation?.score ?? '—'}`,
-      `Task Response:            ${feedback.taskResponse?.score ?? '—'}`,
-      `Fluency & Coherence:      ${feedback.fluencyCoherence?.score ?? '—'}`,
-      `Lexical Resource:         ${feedback.lexicalResource?.score ?? '—'}`,
-      `Grammatical Range & Acc.: ${feedback.grammaticalRange?.score ?? '—'}`,
-      '', '--- WHAT TO FOCUS ON ---',
-      ...(feedback.improvements ?? []).map((s: string, i: number) => `${i + 1}. ${s}`),
-    ].join('\n');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([lines], { type: 'text/plain' }));
-    a.download = `ielts-speaking-${activeTest.id}-${Date.now()}.txt`;
-    a.click();
+    const criteria = [
+      { label: "Fluency & Coherence", val: feedback.fluencyCoherence?.score ?? feedback.fluencyCoherence?.band ?? "—" },
+      { label: "Lexical Resource", val: feedback.lexicalResource?.score ?? feedback.lexicalResource?.band ?? "—" },
+      { label: "Grammatical Range", val: feedback.grammaticalRange?.score ?? feedback.grammaticalRange?.band ?? "—" },
+      { label: "Pronunciation", val: feedback.pronunciation?.score ?? feedback.pronunciation?.band ?? "—" },
+      { label: "Task Response", val: feedback.taskResponse?.score ?? feedback.taskResponse?.band ?? "—" },
+    ];
+    const criteriaRows = criteria.map((c) => `<tr><td>${c.label}</td><td>${c.val}</td></tr>`).join("");
+    const improvements = (feedback.improvements ?? []).map((s: string, i: number) => `<li>${i + 1}. ${s}</li>`).join("");
+    const modelHtml = feedback.enhancedSpeechNextBand
+      ? `<h2>Model Answer</h2><div class="essay">${feedback.enhancedSpeechNextBand.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")}</div>`
+      : "";
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Speaking Feedback — IELTSInAja</title>
+<style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;color:#111;line-height:1.6}h1{font-size:1.4em}h2{font-size:1.1em;margin-top:1.5em;border-bottom:1px solid #ccc}table{width:100%;border-collapse:collapse;margin:1em 0}th,td{border:1px solid #ccc;padding:8px;text-align:left;font-size:0.9em}th{background:#f5f5f5}.score{font-size:2em;font-weight:bold;color:#0ea5e9}.essay{background:#f9f9f9;padding:12px;border-left:3px solid #0ea5e9;font-size:0.9em}ul,ol{padding-left:1.5em}@media print{body{margin:20px}}</style></head>
+<body><h1>IELTS Speaking Feedback</h1><p>IELTSInAja &mdash; ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
+<p>Test: ${activeTest.label}</p>
+<div class="score">Band ${feedback.overallBand?.toFixed(1) ?? "—"}</div>
+<h2>Criteria Breakdown</h2><table><tr><th>Criterion</th><th>Band</th></tr>${criteriaRows}</table>
+<h2>What to Improve</h2><ol>${improvements}</ol>
+${modelHtml}</body></html>`;
+
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 500);
   };
 
   return (

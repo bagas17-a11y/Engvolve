@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { PenTool, Loader2, ChevronRight, Star, AlertTriangle, Target, ArrowRight, Lightbulb, FileText, BarChart3, CheckCircle, XCircle, RefreshCw, BookOpen, Play, ArrowLeft, Zap } from "lucide-react";
+import { PenTool, Loader2, ChevronRight, Star, AlertTriangle, Target, ArrowRight, Lightbulb, FileText, BarChart3, CheckCircle, XCircle, RefreshCw, BookOpen, Play, ArrowLeft, Zap, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -536,6 +536,12 @@ export default function WritingModule() {
               questionTitle: selectedQuestion?.title,
               wordCount: essay.split(/\s+/).filter(Boolean).length,
               essaySnippet: essay.trim().substring(0, 300),
+              criteriaScores: unwrappedData.scoringGrid ? {
+                taskResponse: unwrappedData.scoringGrid.taskResponse?.score ?? null,
+                coherenceCohesion: unwrappedData.scoringGrid.coherenceCohesion?.score ?? null,
+                lexicalResource: unwrappedData.scoringGrid.lexicalResource?.score ?? null,
+                grammaticalRange: unwrappedData.scoringGrid.grammaticalRange?.score ?? null,
+              } : undefined,
             },
           });
           await refreshCounts();
@@ -812,6 +818,35 @@ export default function WritingModule() {
         </table>
       </div>
     );
+  };
+
+  const downloadWritingPDF = (feedbackData: any, essayText: string, taskType: string) => {
+    const grid = feedbackData.scoringGrid ?? {};
+    const criteriaRows = [
+      { label: taskType === "task1" ? "Task Achievement" : "Task Response", key: "taskResponse" },
+      { label: "Coherence & Cohesion", key: "coherenceCohesion" },
+      { label: "Lexical Resource", key: "lexicalResource" },
+      { label: "Grammatical Range", key: "grammaticalRange" },
+    ].map((c) => `<tr><td>${c.label}</td><td>${grid[c.key]?.score ?? "—"}</td><td>${Array.isArray(grid[c.key]?.justification) ? (grid[c.key]?.justification as string[]).join(" ") : (grid[c.key]?.justification ?? "")}</td></tr>`).join("");
+
+    const fixesHtml = (feedbackData.criticalFixes ?? []).map((f: string, i: number) => `<li>${i + 1}. ${f}</li>`).join("");
+    const modelHtml = feedbackData.enhancedSpeechNextBand ? `<h3>Model Answer (Band ${Math.min(9, (feedbackData.overallBand ?? 6) + 1)})</h3><div class="essay">${feedbackData.enhancedSpeechNextBand.replace(/\n/g, "<br>")}</div>` : "";
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Writing Feedback — IELTSInAja</title>
+<style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;color:#111;line-height:1.6}h1{font-size:1.4em}h2{font-size:1.1em;margin-top:1.5em;border-bottom:1px solid #ccc}h3{font-size:1em;margin-top:1em}table{width:100%;border-collapse:collapse;margin:1em 0}th,td{border:1px solid #ccc;padding:8px;text-align:left;font-size:0.9em}th{background:#f5f5f5}.score{font-size:2em;font-weight:bold;color:#0ea5e9}.essay{background:#f9f9f9;padding:12px;border-left:3px solid #0ea5e9;font-size:0.9em;white-space:pre-wrap}ul,ol{padding-left:1.5em}@media print{body{margin:20px}}</style></head>
+<body><h1>IELTS Writing Feedback</h1><p>IELTSInAja &mdash; ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
+<div class="score">Band ${feedbackData.overallBand}</div>
+<h2>Criteria Breakdown</h2><table><tr><th>Criterion</th><th>Band</th><th>Justification</th></tr>${criteriaRows}</table>
+<h2>Your Essay</h2><div class="essay">${essayText.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")}</div>
+<h2>Priority Fixes</h2><ul>${fixesHtml}</ul>
+${modelHtml}</body></html>`;
+
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 500);
   };
 
   const ScoreCell = ({ label, score, justification }: { label: string; score: number; justification?: string | string[] }) => {
@@ -1313,6 +1348,12 @@ export default function WritingModule() {
                 placeholder={`Write your ${selectedQuestion.task_type} response here... (minimum ${minWords} words)`}
                 className="h-[300px] bg-secondary/30 border-border/30 resize-none"
               />
+              {!isAnalyzing && (
+                <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+                  <Loader2 className="w-3 h-3 shrink-0" />
+                  AI analysis takes 20-40 seconds — please wait after clicking.
+                </p>
+              )}
               <div className="flex items-center justify-between mt-4">
                 <div className="flex gap-2">
                   <Button
@@ -1323,7 +1364,7 @@ export default function WritingModule() {
                     {isAnalyzing ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Analyzing...
+                        Analyzing (20-40 sec)...
                       </>
                     ) : (
                       <>
@@ -1414,7 +1455,16 @@ export default function WritingModule() {
             {/* Original Feedback Section */}
             {feedback && (
               <div className="glass-card p-6 mb-6">
-                <h2 className="text-lg font-light mb-6">Diagnostic Feedback Report</h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-light">Diagnostic Feedback Report</h2>
+                  <button
+                    onClick={() => downloadWritingPDF(feedback, essay, activeTask)}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-accent transition-colors border border-border/40 rounded px-2.5 py-1.5 hover:border-accent/40"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Download PDF
+                  </button>
+                </div>
                 <FeedbackDisplay feedbackData={feedback} />
 
               </div>

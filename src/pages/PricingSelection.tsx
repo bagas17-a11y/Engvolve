@@ -127,23 +127,6 @@ export default function PricingSelection() {
         await new Promise((r) => setTimeout(r, 1000));
       }
 
-      // Provisional access: grant the tier immediately so the user can start.
-      // Admin reverts to free if payment is rejected.
-      const durationDays = plan.planKey === "pro_annual" ? 365 : plan.tier === "pro" ? 30 : null;
-      const provisionalEndDate = durationDays
-        ? new Date(Date.now() + durationDays * 86400 * 1000).toISOString().split("T")[0]
-        : null;
-      await supabase
-        .from("profiles")
-        .update({
-          subscription_tier: plan.tier,
-          is_verified: true,
-          ...(provisionalEndDate ? { subscription_end_date: provisionalEndDate } : {}),
-        })
-        .eq("user_id", user.id);
-
-      await refreshProfile();
-
       const waMessage = planSignupWhatsAppMessage({
         email: user.email ?? profile?.email ?? "—",
         planName: plan.name,
@@ -154,12 +137,7 @@ export default function PricingSelection() {
 
       window.open(buildWhatsAppLink(waMessage), "_blank", "noopener,noreferrer");
 
-      toast.success(
-        "You have provisional access — send us payment proof on WhatsApp to confirm.",
-        { duration: 8000 }
-      );
-
-      navigate("/dashboard");
+      navigate("/waiting-room");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Something went wrong";
       console.error("Plan selection error:", error);

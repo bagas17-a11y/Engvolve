@@ -24,7 +24,7 @@ export function ExamCountdown() {
     if (!user || !value) return;
     setSaving(true);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("profiles")
         .update({ exam_date: value })
         .eq("user_id", user.id);

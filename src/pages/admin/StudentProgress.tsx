@@ -67,6 +67,7 @@ interface ProgressEntry {
   completed_at: string;
   errors_log: ErrorEntry[] | null;
   feedback: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
 interface CompletedTask {
@@ -155,7 +156,7 @@ export default function StudentProgress() {
           .order("created_at", { ascending: false }),
         supabase
           .from("user_progress")
-          .select("id, user_id, exam_type, band_score, score, total_questions, correct_answers, completed_at, errors_log, feedback")
+          .select("id, user_id, exam_type, band_score, score, total_questions, correct_answers, completed_at, errors_log, feedback, metadata")
           .in("exam_type", MODULES)
           .order("completed_at", { ascending: false }),
         supabase
@@ -456,7 +457,8 @@ export default function StudentProgress() {
                       const isLowest = selectedStudent.lowestModule === mod;
                       const entries = selectedStudent.rawProgress.filter((p) => p.exam_type === mod);
                       const latest = entries[0];
-                      const errors = (latest?.errors_log as ErrorEntry[] | null) ?? [];
+                      const errors = ((latest?.errors_log as ErrorEntry[] | null) ?? []).filter((e) => e.count > 0);
+                      const criteriaScores = latest?.metadata?.criteriaScores as Record<string, number> | undefined;
                       return (
                         <Card key={mod} className={`glass-card border ${isLowest ? "border-red-500/30" : "border-border/30"}`}>
                           <CardContent className="p-3 space-y-2">
@@ -482,16 +484,35 @@ export default function StudentProgress() {
                             )}
                             {errors.length > 0 && (
                               <div className="space-y-1 pt-1 border-t border-border/20">
-                                <p className="text-xs text-muted-foreground">Error breakdown (latest):</p>
-                                {errors.map((e, i) => (
-                                  <div key={i} className="flex items-center justify-between text-xs">
-                                    <span className="text-muted-foreground capitalize">{e.type.replace(/_/g, " ")}</span>
-                                    <span className="text-red-400 font-medium">{e.count} wrong</span>
-                                  </div>
-                                ))}
+                                <p className="text-xs text-muted-foreground font-medium">Error breakdown:</p>
+                                {errors
+                                  .slice()
+                                  .sort((a, b) => b.count - a.count)
+                                  .map((e, i) => (
+                                    <div key={i} className="flex items-center justify-between text-xs">
+                                      <span className="text-muted-foreground capitalize">{e.type.replace(/_/g, " ")}</span>
+                                      <span className="text-red-400 font-medium">{e.count} wrong</span>
+                                    </div>
+                                  ))}
                               </div>
                             )}
-                            {latest?.feedback && (
+                            {criteriaScores && (
+                              <div className="space-y-1 pt-1 border-t border-border/20">
+                                <p className="text-xs text-muted-foreground font-medium">Criteria:</p>
+                                {Object.entries(criteriaScores)
+                                  .filter(([, v]) => v !== null)
+                                  .sort(([, a], [, b]) => (a as number) - (b as number))
+                                  .map(([k, v]) => (
+                                    <div key={k} className="flex items-center justify-between text-xs">
+                                      <span className="text-muted-foreground capitalize">{k.replace(/([A-Z])/g, " $1")}</span>
+                                      <span className={`font-medium ${(v as number) >= 7 ? "text-green-400" : (v as number) >= 6 ? "text-yellow-400" : "text-red-400"}`}>
+                                        {v}
+                                      </span>
+                                    </div>
+                                  ))}
+                              </div>
+                            )}
+                            {latest?.feedback && !criteriaScores && errors.length === 0 && (
                               <p className="text-xs text-muted-foreground/70 truncate">{latest.feedback}</p>
                             )}
                           </CardContent>
