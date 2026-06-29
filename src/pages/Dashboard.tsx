@@ -6,6 +6,7 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { SubscriptionBanner } from "@/components/dashboard/SubscriptionBanner";
 import { BridgeToSuccess } from "@/components/dashboard/BridgeToSuccess";
 import { ExamCountdown } from "@/components/dashboard/ExamCountdown";
+import { WeeklyInsights } from "@/components/dashboard/WeeklyInsights";
 import { Button } from "@/components/ui/button";
 import {
   BookOpen,
@@ -171,6 +172,9 @@ export default function Dashboard() {
       {/* Bridge to Success - Gap Analysis */}
       <h2 className="text-xl font-light mb-4">Your Path to Success</h2>
       <BridgeToSuccess />
+
+      {/* Weekly insights */}
+      <WeeklyInsights />
 
       {/* Module Cards */}
       <h2 className="text-xl font-light mb-4 mt-8">Practice Modules</h2>

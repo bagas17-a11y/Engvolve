@@ -28,6 +28,7 @@ const FlashcardsTopicPage= lazy(() => import("./pages/dashboard/FlashcardsTopicP
 const StatsPage          = lazy(() => import("./pages/dashboard/StatsPage"));
 const DiagnosticQuiz     = lazy(() => import("./pages/dashboard/DiagnosticQuiz"));
 const StudyPlanPage      = lazy(() => import("./pages/dashboard/StudyPlanPage"));
+const StudyGroupPage     = lazy(() => import("./pages/dashboard/StudyGroupPage"));
 const SettingsPage       = lazy(() => import("./pages/dashboard/SettingsPage"));
 const PricingSelection   = lazy(() => import("./pages/PricingSelection"));
 const WaitingRoom        = lazy(() => import("./pages/WaitingRoom"));
@@ -104,6 +105,7 @@ const App = () => (
               <Route path="/dashboard/revision-notes" element={<RevisionNotesPage />} />
               <Route path="/dashboard/flashcards" element={<FlashcardsPage />} />
               <Route path="/dashboard/flashcards/topic" element={<FlashcardsTopicPage />} />
+              <Route path="/dashboard/group" element={<StudyGroupPage />} />
               <Route path="/dashboard/settings" element={<SettingsPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

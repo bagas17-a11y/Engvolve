@@ -36,3 +36,6 @@ verify_jwt = false
 
 [functions.generate-reading-admin]
 verify_jwt = false
+
+[functions.mudahinaja-coach]
+verify_jwt = false

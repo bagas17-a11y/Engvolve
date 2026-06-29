@@ -144,6 +144,8 @@ export default function WritingModule() {
   const [essay, setEssay] = useState("");
   const [revisedEssay, setRevisedEssay] = useState("");
   const [feedback, setFeedback] = useState<any>(null);
+  const [versionHistory, setVersionHistory] = useState<Array<{ id: string; band_score: number; completed_at: string; essaySnippet?: string }>>([]);
+  const [expandedVersion, setExpandedVersion] = useState<string | null>(null);
 
   // Background analysis store — persists isAnalyzing across module navigation
   const analysisEntry = useGenerationEntry('writing-analysis');
@@ -207,6 +209,31 @@ export default function WritingModule() {
     };
     sessionStorage.setItem(`ielts-writing-cache-${user.id}-${activeTask}`, JSON.stringify(state));
   }, [user?.id, activeTask, view, selectedQuestion, essay, revisedEssay, feedback, revisionFeedback, previousScore]);
+
+  // Fetch version history for the current question when feedback is shown
+  useEffect(() => {
+    if (!user?.id || !selectedQuestion?.id || !feedback) return;
+    supabase
+      .from("user_progress")
+      .select("id, band_score, completed_at, metadata")
+      .eq("user_id", user.id)
+      .eq("exam_type", "writing")
+      .order("completed_at", { ascending: true })
+      .then(({ data }) => {
+        if (!data) return;
+        const forQuestion = data.filter(
+          (r) => (r.metadata as Record<string, unknown>)?.questionId === selectedQuestion.id
+        );
+        setVersionHistory(
+          forQuestion.map((r) => ({
+            id: r.id,
+            band_score: r.band_score ?? 0,
+            completed_at: r.completed_at,
+            essaySnippet: String((r.metadata as Record<string, unknown>)?.essaySnippet ?? ""),
+          }))
+        );
+      });
+  }, [user?.id, selectedQuestion?.id, feedback]);
 
   // Apply analysis results that arrived while this component was unmounted
   useEffect(() => {
@@ -508,6 +535,7 @@ export default function WritingModule() {
               questionId: selectedQuestion?.id,
               questionTitle: selectedQuestion?.title,
               wordCount: essay.split(/\s+/).filter(Boolean).length,
+              essaySnippet: essay.trim().substring(0, 300),
             },
           });
           await refreshCounts();
@@ -889,6 +917,19 @@ export default function WritingModule() {
           </div>
         )}
       </div>
+
+      {/* Share score */}
+      <button
+        onClick={() => {
+          const text = `I just scored Band ${feedbackData.overallBand} on IELTS Writing on IELTSInAja! 🎯`;
+          if (navigator.share) { navigator.share({ text }); }
+          else { navigator.clipboard.writeText(text); toast({ title: "Score copied to clipboard!" }); }
+        }}
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-accent transition-colors"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+        Share to study group
+      </button>
 
       {/* What to fix — priority numbered list */}
       {feedbackData.criticalFixes?.length > 0 && (
@@ -1322,6 +1363,53 @@ export default function WritingModule() {
                 </div>
               </div>
             </div>
+
+            {/* Version history */}
+            {versionHistory.length > 1 && (
+              <div className="glass-card p-4 mb-6">
+                <h3 className="text-sm font-medium mb-3">Score history — {selectedQuestion?.title}</h3>
+                <div className="flex items-center gap-0 overflow-x-auto pb-1">
+                  {versionHistory.map((v, i) => {
+                    const isLatest = i === versionHistory.length - 1;
+                    const delta = i > 0 ? v.band_score - versionHistory[0].band_score : null;
+                    return (
+                      <div key={v.id} className="flex items-center gap-0 shrink-0">
+                        <button
+                          onClick={() => setExpandedVersion(expandedVersion === v.id ? null : v.id)}
+                          className={`flex flex-col items-center px-3 py-2 rounded-lg border transition-all text-center ${isLatest ? "border-accent/40 bg-accent/5" : "border-border/40 bg-secondary/20"}`}
+                        >
+                          <span className={`text-lg font-light ${v.band_score >= 7 ? "text-green-400" : v.band_score >= 5.5 ? "text-elite-gold" : "text-destructive"}`}>
+                            {v.band_score.toFixed(1)}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(v.completed_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                          </span>
+                          {isLatest && delta !== null && delta !== 0 && (
+                            <span className={`text-[10px] font-medium ${delta > 0 ? "text-green-400" : "text-destructive"}`}>
+                              {delta > 0 ? "+" : ""}{delta.toFixed(1)}
+                            </span>
+                          )}
+                        </button>
+                        {i < versionHistory.length - 1 && (
+                          <span className="text-muted-foreground/40 text-xs mx-1">→</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                {expandedVersion && (() => {
+                  const v = versionHistory.find((x) => x.id === expandedVersion);
+                  return v?.essaySnippet ? (
+                    <div className="mt-3 p-3 bg-secondary/30 rounded-lg">
+                      <p className="text-xs text-muted-foreground mb-1">Essay excerpt:</p>
+                      <p className="text-sm text-foreground/80 leading-relaxed">
+                        {v.essaySnippet}{v.essaySnippet.length >= 300 ? "…" : ""}
+                      </p>
+                    </div>
+                  ) : null;
+                })()}
+              </div>
+            )}
 
             {/* Original Feedback Section */}
             {feedback && (

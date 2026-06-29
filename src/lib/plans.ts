@@ -13,7 +13,7 @@ export type PlanTier = "free" | "pro" | "elite";
 
 export interface PlanDefinition {
   /** Stable key used by the admin/payment_verifications.plan_type column. */
-  planKey: "free" | "pro" | "road_to_8";
+  planKey: "free" | "pro" | "pro_annual" | "road_to_8";
   tier: PlanTier;
   name: string;
   /** Display price, e.g. "IDR 200K". */
@@ -79,6 +79,23 @@ export const PLANS: PlanDefinition[] = [
       "Email + WhatsApp support",
     ],
     badge: "Recommended",
+  },
+  {
+    planKey: "pro_annual",
+    tier: "pro",
+    name: "Pro Annual",
+    displayPrice: "IDR 1.8M",
+    period: "per year",
+    amount: 1800000,
+    description: "Same unlimited practice as Pro — 25% off when you commit to the year.",
+    features: [
+      "Everything in Pro",
+      "Save 25% vs monthly (IDR 150K/month)",
+      "12-month access — one payment",
+      "Unlimited AI across all modules",
+      "Priority WhatsApp support",
+    ],
+    badge: "Best Value",
   },
   {
     planKey: "road_to_8",

@@ -34,7 +34,11 @@ import {
   Square,
   Clock,
   Activity,
+  ChevronDown,
+  ChevronRight,
+  Save,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -125,6 +129,9 @@ export default function StudentProgress() {
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<StudentRow | null>(null);
+  const [expandedEssayId, setExpandedEssayId] = useState<string | null>(null);
+  const [coachNotes, setCoachNotes] = useState<Record<string, string>>({});
+  const [savingNote, setSavingNote] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && !user) { navigate("/auth"); return; }
@@ -521,6 +528,97 @@ export default function StudentProgress() {
                     </div>
                   </div>
                 )}
+
+                {/* Writing Submissions — Coach Inbox */}
+                {(() => {
+                  const writingEntries = selectedStudent.rawProgress
+                    .filter((p) => p.exam_type === "writing")
+                    .slice(0, 10);
+                  if (writingEntries.length === 0) return null;
+                  return (
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                        Writing Submissions ({writingEntries.length})
+                      </h3>
+                      <div className="space-y-2">
+                        {writingEntries.map((entry) => {
+                          const meta = entry.metadata as Record<string, unknown> ?? {};
+                          const snippet = String(meta.essaySnippet ?? "");
+                          const isExpanded = expandedEssayId === entry.id;
+                          const noteKey = entry.id;
+                          return (
+                            <div key={entry.id} className="border border-border/30 rounded-lg overflow-hidden">
+                              <button
+                                onClick={() => setExpandedEssayId(isExpanded ? null : entry.id)}
+                                className="w-full flex items-center justify-between p-3 text-left hover:bg-secondary/20 transition-colors"
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <PenLine className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                                  <span className="text-xs text-muted-foreground capitalize">
+                                    {String(meta.taskType ?? "Task")}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground/60 truncate">
+                                    {String(meta.questionTitle ?? "")}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0 ml-2">
+                                  <Badge variant="outline" className={`text-xs ${bandBg(entry.band_score)}`}>
+                                    {entry.band_score ? `Band ${entry.band_score.toFixed(1)}` : "—"}
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground/60">{timeAgo(entry.completed_at)}</span>
+                                  {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />}
+                                </div>
+                              </button>
+                              {isExpanded && (
+                                <div className="p-3 bg-secondary/10 border-t border-border/20 space-y-3">
+                                  {snippet && (
+                                    <div>
+                                      <p className="text-xs text-muted-foreground mb-1">Essay excerpt:</p>
+                                      <p className="text-xs text-foreground/80 leading-relaxed bg-secondary/30 rounded p-2">
+                                        {snippet}{snippet.length >= 300 ? "…" : ""}
+                                      </p>
+                                    </div>
+                                  )}
+                                  <div>
+                                    <p className="text-xs text-muted-foreground mb-1">Coach notes:</p>
+                                    <Textarea
+                                      placeholder="Add tutor feedback for this student..."
+                                      value={coachNotes[noteKey] ?? ""}
+                                      onChange={(e) => setCoachNotes((prev) => ({ ...prev, [noteKey]: e.target.value }))}
+                                      className="text-xs min-h-[80px] resize-none"
+                                    />
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="mt-2 text-xs h-7"
+                                      disabled={savingNote === noteKey}
+                                      onClick={async () => {
+                                        setSavingNote(noteKey);
+                                        await supabase
+                                          .from("user_progress")
+                                          .update({ coach_notes: coachNotes[noteKey] ?? null })
+                                          .eq("id", entry.id);
+                                        setSavingNote(null);
+                                        toast({ description: "Coach notes saved." });
+                                      }}
+                                    >
+                                      {savingNote === noteKey ? (
+                                        <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                                      ) : (
+                                        <Save className="w-3 h-3 mr-1" />
+                                      )}
+                                      Save
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Study Plan Checklist */}
                 {selectedStudent.completedTaskEntries.length > 0 && (
