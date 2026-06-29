@@ -308,6 +308,13 @@ export default function AdminDashboard() {
       path: "/admin/progress",
       color: "text-purple-500",
     },
+    {
+      title: "Study Plans",
+      description: "Browse all 3 tier curricula (Foundation, Developing, Polishing)",
+      icon: <BookOpen className="w-6 h-6" />,
+      path: "/admin/study-plans",
+      color: "text-green-500",
+    },
   ];
 
   const getStatusBadge = (status: string) => {

@@ -51,7 +51,7 @@ interface WorksheetPrompt {
   sectionHeader?: string;
 }
 
-interface StudyTask {
+export interface StudyTask {
   id: string;
   label: string;
   description: string;
@@ -71,7 +71,7 @@ interface ExternalResource {
   type: "video" | "article";
 }
 
-interface StudyWeek {
+export interface StudyWeek {
   week: number;
   theme: string;
   focus: string;
@@ -82,7 +82,7 @@ interface StudyWeek {
   externalResources?: ExternalResource[];
 }
 
-interface TierPlan {
+export interface TierPlan {
   tier: "Foundation" | "Developing" | "Polishing";
   bandRange: string;
   targetBand: string;
@@ -1670,7 +1670,7 @@ function VocabSlideshow({ items }: { items: VocabItem[] }) {
   );
 }
 
-const PLANS: Record<string, TierPlan> = {
+export const PLANS: Record<string, TierPlan> = {
   foundation: FOUNDATION_PLAN,
   developing: DEVELOPING_PLAN,
   polishing: POLISHING_PLAN,
