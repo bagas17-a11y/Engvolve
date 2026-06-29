@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,10 +32,13 @@ import {
   TrendingDown,
   CheckSquare,
   Square,
+  Clock,
+  Activity,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { formatDistanceToNow } from "date-fns";
 
 interface StudentRow {
   user_id: string;
@@ -44,9 +47,10 @@ interface StudentRow {
   moduleScores: Record<string, number | null>;
   lowestModule: string | null;
   studyPlanCompleted: number;
-  studyPlanTotal: number;
   rawProgress: ProgressEntry[];
-  completedTasks: string[];
+  completedTaskEntries: CompletedTask[];
+  lastActiveAt: string | null;
+  lastAction: string | null;
 }
 
 interface ProgressEntry {
@@ -59,6 +63,11 @@ interface ProgressEntry {
   completed_at: string;
   errors_log: ErrorEntry[] | null;
   feedback: string | null;
+}
+
+interface CompletedTask {
+  question_id: string;
+  completed_at: string;
 }
 
 interface ErrorEntry {
@@ -98,6 +107,15 @@ function bandBg(score: number | null): string {
   return "bg-red-500/10 text-red-400 border-red-500/30";
 }
 
+function timeAgo(iso: string | null): string {
+  if (!iso) return "Never";
+  try {
+    return formatDistanceToNow(new Date(iso), { addSuffix: true });
+  } catch {
+    return "—";
+  }
+}
+
 export default function StudentProgress() {
   const navigate = useNavigate();
   const { user, isLoading, isAdmin, isCheckingAdmin } = useAuth();
@@ -124,23 +142,35 @@ export default function StudentProgress() {
     setIsLoadingData(true);
     try {
       const [{ data: profiles }, { data: progressRows }, { data: completedRows }] = await Promise.all([
-        supabase.from("profiles").select("user_id, email, subscription_tier").order("created_at", { ascending: false }),
-        supabase.from("user_progress").select("id, user_id, exam_type, band_score, score, total_questions, correct_answers, completed_at, errors_log, feedback").order("completed_at", { ascending: false }),
-        supabase.from("user_completed_questions").select("user_id, question_id").eq("module", "study_plan"),
+        supabase
+          .from("profiles")
+          .select("user_id, email, subscription_tier")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("user_progress")
+          .select("id, user_id, exam_type, band_score, score, total_questions, correct_answers, completed_at, errors_log, feedback")
+          .in("exam_type", MODULES)
+          .order("completed_at", { ascending: false }),
+        supabase
+          .from("user_completed_questions")
+          .select("user_id, question_id, completed_at")
+          .eq("module", "study_plan")
+          .order("completed_at", { ascending: false }),
       ]);
 
       if (!profiles) return;
 
-      const completedByUser: Record<string, string[]> = {};
+      // Group completed tasks by user
+      const completedByUser: Record<string, CompletedTask[]> = {};
       for (const r of completedRows ?? []) {
         if (!completedByUser[r.user_id]) completedByUser[r.user_id] = [];
-        completedByUser[r.user_id].push(r.question_id);
+        completedByUser[r.user_id].push({ question_id: r.question_id, completed_at: r.completed_at });
       }
 
+      // Group progress by user — first entry per exam_type is the latest (already sorted desc)
       const latestByModule: Record<string, Record<string, ProgressEntry>> = {};
       const allByUser: Record<string, ProgressEntry[]> = {};
       for (const p of progressRows ?? []) {
-        if (!MODULES.includes(p.exam_type)) continue;
         if (!latestByModule[p.user_id]) latestByModule[p.user_id] = {};
         if (!latestByModule[p.user_id][p.exam_type]) {
           latestByModule[p.user_id][p.exam_type] = p as ProgressEntry;
@@ -163,7 +193,39 @@ export default function StudentProgress() {
           );
         }
 
-        const completedTasks = completedByUser[profile.user_id] ?? [];
+        const completedTaskEntries = completedByUser[profile.user_id] ?? [];
+        const userProgressList = allByUser[profile.user_id] ?? [];
+
+        // Last active: compare most recent module completion vs most recent study plan task
+        const latestModuleAt = userProgressList[0]?.completed_at ?? null;
+        const latestTaskAt = completedTaskEntries[0]?.completed_at ?? null;
+
+        let lastActiveAt: string | null = null;
+        let lastAction: string | null = null;
+
+        if (latestModuleAt && latestTaskAt) {
+          if (new Date(latestModuleAt) >= new Date(latestTaskAt)) {
+            lastActiveAt = latestModuleAt;
+            const mod = userProgressList[0].exam_type;
+            const score = userProgressList[0].band_score;
+            lastAction = score !== null
+              ? `${MODULE_LABELS[mod] ?? mod} — Band ${score.toFixed(1)}`
+              : `${MODULE_LABELS[mod] ?? mod} attempt`;
+          } else {
+            lastActiveAt = latestTaskAt;
+            lastAction = `Study plan: ${completedTaskEntries[0].question_id}`;
+          }
+        } else if (latestModuleAt) {
+          lastActiveAt = latestModuleAt;
+          const mod = userProgressList[0].exam_type;
+          const score = userProgressList[0].band_score;
+          lastAction = score !== null
+            ? `${MODULE_LABELS[mod] ?? mod} — Band ${score.toFixed(1)}`
+            : `${MODULE_LABELS[mod] ?? mod} attempt`;
+        } else if (latestTaskAt) {
+          lastActiveAt = latestTaskAt;
+          lastAction = `Study plan: ${completedTaskEntries[0].question_id}`;
+        }
 
         return {
           user_id: profile.user_id,
@@ -171,11 +233,20 @@ export default function StudentProgress() {
           subscription_tier: profile.subscription_tier ?? "free",
           moduleScores,
           lowestModule,
-          studyPlanCompleted: completedTasks.length,
-          studyPlanTotal: 0,
-          rawProgress: allByUser[profile.user_id] ?? [],
-          completedTasks,
+          studyPlanCompleted: completedTaskEntries.length,
+          rawProgress: userProgressList,
+          completedTaskEntries,
+          lastActiveAt,
+          lastAction,
         };
+      });
+
+      // Sort by most recently active first
+      rows.sort((a, b) => {
+        if (!a.lastActiveAt && !b.lastActiveAt) return 0;
+        if (!a.lastActiveAt) return 1;
+        if (!b.lastActiveAt) return -1;
+        return new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime();
       });
 
       setStudents(rows);
@@ -192,8 +263,10 @@ export default function StudentProgress() {
   );
 
   const tierBadge = (tier: string) => {
-    if (tier === "premium" || tier === "elite") return <Badge variant="outline" className="bg-elite-gold/10 text-elite-gold border-elite-gold/30 text-xs">{tier}</Badge>;
-    if (tier === "basic") return <Badge variant="outline" className="bg-accent/10 text-accent border-accent/30 text-xs">{tier}</Badge>;
+    if (tier === "premium" || tier === "elite")
+      return <Badge variant="outline" className="bg-elite-gold/10 text-elite-gold border-elite-gold/30 text-xs">{tier}</Badge>;
+    if (tier === "basic")
+      return <Badge variant="outline" className="bg-accent/10 text-accent border-accent/30 text-xs">{tier}</Badge>;
     return <Badge variant="outline" className="text-xs text-muted-foreground">{tier}</Badge>;
   };
 
@@ -218,7 +291,9 @@ export default function StudentProgress() {
             </div>
             <div>
               <h1 className="text-2xl font-light">Student Progress</h1>
-              <p className="text-sm text-muted-foreground">Module scores, weak areas, and study plan completion</p>
+              <p className="text-sm text-muted-foreground">
+                Sorted by most recently active — updates whenever a student completes a module or checks off a study plan task
+              </p>
             </div>
           </div>
           <Button variant="outline" onClick={fetchData} disabled={isLoadingData}>
@@ -258,13 +333,20 @@ export default function StudentProgress() {
                       <TableHead className="text-center">Listening</TableHead>
                       <TableHead className="text-center">Weakest</TableHead>
                       <TableHead className="text-center">Study Plan</TableHead>
+                      <TableHead>Last Active</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filtered.map((student) => (
-                      <TableRow key={student.user_id} className="cursor-pointer hover:bg-secondary/20" onClick={() => setSelectedStudent(student)}>
-                        <TableCell className="text-sm font-medium max-w-[200px] truncate">{student.email}</TableCell>
+                      <TableRow
+                        key={student.user_id}
+                        className="cursor-pointer hover:bg-secondary/20"
+                        onClick={() => setSelectedStudent(student)}
+                      >
+                        <TableCell className="text-sm font-medium max-w-[180px] truncate">
+                          {student.email}
+                        </TableCell>
                         <TableCell>{tierBadge(student.subscription_tier)}</TableCell>
                         {MODULES.map((mod) => (
                           <TableCell key={mod} className="text-center">
@@ -297,8 +379,31 @@ export default function StudentProgress() {
                             <span className="text-xs text-muted-foreground">Not started</span>
                           )}
                         </TableCell>
+                        <TableCell className="min-w-[160px]">
+                          {student.lastActiveAt ? (
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-1 text-xs text-accent">
+                                <Activity className="w-3 h-3" />
+                                <span>{timeAgo(student.lastActiveAt)}</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground truncate max-w-[150px]">
+                                {student.lastAction}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="w-3 h-3" />
+                              <span>No activity yet</span>
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm" className="text-xs text-accent" onClick={(e) => { e.stopPropagation(); setSelectedStudent(student); }}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-accent"
+                            onClick={(e) => { e.stopPropagation(); setSelectedStudent(student); }}
+                          >
                             View
                           </Button>
                         </TableCell>
@@ -318,15 +423,26 @@ export default function StudentProgress() {
             <>
               <SheetHeader className="mb-6">
                 <SheetTitle className="font-light text-lg">{selectedStudent.email}</SheetTitle>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex flex-wrap items-center gap-2 mt-1">
                   {tierBadge(selectedStudent.subscription_tier)}
-                  <span className="text-xs text-muted-foreground">{selectedStudent.studyPlanCompleted} study plan tasks completed</span>
+                  <span className="text-xs text-muted-foreground">
+                    {selectedStudent.studyPlanCompleted} study plan tasks completed
+                  </span>
+                  {selectedStudent.lastActiveAt && (
+                    <span className="text-xs text-accent flex items-center gap-1">
+                      <Activity className="w-3 h-3" />
+                      Last active {timeAgo(selectedStudent.lastActiveAt)}
+                    </span>
+                  )}
                 </div>
               </SheetHeader>
 
               <div className="space-y-6">
+                {/* Module Score Cards */}
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Latest Module Scores</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                    Latest Module Scores
+                  </h3>
                   <div className="grid grid-cols-2 gap-3">
                     {MODULES.map((mod) => {
                       const score = selectedStudent.moduleScores[mod];
@@ -348,7 +464,14 @@ export default function StudentProgress() {
                               </Badge>
                             </div>
                             {entries.length > 0 && (
-                              <p className="text-xs text-muted-foreground">{entries.length} attempt{entries.length !== 1 ? "s" : ""}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {entries.length} attempt{entries.length !== 1 ? "s" : ""}
+                                {latest?.completed_at && (
+                                  <span className="ml-1 text-muted-foreground/60">
+                                    · {timeAgo(latest.completed_at)}
+                                  </span>
+                                )}
+                              </p>
                             )}
                             {errors.length > 0 && (
                               <div className="space-y-1 pt-1 border-t border-border/20">
@@ -371,10 +494,13 @@ export default function StudentProgress() {
                   </div>
                 </div>
 
+                {/* Score History */}
                 {selectedStudent.rawProgress.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Score History</h3>
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                      Score History
+                    </h3>
+                    <div className="space-y-2 max-h-56 overflow-y-auto">
                       {selectedStudent.rawProgress.map((entry) => (
                         <div key={entry.id} className="flex items-center justify-between text-xs p-2 rounded-lg bg-secondary/20">
                           <div className="flex items-center gap-2">
@@ -388,9 +514,7 @@ export default function StudentProgress() {
                             <span className={`font-medium ${bandColor(entry.band_score)}`}>
                               {entry.band_score !== null ? `Band ${entry.band_score.toFixed(1)}` : "—"}
                             </span>
-                            <span className="text-muted-foreground/60">
-                              {new Date(entry.completed_at).toLocaleDateString()}
-                            </span>
+                            <span className="text-muted-foreground/60">{timeAgo(entry.completed_at)}</span>
                           </div>
                         </div>
                       ))}
@@ -398,23 +522,27 @@ export default function StudentProgress() {
                   </div>
                 )}
 
-                {selectedStudent.completedTasks.length > 0 && (
+                {/* Study Plan Checklist */}
+                {selectedStudent.completedTaskEntries.length > 0 && (
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
                       Study Plan Checklist ({selectedStudent.studyPlanCompleted} completed)
                     </h3>
-                    <div className="space-y-1.5 max-h-80 overflow-y-auto">
-                      {selectedStudent.completedTasks.map((taskId) => (
-                        <div key={taskId} className="flex items-center gap-2 text-xs p-2 rounded-lg bg-green-500/5 border border-green-500/10">
-                          <CheckSquare className="w-3.5 h-3.5 text-green-400 shrink-0" />
-                          <span className="text-muted-foreground font-mono">{taskId}</span>
+                    <div className="space-y-1.5 max-h-72 overflow-y-auto">
+                      {selectedStudent.completedTaskEntries.map((entry) => (
+                        <div key={entry.question_id} className="flex items-center justify-between text-xs p-2 rounded-lg bg-green-500/5 border border-green-500/10">
+                          <div className="flex items-center gap-2">
+                            <CheckSquare className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                            <span className="text-muted-foreground font-mono">{entry.question_id}</span>
+                          </div>
+                          <span className="text-muted-foreground/60 shrink-0 ml-2">{timeAgo(entry.completed_at)}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {selectedStudent.completedTasks.length === 0 && selectedStudent.rawProgress.length === 0 && (
+                {selectedStudent.completedTaskEntries.length === 0 && selectedStudent.rawProgress.length === 0 && (
                   <div className="text-center py-8 text-sm text-muted-foreground">
                     <Square className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
                     This student has not started any modules or study plan tasks yet.
