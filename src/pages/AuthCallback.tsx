@@ -1,0 +1,62 @@
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
+
+export default function AuthCallback() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const planParam = searchParams.get("plan");
+
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+
+      const userId = session.user.id;
+
+      // Check admin
+      const { data: isAdminRole } = await supabase.rpc("has_role", {
+        _user_id: userId,
+        _role: "admin",
+      });
+      if (isAdminRole) { navigate("/dashboard"); return; }
+
+      // Wait up to 5s for the profile trigger to create the row
+      let profile = null;
+      for (let i = 0; i < 5; i++) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("is_verified, subscription_tier")
+          .eq("user_id", userId)
+          .maybeSingle();
+        if (data) { profile = data; break; }
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+
+      if (!profile) {
+        // New Google user — no profile yet (trigger may have failed); send to pricing
+        navigate(planParam ? `/pricing-selection?plan=${planParam}` : "/pricing-selection");
+        return;
+      }
+
+      if (!profile.is_verified) { navigate("/waiting-room"); return; }
+
+      // If they came from a plan link, respect that
+      if (planParam) { navigate(`/pricing-selection?plan=${planParam}`); return; }
+
+      navigate("/dashboard");
+    });
+  }, [navigate, planParam]);
+
+  return (
+    <div className="min-h-screen bg-atmospheric flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+        <p className="text-sm text-muted-foreground">Signing you in…</p>
+      </div>
+    </div>
+  );
+}
