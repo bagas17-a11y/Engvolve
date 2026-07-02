@@ -12,7 +12,7 @@
 
 export const OPERATOR = {
   /** Public-facing operator name used on the pricing/payment surface. */
-  name: "Mumpune",
+  name: "Mumpuni",
   /** Country dial code + WhatsApp number for support (no leading +). */
   whatsappNumber: "6281934349453",
   instagramHandle: "eng-inaja",
@@ -36,13 +36,13 @@ export function buildWhatsAppLink(message: string, phone = OPERATOR.whatsappNumb
 /** Default contact messages — reuse for consistency. */
 export const CONTACT_MESSAGES = {
   generalHelp:
-    "Hi Mumpune team, I have a question about the platform.",
+    "Hi Mumpuni team, I have a question about the platform.",
   pricingHelp:
-    "Hi Mumpune team, I have a question about your pricing or payment.",
+    "Hi Mumpuni team, I have a question about your pricing or payment.",
   bookConsultation:
-    "Hi Mumpune team, I'd like to book a 1-on-1 IELTS coaching session.",
+    "Hi Mumpuni team, I'd like to book a 1-on-1 IELTS coaching session.",
   paymentTransferred:
-    "Hi Mumpune team, I have just made a transfer and uploaded my receipt. Please confirm.",
+    "Hi Mumpuni team, I have just made a transfer and uploaded my receipt. Please confirm.",
 };
 
 /** Prefilled message when a user picks a paid plan after signup. */
