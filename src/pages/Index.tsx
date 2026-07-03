@@ -12,22 +12,22 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { CredibilitySection } from "@/components/CredibilitySection";
 
 const Index = () => {
-  // Landing page is always dark — the hero uses a night-sky aesthetic.
-  // MutationObserver prevents ThemeProvider from re-adding .light while mounted.
-  // Cleanup restores the user's saved theme on navigation away.
+  // Landing page is always light — daytime ocean background needs light theme for nav/sections.
+  // MutationObserver prevents ThemeProvider from removing .light while mounted.
+  // Cleanup restores the user's saved dashboard theme on navigation away.
   useLayoutEffect(() => {
     const root = document.documentElement;
-    root.classList.remove("light");
+    root.classList.add("light");
 
     const observer = new MutationObserver(() => {
-      if (root.classList.contains("light")) root.classList.remove("light");
+      if (!root.classList.contains("light")) root.classList.add("light");
     });
     observer.observe(root, { attributes: true, attributeFilter: ["class"] });
 
     return () => {
       observer.disconnect();
       const stored = localStorage.getItem("ielts-theme");
-      if (!stored || stored === "light") root.classList.add("light");
+      if (!stored || stored === "dark") root.classList.remove("light");
     };
   }, []);
 
