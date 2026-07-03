@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const navLinks = [
   { label: "How it works", href: "#features" },
@@ -15,9 +15,7 @@ export const Header = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -34,60 +32,104 @@ export const Header = () => {
 
   return (
     <>
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled ? "header-blur py-4" : "bg-transparent py-6"
-        }`}
-      >
-        <div className="container mx-auto px-6 flex items-center justify-between">
-          <a href="#" className="text-2xl font-light tracking-tight text-foreground">
-            Mum<span className="text-accent font-medium">puni</span>
+      {/* Desktop — floating pill nav */}
+      <header className="fixed top-0 left-0 right-0 z-50 hidden lg:flex justify-center pt-5 px-6 pointer-events-none">
+        <div
+          className="pointer-events-auto flex items-center gap-1 pl-4 pr-1.5 rounded-full transition-all duration-300"
+          style={{
+            background: isScrolled ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.78)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            border: "1px solid rgba(14,56,96,0.10)",
+            boxShadow: isScrolled
+              ? "0 4px 24px rgba(14,56,96,0.12), 0 1px 4px rgba(14,56,96,0.06)"
+              : "0 2px 14px rgba(14,56,96,0.07)",
+            height: 44,
+          }}
+        >
+          {/* Logo */}
+          <a href="#" className="text-[17px] font-light tracking-tight mr-3" style={{ color: "#0A1C40" }}>
+            Mum<span style={{ color: "#48A8CC", fontWeight: 500 }}>puni</span>
           </a>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8">
+          {/* Divider */}
+          <div className="w-px h-4 mx-1 shrink-0" style={{ background: "rgba(14,56,96,0.12)" }} />
+
+          {/* Nav links — tight */}
+          <nav className="flex items-center">
             {navLinks.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
-                className="text-sm text-foreground/70 hover:text-foreground transition-colors duration-300"
+                className="px-3 py-1.5 text-sm transition-colors duration-200 whitespace-nowrap"
+                style={{ color: "rgba(10,28,64,0.60)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#0A1C40")}
+                onMouseLeave={e => (e.currentTarget.style.color = "rgba(10,28,64,0.60)")}
               >
                 {link.label}
               </a>
             ))}
           </nav>
 
-          {/* Desktop CTAs */}
-          <div className="hidden lg:flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={handleLogin}>
-              Log in
-            </Button>
-            <Button variant="neumorphicPrimary" size="sm" onClick={handleStartFree}>
-              Start free
-            </Button>
-          </div>
+          {/* Divider */}
+          <div className="w-px h-4 mx-1 shrink-0" style={{ background: "rgba(14,56,96,0.12)" }} />
 
-          {/* Mobile Menu Toggle */}
+          {/* CTAs */}
+          <div className="flex items-center gap-1 ml-1">
+            <button
+              onClick={handleLogin}
+              className="px-3 py-1.5 text-sm rounded-full transition-colors duration-200"
+              style={{ color: "rgba(10,28,64,0.60)" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#0A1C40")}
+              onMouseLeave={e => (e.currentTarget.style.color = "rgba(10,28,64,0.60)")}
+            >
+              Log in
+            </button>
+            <button
+              onClick={handleStartFree}
+              className="relative overflow-hidden px-4 py-1.5 rounded-full text-sm font-medium text-white transition-transform hover:scale-105 active:scale-95"
+              style={{
+                background: "linear-gradient(135deg, #48A8CC 0%, #185688 100%)",
+                animation: "btnGlow 2.6s ease-in-out infinite",
+              }}
+            >
+              <span aria-hidden className="pointer-events-none absolute inset-0"
+                    style={{ background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.28) 50%, transparent 65%)", animation: "btnShimmer 2.8s ease-in-out infinite", animationDelay: "1.6s" }} />
+              Start free
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile — simple top bar */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 lg:hidden transition-all duration-300 ${
+          isScrolled ? "py-3" : "py-5"
+        }`}
+        style={{ background: isScrolled ? "rgba(255,255,255,0.90)" : "transparent", backdropFilter: isScrolled ? "blur(16px)" : "none", borderBottom: isScrolled ? "1px solid rgba(14,56,96,0.08)" : "none" }}
+      >
+        <div className="flex items-center justify-between px-5">
+          <a href="#" className="text-xl font-light" style={{ color: isScrolled ? "#0A1C40" : "#FFFFFF" }}>
+            Mum<span style={{ color: isScrolled ? "#48A8CC" : "#FFE4A0", fontWeight: 500 }}>puni</span>
+          </a>
           <button
-            className="lg:hidden text-foreground p-2"
+            className="p-2"
+            style={{ color: isScrolled ? "#0A1C40" : "#FFFFFF" }}
             onClick={() => setIsMobileMenuOpen(true)}
             aria-label="Open menu"
           >
-            <Menu size={24} />
+            <Menu size={22} />
           </button>
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile menu overlay */}
       <div
         className={`fixed inset-0 z-[100] transition-all duration-500 lg:hidden ${
           isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >
-        <div
-          className="absolute inset-0 bg-background/95 backdrop-blur-xl"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
+        <div className="absolute inset-0 bg-background/95 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)} />
         <div className="relative h-full flex flex-col items-center justify-center gap-8 px-6">
           <button
             className="absolute top-6 right-6 text-foreground p-2"
@@ -101,7 +143,7 @@ export const Header = () => {
               key={link.label}
               href={link.href}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="text-2xl font-light text-foreground hover:text-accent transition-colors animate-fade-in"
+              className="text-2xl font-light text-foreground hover:text-accent transition-colors"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               {link.label}

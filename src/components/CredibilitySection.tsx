@@ -7,29 +7,45 @@ const destinations = [
   {
     region: "United States",
     flag: "🇺🇸",
-    color: "from-blue-900/40 to-red-900/20 border-blue-500/20",
-    accent: "text-blue-400",
+    cardStyle: {
+      background: "linear-gradient(135deg, rgba(72,168,204,0.10) 0%, rgba(30,150,190,0.04) 100%)",
+      border: "1px solid rgba(72,168,204,0.22)",
+    },
+    accentColor: "#48A8CC",
+    tagStyle: { background: "rgba(72,168,204,0.09)", border: "1px solid rgba(72,168,204,0.20)" },
     universities: ["Harvard", "MIT", "Stanford", "Columbia", "UC Berkeley", "UCLA"],
   },
   {
     region: "United Kingdom",
     flag: "🇬🇧",
-    color: "from-blue-900/40 to-indigo-900/20 border-indigo-500/20",
-    accent: "text-indigo-400",
+    cardStyle: {
+      background: "linear-gradient(135deg, rgba(10,28,64,0.07) 0%, rgba(14,56,96,0.03) 100%)",
+      border: "1px solid rgba(10,28,64,0.14)",
+    },
+    accentColor: "#0A1C40",
+    tagStyle: { background: "rgba(10,28,64,0.05)", border: "1px solid rgba(10,28,64,0.14)" },
     universities: ["Oxford", "Cambridge", "Imperial College", "UCL", "LSE", "Edinburgh"],
   },
   {
     region: "Singapore",
     flag: "🇸🇬",
-    color: "from-red-900/30 to-zinc-900/20 border-red-500/20",
-    accent: "text-red-400",
+    cardStyle: {
+      background: "linear-gradient(135deg, rgba(24,86,136,0.09) 0%, rgba(72,168,204,0.04) 100%)",
+      border: "1px solid rgba(24,86,136,0.18)",
+    },
+    accentColor: "#185688",
+    tagStyle: { background: "rgba(24,86,136,0.07)", border: "1px solid rgba(24,86,136,0.16)" },
     universities: ["NUS", "NTU", "SMU", "SUTD"],
   },
   {
     region: "Europe",
     flag: "🇪🇺",
-    color: "from-yellow-900/20 to-zinc-900/20 border-yellow-500/15",
-    accent: "text-yellow-400",
+    cardStyle: {
+      background: "linear-gradient(135deg, rgba(245,188,60,0.09) 0%, rgba(245,128,58,0.03) 100%)",
+      border: "1px solid rgba(245,188,60,0.24)",
+    },
+    accentColor: "#C8860A",
+    tagStyle: { background: "rgba(245,188,60,0.08)", border: "1px solid rgba(245,188,60,0.20)" },
     universities: ["Sciences Po", "TU Delft", "Erasmus", "LMU Munich", "University of Amsterdam"],
   },
 ];
@@ -76,17 +92,19 @@ export const CredibilitySection = () => {
           {destinations.map((d) => (
             <div
               key={d.region}
-              className={`rounded-xl bg-gradient-to-br ${d.color} border p-5`}
+              className="rounded-xl p-5"
+              style={d.cardStyle}
             >
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xl">{d.flag}</span>
-                <p className={`text-sm font-semibold ${d.accent}`}>{d.region}</p>
+                <p className="text-sm font-semibold" style={{ color: d.accentColor }}>{d.region}</p>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {d.universities.map((uni) => (
                   <span
                     key={uni}
-                    className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/8 text-foreground/60"
+                    className="text-[10px] px-2 py-0.5 rounded-full"
+                    style={{ ...d.tagStyle, color: "rgba(10,28,64,0.62)" }}
                   >
                     {uni}
                   </span>

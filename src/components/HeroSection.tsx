@@ -5,7 +5,7 @@ export const HeroSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative min-h-screen overflow-hidden" style={{ background: "#FFFFFF" }}>
+    <section className="relative min-h-screen overflow-hidden">
       <HeroBackground />
 
       <div className="relative z-10 flex flex-col items-center text-center px-6 pt-36 pb-0">
@@ -14,69 +14,40 @@ export const HeroSection = () => {
         <div
           className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs mb-8 animate-entrance"
           style={{
-            border: "1px solid rgba(14,56,96,0.18)",
-            background: "rgba(14,56,96,0.06)",
-            color: "rgba(14,56,96,0.72)",
+            border: "1px solid rgba(255,255,255,0.22)",
+            background: "rgba(255,255,255,0.14)",
+            color: "rgba(255,255,255,0.88)",
           }}
         >
-          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#48A8CC" }} />
+          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#FFE4A0" }} />
           AI-powered · Built by 8.5+ scorers · For Indonesian students
         </div>
 
-        {/* Headline — thinner weight */}
+        {/* Headline */}
         <h1
           className="leading-[1.10] mb-5 max-w-3xl animate-entrance"
           style={{
             fontSize: "clamp(2.4rem, 6vw, 4.5rem)",
-            fontWeight: 400,
-            color: "#0A1C40",
+            fontWeight: 300,
+            color: "#FFFFFF",
             animationDelay: "100ms",
           }}
         >
           Indonesia's First Ever<br />
-          <span style={{ fontWeight: 600, color: "#1A6090" }}>All-in-one IELTS</span>
+          <span style={{ fontWeight: 600, color: "#FFE4A0" }}>All-in-one IELTS</span>
           <br />
-          <span style={{ fontWeight: 400 }}>Prep Platform.</span>
+          <span style={{ fontWeight: 300 }}>Prep Platform.</span>
         </h1>
 
         {/* Subheadline */}
         <p
           className="text-sm md:text-base max-w-lg mb-10 leading-relaxed animate-entrance"
-          style={{ color: "#3A5878", animationDelay: "200ms", fontWeight: 300 }}
+          style={{ color: "rgba(255,255,255,0.70)", animationDelay: "200ms", fontWeight: 300 }}
         >
           Mumpuni gives you personalised feedback, real Band 6.5+ strategies, and a coach in
           your pocket — built by scorers who've been where you are.
         </p>
 
-        {/* CTA buttons */}
-        <div
-          className="flex flex-wrap items-center justify-center gap-3 mb-14 animate-entrance"
-          style={{ animationDelay: "300ms" }}
-        >
-          {/* Primary — ocean gradient */}
-          <button
-            onClick={() => navigate("/auth?mode=signup")}
-            className="px-8 py-3 rounded-full font-semibold text-sm text-white transition-transform hover:scale-105 active:scale-95"
-            style={{
-              background: "linear-gradient(135deg, #48A8CC 0%, #185688 100%)",
-              boxShadow: "0 4px 20px rgba(24,86,136,0.30)",
-            }}
-          >
-            Mulai Gratis
-          </button>
-
-          {/* Secondary — outlined */}
-          <button
-            onClick={() => navigate("/auth?mode=signup&plan=elite")}
-            className="px-8 py-3 rounded-full text-sm font-medium transition-all hover:bg-[#0E3860]/5"
-            style={{
-              border: "1px solid rgba(14,56,96,0.35)",
-              color: "#0E3860",
-            }}
-          >
-            See Elite Coaching
-          </button>
-        </div>
 
         {/* Product mockup — writing feedback panel, docked on ocean */}
         <div
@@ -210,10 +181,6 @@ export const HeroSection = () => {
                 </div>
               </div>
 
-              {/* Ocean dock fade */}
-              <div className="absolute bottom-0 left-0 right-0 h-1/3 pointer-events-none" style={{
-                background: "linear-gradient(180deg, transparent 0%, rgba(14,56,96,0.88) 100%)",
-              }} />
             </div>
           </div>
         </div>

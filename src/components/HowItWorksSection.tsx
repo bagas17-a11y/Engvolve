@@ -121,11 +121,31 @@ const StudyPlanMockup = () => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
+// MAC WINDOW CHROME
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MacWindowBar = ({ title, dark = false }: { title?: string; dark?: boolean }) => (
+  <div className="flex items-center gap-1.5 px-3 shrink-0"
+       style={{ height: 28, background: dark ? "rgba(255,255,255,0.06)" : "rgba(14,56,96,0.04)", borderBottom: dark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(14,56,96,0.08)" }}>
+    <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FF5F57", boxShadow: "0 0 0 0.5px rgba(0,0,0,0.15)" }} />
+    <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FFBD2E", boxShadow: "0 0 0 0.5px rgba(0,0,0,0.12)" }} />
+    <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#28C840", boxShadow: "0 0 0 0.5px rgba(0,0,0,0.10)" }} />
+    {title && (
+      <span className="flex-1 text-center text-[9px] truncate"
+            style={{ color: dark ? "rgba(255,255,255,0.28)" : "rgba(14,56,96,0.35)", marginLeft: 4 }}>
+        {title}
+      </span>
+    )}
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
 // STEP 2 MOCKUPS
 // ─────────────────────────────────────────────────────────────────────────────
 
 const RevisionNotesMockup = () => (
   <div className="mt-6 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(14,56,96,0.10)", boxShadow: "0 4px 20px rgba(14,56,96,0.06)" }}>
+    <MacWindowBar title="Writing Skills — Linking Words &amp; Coherence" />
     <div className="grid grid-cols-5" style={{ minHeight: 220 }}>
       <div className="col-span-2 p-3" style={{ background: "rgba(255,255,255,0.55)", borderRight: "1px solid rgba(14,56,96,0.08)" }}>
         <p className="text-[9px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#7A95B0" }}>Writing Skills</p>
@@ -157,7 +177,9 @@ const RevisionNotesMockup = () => (
 const FlashcardMockup = () => {
   const [flipped, setFlipped] = useState(false);
   return (
-    <div className="mt-6">
+    <div className="mt-6 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(14,56,96,0.10)", boxShadow: "0 4px 20px rgba(14,56,96,0.06)" }}>
+      <MacWindowBar title="Grammar Flashcards — Parts of Speech" />
+      <div className="p-4">
       <div className="flex items-center gap-2 mb-3">
         <span className="text-[9.5px] font-semibold px-2.5 py-1 rounded-full"
               style={{ background: "rgba(14,56,96,0.08)", color: "#185688", border: "1px solid rgba(14,56,96,0.14)" }}>Parts of Speech</span>
@@ -189,6 +211,7 @@ const FlashcardMockup = () => {
           <div key={i} className="rounded-full" style={{ width: i === 1 ? 16 : 6, height: 6, background: i < 2 ? "#48A8CC" : "rgba(14,56,96,0.12)" }} />
         ))}
       </div>
+      </div>
     </div>
   );
 };
@@ -204,6 +227,7 @@ const TutorialMockup = () => {
   const tagColor: Record<string, string> = { Easiest: "#22c55e", Medium: "#f59e0b", Hardest: "#ef4444" };
   return (
     <div className="mt-6 rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" }}>
+      <MacWindowBar title="MudahinAja — Reading Strategies" dark />
       <div className="px-4 pt-3 pb-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         <div className="flex items-center justify-between mb-2">
           <div className="flex gap-1">
@@ -295,6 +319,7 @@ const ReadingSliderMockup = () => {
 
   return (
     <div className="mt-6 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(14,56,96,0.12)", boxShadow: "0 4px 20px rgba(14,56,96,0.08)" }}>
+      <MacWindowBar title="Mumpuni Reading · Academic" />
       <div className="px-3 py-2 flex items-center justify-between"
            style={{ background: slide === 0 ? "rgba(255,255,255,0.90)" : "rgba(254,242,242,0.90)", borderBottom: "1px solid rgba(14,56,96,0.08)", transition: "background 0.4s" }}>
         <div className="flex items-center gap-2">
@@ -361,6 +386,7 @@ const ReadingSliderMockup = () => {
 
 const ListeningMockup = () => (
   <div className="mt-6 rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.80)", border: "1px solid rgba(14,56,96,0.10)", boxShadow: "0 4px 16px rgba(14,56,96,0.07)" }}>
+    <MacWindowBar title="Mumpuni Listening · Part 1" />
     <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(14,56,96,0.08)" }}>
       <div className="flex items-center justify-between mb-2">
         <p className="text-[10.5px] font-semibold" style={{ color: "#0A1C40" }}>City Information Service</p>
@@ -418,6 +444,7 @@ const WritingSliderMockup = () => {
 
   return (
     <div className="mt-6 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.04)" }}>
+      <MacWindowBar title="Mumpuni Writing · Task 1 Academic" dark />
       <div style={{ minHeight: 230, opacity: fading ? 0 : 1, transition: "opacity 0.28s ease" }}>
 
         {frame === 0 && (
@@ -552,7 +579,9 @@ const SpeakingMockup = () => {
   }, [words.length]);
 
   return (
-    <div className="mt-6 rounded-xl p-4" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}>
+    <div className="mt-6 rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}>
+      <MacWindowBar title="Mumpuni Speaking · Part 2" dark />
+      <div className="p-4">
       <div className="text-center mb-3">
         <p className="text-2xl font-bold tabular-nums" style={{ color: "#F0F8FF", letterSpacing: "0.06em" }}>
           00:{String(secs).padStart(2, "0")}
@@ -580,6 +609,7 @@ const SpeakingMockup = () => {
         {["What should I say?", "Follow-up questions", "Recap"].map(opt => (
           <div key={opt} className="text-[8px] px-2 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.40)", border: "1px solid rgba(255,255,255,0.09)" }}>{opt}</div>
         ))}
+      </div>
       </div>
     </div>
   );
@@ -703,9 +733,11 @@ export const HowItWorksSection = () => {
         <div className="mt-14 text-center">
           <button
             onClick={() => navigate("/auth?mode=signup")}
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-semibold text-sm text-white transition-transform hover:scale-105 active:scale-95"
-            style={{ background: "linear-gradient(135deg, #48A8CC 0%, #0E3860 100%)", boxShadow: "0 4px 20px rgba(14,56,96,0.25)" }}
+            className="relative overflow-hidden inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-semibold text-sm text-white transition-transform hover:scale-105 active:scale-95"
+            style={{ background: "linear-gradient(135deg, #48A8CC 0%, #0E3860 100%)", animation: "btnGlow 2.6s ease-in-out infinite" }}
           >
+            <span aria-hidden className="pointer-events-none absolute inset-0"
+                  style={{ background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.28) 50%, transparent 65%)", animation: "btnShimmer 2.8s ease-in-out infinite", animationDelay: "0.5s" }} />
             Start free — takes 2 minutes
             <ArrowRight className="w-4 h-4" />
           </button>

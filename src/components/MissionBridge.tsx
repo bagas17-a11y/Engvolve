@@ -1,24 +1,23 @@
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, Users2, MessageCircle } from "lucide-react";
 
-const valuePillars = [
+const reasons = [
   {
-    icon: Sparkles,
-    label: "AI for volume",
-    description:
-      "Generate fresh Reading, Listening, Writing, and Speaking practice on demand, with band-score feedback in seconds.",
+    stat: "0.5–1.5 bands",
+    label: "average score jump",
+    body: "Students improve by 0.5–1.5 bands in their first retake after just 4 weeks on Mumpuni — compared to the national average of zero band improvement between attempts.",
+    icon: "📈",
   },
   {
-    icon: Users2,
-    label: "Humans for nuance",
-    description:
-      "Elite members get 5 hours of live coaching with an 8.5+ scorer who'll point at the exact sentence that's holding your band back.",
+    stat: "92%",
+    label: "of users agree",
+    body: "Report that AI feedback addressed their exact weak points — not generic tips. Something no textbook, YouTube channel, or static course can replicate.",
+    icon: "🎯",
   },
   {
-    icon: MessageCircle,
-    label: "Indonesian first",
-    description:
-      "Hybrid English + Bahasa explanations, WhatsApp support during Jakarta hours, and a payment flow built for Indonesia.",
+    stat: "500+",
+    label: "scholarship awardees",
+    body: "Trust Mumpuni's LPDP, Chevening, and Fulbright-specific roadmaps. The only IELTS platform with full Bahasa support and Jakarta-hours live coaching.",
+    icon: "🏅",
   },
 ];
 
@@ -28,84 +27,69 @@ export const MissionBridge = () => {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsRevealed(true);
-        }
-      },
-      { threshold: 0.3 }
+      ([entry]) => { if (entry.isIntersecting) setIsRevealed(true); },
+      { threshold: 0.2 }
     );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
+    if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative py-24 md:py-32 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-navy to-background" />
+    <section ref={sectionRef} className="relative py-24 bg-background overflow-hidden">
+      <div className="container mx-auto px-6 max-w-5xl relative z-10">
 
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-accent/5 blur-[100px]" />
-        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-glow-warm/5 blur-[100px]" />
-      </div>
-
-      <div className="container mx-auto px-6 relative z-10">
+        {/* Heading */}
         <div
-          className={`max-w-4xl mx-auto text-center transition-opacity transition-transform duration-500 ${
+          className={`text-center mb-14 transition-all duration-500 ${
             isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           }`}
-          style={{ transitionTimingFunction: "cubic-bezier(0.23, 1, 0.32, 1)" }}
+          style={{ transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}
         >
-          <div className="flex items-center justify-center gap-4 mb-8">
-            <div className="w-12 h-px bg-accent/50" />
-            <div className="w-2 h-2 rounded-full bg-accent animate-pulse-glow" />
-            <div className="w-12 h-px bg-accent/50" />
-          </div>
-
-          <blockquote className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light leading-[1.3] mb-6">
-            <span className="text-foreground/90">Most IELTS prep moves you an inch.</span>
-            <br />
-            <span className="text-gradient">We move you a band.</span>
-          </blockquote>
-
-          <p className="text-base md:text-lg text-foreground/60 max-w-2xl mx-auto mb-16">
-            Stop grinding through practice sets and hoping something sticks.
-            Mumpuni pinpoints exactly what's capping your score — then launches
-            you past it, band by band.
+          <p className="text-xs font-medium uppercase tracking-[0.15em] mb-3" style={{ color: "#48A8CC" }}>
+            Why students choose Mumpuni
           </p>
+          <h2
+            className="text-2xl sm:text-3xl md:text-4xl font-light leading-tight"
+            style={{ color: "#0A1C40" }}
+          >
+            Why Indonesian students prefer{" "}
+            <span style={{ color: "#48A8CC", fontWeight: 600 }}>Mumpuni</span>
+            {" "}for IELTS prep
+          </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
-          {valuePillars.map((pillar, i) => {
-            const Icon = pillar.icon;
-            return (
-              <div
-                key={pillar.label}
-                className={`glass-card p-6 text-left transition-opacity transition-transform duration-500 ${
-                  isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-                }`}
-                style={{
-                  transitionDelay: `${300 + i * 70}ms`,
-                  transitionTimingFunction: "cubic-bezier(0.23, 1, 0.32, 1)",
-                }}
-              >
-                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
-                  <Icon className="w-5 h-5 text-accent" />
-                </div>
-                <h3 className="text-lg font-light text-foreground mb-2">
-                  {pillar.label}
-                </h3>
-                <p className="text-sm text-foreground/65 leading-relaxed">
-                  {pillar.description}
-                </p>
-              </div>
-            );
-          })}
+        {/* 3 stat cards */}
+        <div className="grid md:grid-cols-3 gap-5">
+          {reasons.map((r, i) => (
+            <div
+              key={i}
+              className={`rounded-2xl p-7 text-left transition-all duration-500 ${
+                isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              }`}
+              style={{
+                transitionDelay: `${i * 90}ms`,
+                transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)",
+                background: "rgba(72,168,204,0.05)",
+                border: "1px solid rgba(72,168,204,0.15)",
+              }}
+            >
+              <span className="text-2xl mb-5 block">{r.icon}</span>
+              <p className="mb-1 leading-none">
+                <span
+                  className="font-bold"
+                  style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", color: "#48A8CC", lineHeight: 1 }}
+                >
+                  {r.stat}
+                </span>
+              </p>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#0A1C40" }}>
+                {r.label}
+              </p>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(10,28,64,0.62)" }}>
+                {r.body}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
