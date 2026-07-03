@@ -10,6 +10,7 @@ import { FAQSection } from "@/components/FAQSection";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { CredibilitySection } from "@/components/CredibilitySection";
+import { HowItWorksSection } from "@/components/HowItWorksSection";
 
 const Index = () => {
   // Landing page is always light — daytime ocean background needs light theme for nav/sections.
@@ -36,6 +37,7 @@ const Index = () => {
       <Header />
       <main>
         <HeroSection />
+        <HowItWorksSection />
         <CredibilitySection />
         <SocialProofBar />
         <FeatureGrid />
