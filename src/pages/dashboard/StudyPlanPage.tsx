@@ -1767,6 +1767,42 @@ const WEEK_COLORS = {
 };
 
 // ─────────────────────────────────────────────
+// Game-map helpers
+// ─────────────────────────────────────────────
+const WEEK_BANNER_GRADIENTS: Record<string, string> = {
+  blue:   "linear-gradient(135deg,#1279A0 0%,#48A8CC 100%)",
+  purple: "linear-gradient(135deg,#6d28d9 0%,#a855f7 100%)",
+  amber:  "linear-gradient(135deg,#b45309 0%,#f59e0b 100%)",
+  green:  "linear-gradient(135deg,#047857 0%,#10b981 100%)",
+  red:    "linear-gradient(135deg,#b91c1c 0%,#f87171 100%)",
+};
+
+function getNodeInfo(task: StudyTask): { color: string; shadow: string; IconComponent: React.ElementType } {
+  const l = task.label.toLowerCase();
+  if (l.startsWith("optional"))                          return { color: "#14b8a6", shadow: "#14b8a640", IconComponent: Sparkles };
+  if (l.includes("worksheet"))                           return { color: "#6366f1", shadow: "#6366f140", IconComponent: ClipboardList };
+  if (l.includes("mudahinaja"))                          return { color: "#f59e0b", shadow: "#f59e0b40", IconComponent: Brain };
+  if (l.includes("revision notes") && l.includes("vocab")) return { color: "#a855f7", shadow: "#a855f740", IconComponent: Sparkles };
+  if (l.includes("revision notes"))                     return { color: "#8b5cf6", shadow: "#8b5cf640", IconComponent: BookOpen };
+  if (l.includes("reading"))                             return { color: "#3b82f6", shadow: "#3b82f640", IconComponent: BookOpen };
+  if (l.includes("listening"))                           return { color: "#10b981", shadow: "#10b98140", IconComponent: Headphones };
+  if (l.includes("writing"))                             return { color: "#f97316", shadow: "#f9731640", IconComponent: PenTool };
+  if (l.includes("speaking"))                            return { color: "#ec4899", shadow: "#ec489940", IconComponent: Mic };
+  if (l.includes("end-of-week") || l.includes("submit")) return { color: "#f59e0b", shadow: "#f59e0b40", IconComponent: Trophy };
+  return { color: "#48A8CC", shadow: "#48A8CC40", IconComponent: BookOpen };
+}
+
+function shortTaskLabel(label: string): string {
+  return label
+    .replace(/^Day \d+:?\s*/i, "")
+    .replace(/^Optional [A-Z]?:?\s*/i, "Optional: ")
+    .split("(")[0]
+    .replace(/^\s*—\s*/, "")
+    .replace(/\s*(—|–)\s*.*$/, "")
+    .trim();
+}
+
+// ─────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────
 export default function StudyPlanPage() {
@@ -1775,7 +1811,7 @@ export default function StudyPlanPage() {
   const [diagnosticBand, setDiagnosticBand] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
-  const [expandedWeek, setExpandedWeek] = useState<number | null>(1);
+  const [selectedTask, setSelectedTask] = useState<{ task: StudyTask; week: StudyWeek } | null>(null);
   const completedRef = useRef(completedTasks);
   completedRef.current = completedTasks;
 
@@ -1965,168 +2001,340 @@ export default function StudyPlanPage() {
           </div>
         </div>
 
-        {/* Week cards — gated for non-Elite */}
+        {/* ─── Game Map ─── */}
         <div className="relative">
-        {profile?.subscription_tier !== "elite" && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
-            <div className="glass-card p-7 border border-elite-gold/40 bg-card/95 shadow-xl text-center max-w-sm mx-4 space-y-4">
-              <div className="w-14 h-14 rounded-full bg-elite-gold/20 flex items-center justify-center mx-auto">
-                <Lock className="w-7 h-7 text-elite-gold" />
-              </div>
-              <div>
-                <p className="text-lg font-bold text-foreground">Elite members only</p>
-                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-                  Unlock your full {plan.weeks.length}-week personalised roadmap.
-                  Guaranteed +1.5 band increase — or we coach you for free until you hit it.
-                </p>
-              </div>
-              <a
-                href={buildWhatsAppLink("Hi Mumpuni team, I'd like to upgrade to Elite to unlock my full Study Plan and get the +1.5 band guarantee.")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full px-5 py-2.5 rounded-xl bg-elite-gold/20 text-elite-gold border border-elite-gold/40 hover:bg-elite-gold/30 transition-colors text-sm font-semibold"
-              >
-                <Crown className="w-4 h-4" /> Upgrade to Elite via WhatsApp
-              </a>
-            </div>
-          </div>
-        )}
-        <div className={cn("space-y-3", profile?.subscription_tier !== "elite" && "blur-sm pointer-events-none select-none")}>
-          {plan.weeks.map(week => {
-            const weekTasks = week.tasks;
-            const weekDone = weekTasks.filter(t => completedTasks.has(t.id)).length;
-            const allDone = weekDone === weekTasks.length;
-            const isOpen = expandedWeek === week.week;
-            const colors = WEEK_COLORS[week.color];
-            const FocusIcon = FOCUS_ICONS[week.focus] ?? BookOpen;
-
-            return (
-              <div key={week.week} className={cn("rounded-xl border transition-all", allDone ? "border-green-500/30 bg-green-500/5" : `${colors.card}`)}>
-                {/* Week header */}
-                <button
-                  onClick={() => setExpandedWeek(isOpen ? null : week.week)}
-                  className="w-full flex items-center gap-4 p-4 text-left"
+          {/* Elite gate overlay */}
+          {profile?.subscription_tier !== "elite" && (
+            <div className="absolute inset-0 z-10 flex items-start justify-center pt-16">
+              <div className="glass-card p-7 border border-elite-gold/40 bg-card/95 shadow-xl text-center max-w-sm mx-4 space-y-4">
+                <div className="w-14 h-14 rounded-full bg-elite-gold/20 flex items-center justify-center mx-auto">
+                  <Lock className="w-7 h-7 text-elite-gold" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-foreground">Elite members only</p>
+                  <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+                    Unlock your full {plan.weeks.length}-week personalised roadmap.
+                    Guaranteed +1.5 band increase — or we coach you for free until you hit it.
+                  </p>
+                </div>
+                <a
+                  href={buildWhatsAppLink("Hi Mumpuni team, I'd like to upgrade to Elite to unlock my full Study Plan and get the +1.5 band guarantee.")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full px-5 py-2.5 rounded-xl bg-elite-gold/20 text-elite-gold border border-elite-gold/40 hover:bg-elite-gold/30 transition-colors text-sm font-semibold"
                 >
-                  <div className={cn("w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-sm font-bold", allDone ? "bg-green-500/20 text-green-400" : colors.num)}>
-                    {allDone ? <CheckCircle2 className="w-4 h-4" /> : week.week}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-foreground">{week.theme}</p>
-                      <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", allDone ? "bg-green-500/20 text-green-400" : colors.badge)}>
-                        {week.focus}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      <p className="text-xs text-muted-foreground">{weekDone}/{weekTasks.length} tasks</p>
-                      <div className="flex-1 max-w-[120px] bg-border/30 rounded-full h-1">
+                  <Crown className="w-4 h-4" /> Upgrade to Elite via WhatsApp
+                </a>
+              </div>
+            </div>
+          )}
+
+          <div className={cn(profile?.subscription_tier !== "elite" && "blur-sm pointer-events-none select-none")}>
+            {(() => {
+              // Compute the index of the first globally-incomplete task
+              const allPlanTasks = plan.weeks.flatMap(w => w.tasks);
+              const globalActiveId = allPlanTasks.find(t => !completedTasks.has(t.id))?.id ?? null;
+
+              return plan.weeks.map((week, wi) => {
+                const weekTasks = week.tasks;
+                const weekDone = weekTasks.filter(t => completedTasks.has(t.id)).length;
+                const allDone = weekDone === weekTasks.length;
+                const FocusIcon = FOCUS_ICONS[week.focus] ?? BookOpen;
+                const bannerGrad = WEEK_BANNER_GRADIENTS[week.color] ?? WEEK_BANNER_GRADIENTS.blue;
+                const ZIGZAG = ["justify-center", "justify-end pr-10", "justify-center", "justify-start pl-10"] as const;
+
+                return (
+                  <div key={week.week} className="mb-2">
+                    {/* Week banner */}
+                    <div className="rounded-2xl overflow-hidden mb-6" style={{ background: bannerGrad }}>
+                      <div className="flex items-center justify-between px-5 py-4 text-white">
+                        <div>
+                          <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-75">
+                            Week {week.week} · {week.focus}
+                          </p>
+                          <h3 className="text-lg font-extrabold mt-0.5 leading-tight">{week.theme}</h3>
+                          <p className="text-xs opacity-65 mt-1">{weekDone}/{weekTasks.length} completed</p>
+                        </div>
+                        <div className="flex flex-col items-center gap-1.5">
+                          <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center">
+                            <FocusIcon className="w-5 h-5 text-white" />
+                          </div>
+                          {allDone && (
+                            <span className="text-[10px] font-bold text-yellow-300 uppercase tracking-wider">Done!</span>
+                          )}
+                        </div>
+                      </div>
+                      {/* Progress bar */}
+                      <div className="h-1.5 bg-black/20">
                         <div
-                          className={cn("h-1 rounded-full transition-all", allDone ? "bg-green-500" : "bg-accent")}
+                          className="h-1.5 bg-white/70 transition-all duration-500"
                           style={{ width: `${(weekDone / weekTasks.length) * 100}%` }}
                         />
                       </div>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {Math.round(weekTasks.reduce((s, t) => s + t.minutes, 0) / 60 * 10) / 10}h
-                      </p>
+                    </div>
+
+                    {/* Node path */}
+                    <div className="relative max-w-xs mx-auto pb-4">
+                      {/* Vertical dashed track */}
+                      <div className="absolute left-1/2 top-8 bottom-8 w-0 border-l-2 border-dashed border-border/25 -translate-x-1/2 pointer-events-none" />
+
+                      <div className="space-y-2">
+                        {weekTasks.map((task, ti) => {
+                          const done = completedTasks.has(task.id);
+                          const isActive = task.id === globalActiveId;
+                          const { color, shadow, IconComponent } = getNodeInfo(task);
+                          const nodeColor = done ? "#22c55e" : color;
+                          const nodeShadow = done ? "#22c55e40" : shadow;
+                          const zigClass = ZIGZAG[ti % 4];
+
+                          return (
+                            <div key={task.id} className={cn("flex items-center", zigClass)}>
+                              <div className="relative flex flex-col items-center gap-1">
+                                {/* Active tooltip */}
+                                {isActive && (
+                                  <div className="absolute bottom-full mb-3 z-20 pointer-events-none">
+                                    <div className="relative bg-card border border-border rounded-2xl shadow-2xl px-4 py-2.5 flex items-center gap-2 whitespace-nowrap">
+                                      <span className="text-sm font-extrabold text-foreground">
+                                        {weekDone === 0 ? "START" : "CONTINUE"}
+                                      </span>
+                                      <span className="text-base">⭐</span>
+                                      {/* Caret shadow */}
+                                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0
+                                        border-l-[7px] border-r-[7px] border-t-[7px]
+                                        border-l-transparent border-r-transparent border-t-border" />
+                                      {/* Caret fill */}
+                                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 mt-[-1px]
+                                        border-l-[6px] border-r-[6px] border-t-[6px]
+                                        border-l-transparent border-r-transparent border-t-card" />
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Stars */}
+                                <div className="flex gap-[2px] h-3.5">
+                                  {[0, 1, 2].map(si => (
+                                    <span
+                                      key={si}
+                                      className="text-xs leading-none transition-colors"
+                                      style={{ color: done && si === 0 ? "#fbbf24" : "rgba(100,100,100,0.25)" }}
+                                    >★</span>
+                                  ))}
+                                </div>
+
+                                {/* Node circle */}
+                                <button
+                                  onClick={() => setSelectedTask({ task, week })}
+                                  className={cn(
+                                    "relative w-[72px] h-[72px] rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none",
+                                    isActive && "scale-110",
+                                  )}
+                                  style={{
+                                    background: nodeColor,
+                                    boxShadow: isActive
+                                      ? `0 0 0 6px ${nodeShadow}, 0 0 0 14px ${nodeShadow.replace("40", "18")}, 0 10px 32px ${nodeShadow}`
+                                      : `0 6px 18px ${nodeShadow}, 0 2px 4px rgba(0,0,0,0.12)`,
+                                  }}
+                                >
+                                  {/* 3-D bottom tint */}
+                                  <div className="absolute inset-x-0 bottom-0 h-1/3 rounded-b-full bg-black/20 pointer-events-none" />
+                                  {/* Top shine */}
+                                  <div className="absolute inset-x-3 top-2 h-[30%] rounded-full bg-white/20 pointer-events-none" />
+
+                                  {done
+                                    ? <CheckCircle2 className="w-7 h-7 text-white relative z-10 drop-shadow" />
+                                    : <IconComponent className="w-7 h-7 text-white relative z-10 drop-shadow" />
+                                  }
+
+                                  {/* Pulse ring for active node */}
+                                  {isActive && (
+                                    <span
+                                      className="absolute inset-0 rounded-full animate-ping opacity-30 pointer-events-none"
+                                      style={{ background: nodeColor }}
+                                    />
+                                  )}
+                                </button>
+
+                                {/* Short label below node */}
+                                <p className="text-[10px] text-center text-muted-foreground/70 max-w-[88px] leading-tight mt-0.5 line-clamp-2">
+                                  {shortTaskLabel(task.label)}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* External resources row (compact chips) */}
+                    {week.externalResources && week.externalResources.length > 0 && (
+                      <div className="mt-1 mb-4 max-w-xs mx-auto">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 mb-2 flex items-center gap-1.5">
+                          <Newspaper className="w-3 h-3" /> Optional sources
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {week.externalResources.map((res, ri) => (
+                            <a
+                              key={ri}
+                              href={res.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-accent border border-border/30 rounded-full px-2.5 py-1 bg-card/50 hover:border-accent/30 transition-colors"
+                            >
+                              {res.type === "video"
+                                ? <PlayCircle className="w-3 h-3 text-red-400 shrink-0" />
+                                : <ExternalLink className="w-3 h-3 shrink-0" />}
+                              {res.label.split(":")[1]?.trim() ?? res.label}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Inter-week dots */}
+                    {wi < plan.weeks.length - 1 && (
+                      <div className="flex flex-col items-center gap-2 py-3">
+                        {[0, 1, 2].map(i => (
+                          <div key={i} className="w-2 h-2 rounded-full bg-border/30" />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        </div>
+
+        {/* ─── Task Detail Bottom Sheet ─── */}
+        <AnimatePresence>
+          {selectedTask && (() => {
+            const { task, week } = selectedTask;
+            const done = completedTasks.has(task.id);
+            const { color, IconComponent } = getNodeInfo(task);
+            const bannerGrad = WEEK_BANNER_GRADIENTS[week.color] ?? WEEK_BANNER_GRADIENTS.blue;
+
+            return (
+              <motion.div
+                key="task-sheet"
+                className="fixed inset-0 z-50 flex items-end justify-center"
+              >
+                {/* Backdrop */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                  onClick={() => setSelectedTask(null)}
+                />
+
+                {/* Sheet */}
+                <motion.div
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  exit={{ y: "100%" }}
+                  transition={{ type: "spring", damping: 28, stiffness: 320 }}
+                  className="relative w-full max-w-2xl bg-background rounded-t-3xl shadow-2xl max-h-[88vh] overflow-y-auto"
+                  style={{ paddingBottom: "env(safe-area-inset-bottom, 20px)" }}
+                >
+                  {/* Drag handle */}
+                  <div className="flex justify-center pt-3 pb-1 sticky top-0 bg-background/80 backdrop-blur-sm z-10">
+                    <div className="w-10 h-1 rounded-full bg-border" />
+                  </div>
+
+                  {/* Coloured header strip */}
+                  <div className="mx-4 mb-4 rounded-2xl overflow-hidden" style={{ background: bannerGrad }}>
+                    <div className="flex items-center gap-3.5 px-4 py-4">
+                      <div className="w-12 h-12 rounded-2xl bg-white/25 flex items-center justify-center shrink-0">
+                        <IconComponent className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
+                          Week {week.week} · {week.focus}
+                        </p>
+                        <h2 className="text-base font-extrabold text-white leading-tight mt-0.5 line-clamp-2">
+                          {task.label}
+                        </h2>
+                      </div>
                     </div>
                   </div>
-                  <ChevronDown className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200", isOpen && "rotate-180")} />
-                </button>
 
-                {/* Expanded content */}
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="overflow-hidden"
+                  <div className="px-4 pb-6 space-y-4">
+                    {/* Duration + done badge */}
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center gap-1.5 text-xs text-muted-foreground bg-card border border-border/50 rounded-full px-3 py-1.5">
+                        <Clock className="w-3.5 h-3.5" /> ~{task.minutes} min
+                      </span>
+                      {done && (
+                        <span className="flex items-center gap-1 text-xs text-green-400 bg-green-500/10 border border-green-500/20 rounded-full px-3 py-1.5 font-semibold">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Completed
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-sm text-muted-foreground leading-relaxed">{task.description}</p>
+
+                    {/* Resource button */}
+                    {task.resourcePath && (
+                      <button
+                        onClick={() => { navigate(task.resourcePath!); setSelectedTask(null); }}
+                        className="w-full flex items-center gap-3 p-3.5 rounded-2xl border border-accent/30 bg-accent/5 hover:bg-accent/10 transition-colors text-left"
+                      >
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: color }}>
+                          <ExternalLink className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="text-sm font-semibold text-accent flex-1 leading-snug">{task.resourceLabel}</span>
+                        <ArrowRight className="w-4 h-4 text-accent/60 shrink-0" />
+                      </button>
+                    )}
+
+                    {/* External article/video source */}
+                    {task.sourceUrl && (
+                      <a
+                        href={task.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center gap-3 p-3.5 rounded-2xl border border-border/30 bg-card/60 hover:bg-card transition-colors"
+                      >
+                        {task.sourceType === "video"
+                          ? <PlayCircle className="w-5 h-5 text-red-400 shrink-0" />
+                          : <ExternalLink className="w-5 h-5 text-blue-400 shrink-0" />}
+                        <span className="text-sm text-foreground/80 flex-1 leading-snug">
+                          Open {task.sourceType === "video" ? "video" : "article"}: {shortTaskLabel(task.label)}
+                        </span>
+                      </a>
+                    )}
+
+                    {/* Vocab slideshow */}
+                    {task.vocabList && <VocabSlideshow items={task.vocabList} />}
+
+                    {/* Worksheet */}
+                    {task.worksheetPrompts && <ExternalSourceWorksheetCard task={task} />}
+
+                    {/* External resources for this task (if it has relatedSources shown in worksheet) */}
+
+                    {/* Mark complete CTA */}
+                    <button
+                      onClick={() => { toggleTask(task.id); setSelectedTask(null); }}
+                      className={cn(
+                        "w-full py-4 rounded-2xl text-base font-extrabold tracking-wide transition-all duration-200 shadow-lg active:scale-95",
+                        done
+                          ? "bg-card border-2 border-border text-muted-foreground hover:border-border/60"
+                          : "text-white"
+                      )}
+                      style={!done ? {
+                        background: `linear-gradient(135deg, ${color} 0%, ${color}cc 100%)`,
+                        boxShadow: `0 4px 20px ${color}50`,
+                      } : undefined}
                     >
-                      <div className="px-4 pb-4 space-y-4 border-t border-border/20 pt-4">
-                        {/* Rationale */}
-                        <div className="flex gap-2 p-3 rounded-lg bg-card/50 border border-border/30">
-                          <Sparkles className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                          <p className="text-xs text-muted-foreground leading-relaxed">{week.rationale}</p>
-                        </div>
-
-                        {/* Tasks */}
-                        <div className="space-y-2.5">
-                          {weekTasks.map((task, ti) => {
-                            const done = completedTasks.has(task.id);
-                            return (
-                              <div key={task.id} className={cn("flex gap-3 p-3.5 rounded-xl border transition-all", done ? "bg-green-500/5 border-green-500/20" : "bg-card/40 border-border/20")}>
-                                <button
-                                  onClick={() => toggleTask(task.id)}
-                                  className="shrink-0 mt-0.5 transition-colors"
-                                >
-                                  {done
-                                    ? <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                    : <Circle className="w-5 h-5 text-muted-foreground/40 hover:text-accent/50" />
-                                  }
-                                </button>
-                                <div className="flex-1 min-w-0">
-                                  <p className={cn("text-sm font-medium leading-snug", done ? "text-muted-foreground line-through" : "text-foreground")}>
-                                    {task.label}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{task.description}</p>
-                                  {task.vocabList && <VocabSlideshow items={task.vocabList} />}
-                                  {task.worksheetPrompts && <ExternalSourceWorksheetCard task={task} />}
-                                  <div className="flex items-center gap-3 mt-2">
-                                    <span className="text-xs text-muted-foreground/60 flex items-center gap-1">
-                                      <Clock className="w-3 h-3" /> ~{task.minutes} min
-                                    </span>
-                                    {task.resourcePath && (
-                                      <button
-                                        onClick={() => navigate(task.resourcePath!)}
-                                        className="text-xs text-accent hover:underline flex items-center gap-1"
-                                      >
-                                        {task.resourceLabel} <ChevronRight className="w-3 h-3" />
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        {week.externalResources && week.externalResources.length > 0 && (
-                          <div className="mt-4">
-                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                              <Newspaper className="w-3.5 h-3.5" />
-                              External Resources{week.weeklyTheme ? ` — ${week.weeklyTheme}` : ""}
-                            </p>
-                            <div className="space-y-1.5">
-                              {week.externalResources.map((res, ri) => (
-                                <a
-                                  key={ri}
-                                  href={res.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center gap-2 text-xs text-muted-foreground hover:text-accent transition-colors group"
-                                >
-                                  {res.type === "video"
-                                    ? <PlayCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                                    : <ExternalLink className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                                  }
-                                  <span className="group-hover:underline underline-offset-2">{res.label}</span>
-                                  <span className="text-muted-foreground/40 text-[10px]">{res.type === "video" ? "YouTube" : "Article"}</span>
-                                </a>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                      {done ? "Undo — Mark as Incomplete" : "Mark as Complete ✓"}
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
             );
-          })}
-        </div>
-        </div>
+          })()}
+        </AnimatePresence>
 
         {/* Bottom retake CTA */}
         <div className="glass-card p-5 flex items-center justify-between gap-4">
