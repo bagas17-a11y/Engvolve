@@ -622,7 +622,7 @@ const FOUNDATION_PLAN: TierPlan = {
         },
         {
           id: "f-w1-t3", label: "Day 3: Vocabulary Expansion",
-          description: "Read 2–3 of this week's external resources (Technology theme). Note down any new words, look up their collocations, and write one sentence using each.",
+          description: "Read all of this week's external resources (Technology theme). Note down any new words, look up their collocations, and write one sentence using each.",
           minutes: 30,
         },
         {
@@ -664,7 +664,7 @@ const FOUNDATION_PLAN: TierPlan = {
         },
         {
           id: "f-w2-t4", label: "Day 4: Vocabulary Expansion",
-          description: "Read 2–3 of this week's external resources (Health theme). For each article or video, write a 2–3 sentence summary using at least one linking word from your notes.",
+          description: "Read all of this week's external resources (Health theme). For each article or video, write a 2–3 sentence summary using at least one linking word from your notes.",
           minutes: 30,
         },
         {
@@ -1812,7 +1812,6 @@ export default function StudyPlanPage() {
   const [loading, setLoading] = useState(true);
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
   const [selectedTask, setSelectedTask] = useState<{ task: StudyTask; week: StudyWeek } | null>(null);
-  const [activeWeek, setActiveWeek] = useState<number>(1);
   const completedRef = useRef(completedTasks);
   completedRef.current = completedTasks;
 
@@ -1942,72 +1941,97 @@ export default function StudyPlanPage() {
     polishing: "bg-amber-500/20 text-amber-400 border-amber-500/30",
   };
 
+  // ─── Horizontal map geometry (all weeks, continuous) ──────────────────────
+  const NODE_SPACING = 130;
+  const MAP_HEIGHT = 420;
+  const WAVE_Y = [120, 180, 250, 300, 250, 180];
+
+  const allTasksWithWeek = plan.weeks.flatMap(w => w.tasks.map(t => ({ task: t, week: w })));
+  const globalActiveId = allTasksWithWeek.find(({ task }) => !completedTasks.has(task.id))?.task.id ?? null;
+
+  const nodePositions = allTasksWithWeek.map((_, i) => ({
+    x: 80 + i * NODE_SPACING,
+    y: WAVE_Y[i % WAVE_Y.length],
+  }));
+  const totalMapWidth = Math.max(80 + (allTasksWithWeek.length - 1) * NODE_SPACING + 80, 400);
+
+  const smoothPath = nodePositions.reduce((d, pos, i) => {
+    if (i === 0) return `M ${pos.x},${pos.y}`;
+    const prev = nodePositions[i - 1];
+    const cx = (prev.x + pos.x) / 2;
+    return `${d} C ${cx},${prev.y} ${cx},${pos.y} ${pos.x},${pos.y}`;
+  }, "");
+
+  // Start index of each week for boundary labels
+  const weekBoundaries = plan.weeks.map(w => ({
+    week: w,
+    startIndex: allTasksWithWeek.findIndex(({ week }) => week.week === w.week),
+  }));
+
   return (
-    <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-8">
-        {/* Breadcrumb */}
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/dashboard" className="flex items-center gap-1.5">
-                  <Home className="h-3.5 w-3.5" /> Home
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbPage>Study Roadmap</BreadcrumbPage></BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+    <DashboardLayout noPadding>
+      {/* Full-bleed container */}
+      <div className="flex flex-col flex-1 relative overflow-hidden bg-background">
 
-        {/* Hero */}
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={cn("px-3 py-1 rounded-full text-xs font-medium border", tierBadgeColors[tierKey])}>
-              {plan.tier} Track
-            </span>
-            <span className="text-xs text-muted-foreground">Predicted Band {diagnosticBand} → Target {plan.targetBand}</span>
-          </div>
-          <h1 className="text-3xl font-bold text-foreground">Your Study Roadmap</h1>
-          <p className="text-muted-foreground leading-relaxed max-w-2xl">{plan.description}</p>
+        {/* ── Header stats ── */}
+        <div className="relative z-10 px-5 pt-5 pb-3">
+          <div className="max-w-4xl mx-auto">
+            <Breadcrumb className="mb-3">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/dashboard" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                      <Home className="h-3.5 w-3.5" /> Home
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem><BreadcrumbPage>My Journey</BreadcrumbPage></BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
 
-          {/* Stats row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: "Weeks", value: plan.weeks.length, sub: "total" },
-              { label: "Completed", value: weeksCompleted, sub: "weeks" },
-              { label: "Tasks done", value: `${completedCount}/${totalTasks}`, sub: "" },
-              { label: "Total time", value: `${Math.round(totalMinutes / 60)}h`, sub: "study hours" },
-            ].map(s => (
-              <div key={s.label} className="glass-card p-4 text-center">
-                <p className="text-2xl font-bold text-accent">{s.value}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{s.label}{s.sub ? ` ${s.sub}` : ""}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Progress bar */}
-          <div>
-            <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-              <span>Overall progress</span>
-              <span>{Math.round((completedCount / totalTasks) * 100)}%</span>
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className={cn("px-3 py-1 rounded-full text-xs font-medium border", tierBadgeColors[tierKey])}>
+                {plan.tier} Track
+              </span>
+              <span className="text-xs text-muted-foreground">Predicted Band {diagnosticBand} → Target {plan.targetBand}</span>
             </div>
-            <div className="w-full bg-border/50 rounded-full h-2">
-              <motion.div
-                className="bg-accent h-2 rounded-full"
-                animate={{ width: `${(completedCount / totalTasks) * 100}%` }}
-                transition={{ duration: 0.5 }}
-              />
+            <h1 className="text-2xl font-bold text-foreground mb-3">Your Study Roadmap</h1>
+
+            <div className="grid grid-cols-4 gap-2 mb-3">
+              {[
+                { label: "Weeks", value: plan.weeks.length },
+                { label: "Done", value: weeksCompleted },
+                { label: "Tasks", value: `${completedCount}/${totalTasks}` },
+                { label: "Hours", value: `${Math.round(totalMinutes / 60)}h` },
+              ].map(s => (
+                <div key={s.label} className="rounded-xl p-3 text-center bg-card border border-border/40">
+                  <p className="text-lg font-bold text-foreground">{s.value}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
+                <span>Overall progress</span>
+                <span>{Math.round((completedCount / totalTasks) * 100)}%</span>
+              </div>
+              <div className="w-full rounded-full h-1.5 bg-border">
+                <motion.div className="h-1.5 rounded-full bg-accent"
+                  animate={{ width: `${(completedCount / totalTasks) * 100}%` }}
+                  transition={{ duration: 0.5 }} />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ─── Game Map ─── */}
-        <div className="relative">
+        {/* ─── Continuous journey map ─── */}
+        <div className="relative flex-1 z-10 min-h-[420px]">
           {/* Elite gate overlay */}
           {profile?.subscription_tier !== "elite" && (
-            <div className="absolute inset-0 z-10 flex items-start justify-center pt-16">
-              <div className="glass-card p-7 border border-elite-gold/40 bg-card/95 shadow-xl text-center max-w-sm mx-4 space-y-4">
+            <div className="absolute inset-0 z-20 flex items-center justify-center">
+              <div className="rounded-3xl p-7 border border-elite-gold/40 shadow-2xl text-center max-w-sm mx-4 space-y-4 bg-card">
                 <div className="w-14 h-14 rounded-full bg-elite-gold/20 flex items-center justify-center mx-auto">
                   <Lock className="w-7 h-7 text-elite-gold" />
                 </div>
@@ -2018,198 +2042,166 @@ export default function StudyPlanPage() {
                     Guaranteed +1.5 band increase — or we coach you for free until you hit it.
                   </p>
                 </div>
-                <a
-                  href={buildWhatsAppLink("Hi Engvolve team, I'd like to upgrade to Elite to unlock my full Study Plan and get the +1.5 band guarantee.")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full px-5 py-2.5 rounded-xl bg-elite-gold/20 text-elite-gold border border-elite-gold/40 hover:bg-elite-gold/30 transition-colors text-sm font-semibold"
-                >
+                <a href={buildWhatsAppLink("Hi Engvolve team, I'd like to upgrade to Elite to unlock my full Study Plan and get the +1.5 band guarantee.")}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full px-5 py-2.5 rounded-xl bg-elite-gold/20 text-elite-gold border border-elite-gold/40 hover:bg-elite-gold/30 transition-colors text-sm font-semibold">
                   <Crown className="w-4 h-4" /> Upgrade to Elite via WhatsApp
                 </a>
               </div>
             </div>
           )}
 
-          <div className={cn(profile?.subscription_tier !== "elite" && "blur-sm pointer-events-none select-none")}>
-            {(() => {
-              const allPlanTasks = plan.weeks.flatMap(w => w.tasks);
-              const globalActiveId = allPlanTasks.find(t => !completedTasks.has(t.id))?.id ?? null;
-              const currentWeek = plan.weeks.find(w => w.week === activeWeek) ?? plan.weeks[0];
-              const weekTasks = currentWeek.tasks;
-              const weekDone = weekTasks.filter(t => completedTasks.has(t.id)).length;
-              const allDone = weekDone === weekTasks.length;
-              const FocusIcon = FOCUS_ICONS[currentWeek.focus] ?? BookOpen;
-              const bannerGrad = WEEK_BANNER_GRADIENTS[currentWeek.color] ?? WEEK_BANNER_GRADIENTS.blue;
+          <div className={cn("h-full", profile?.subscription_tier !== "elite" && "blur-sm pointer-events-none select-none")}>
+            <div className="overflow-x-auto overflow-y-visible h-full pb-10" style={{ WebkitOverflowScrolling: "touch" }}>
+              <div className="relative" style={{ width: totalMapWidth, height: MAP_HEIGHT, minWidth: "100%" }}>
 
-              return (
-                <div>
-                  {/* Sky background card */}
-                  <div className="relative rounded-3xl overflow-hidden mb-6" style={{
-                    background: "linear-gradient(180deg, #0e3860 0%, #1279A0 45%, #48A8CC 100%)",
-                    minHeight: 360,
-                  }}>
-                    {/* Stars */}
-                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                      {[
-                        [8,6],[15,18],[25,8],[35,22],[45,5],[55,15],[65,9],[75,20],[85,7],[92,17],
-                        [10,35],[20,42],[30,30],[50,38],[70,32],[80,45],[90,33],
-                      ].map(([x,y],i) => (
-                        <div key={i} className="absolute rounded-full bg-white"
-                          style={{ left:`${x}%`, top:`${y}%`, width: i%3===0?3:2, height: i%3===0?3:2, opacity: 0.25+Math.random()*0.4 }} />
-                      ))}
-                    </div>
+                {/* SVG: dashed path + week band backgrounds */}
+                <svg className="absolute inset-0 pointer-events-none" width={totalMapWidth} height={MAP_HEIGHT}
+                  style={{ overflow: "visible" }}>
+                  {/* Subtle per-week lane shading */}
+                  {weekBoundaries.map(({ week, startIndex }, bi) => {
+                    const nextStart = weekBoundaries[bi + 1]?.startIndex ?? allTasksWithWeek.length;
+                    const x1 = startIndex === 0 ? 0 : nodePositions[startIndex].x - NODE_SPACING / 2;
+                    const x2 = nextStart < allTasksWithWeek.length
+                      ? nodePositions[nextStart].x - NODE_SPACING / 2
+                      : totalMapWidth;
+                    const grad = WEEK_BANNER_GRADIENTS[week.color] ?? WEEK_BANNER_GRADIENTS.blue;
+                    const baseColor = grad.match(/#[0-9a-fA-F]{6}/)?.[0] ?? "#48A8CC";
+                    return (
+                      <rect key={week.week} x={x1} y={0} width={x2 - x1} height={MAP_HEIGHT}
+                        fill={baseColor} fillOpacity={0.06} rx={0} />
+                    );
+                  })}
+                  {/* Dashed connector path */}
+                  <path d={smoothPath} stroke="var(--border)" strokeWidth="3"
+                    strokeDasharray="8,7" fill="none" strokeLinecap="round" />
+                </svg>
 
-                    {/* Rocket decoration */}
-                    <div className="absolute top-4 right-5 opacity-20 pointer-events-none select-none" style={{ fontSize: 52 }}>🚀</div>
-                    <div className="absolute bottom-8 left-4 opacity-10 pointer-events-none select-none" style={{ fontSize: 36 }}>⭐</div>
-                    <div className="absolute top-12 left-8 opacity-10 pointer-events-none select-none" style={{ fontSize: 28 }}>✦</div>
-
-                    {/* Week selector tabs */}
-                    <div className="flex gap-2 overflow-x-auto px-4 pt-4 pb-3 scrollbar-hide">
-                      {plan.weeks.map(week => {
-                        const wDone = week.tasks.filter(t => completedTasks.has(t.id)).length;
-                        const wTotal = week.tasks.length;
-                        const isSelected = week.week === activeWeek;
-                        const wGrad = WEEK_BANNER_GRADIENTS[week.color] ?? WEEK_BANNER_GRADIENTS.blue;
-                        return (
-                          <button
-                            key={week.week}
-                            onClick={() => setActiveWeek(week.week)}
-                            className={cn(
-                              "flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all duration-200",
-                              isSelected
-                                ? "text-white shadow-lg scale-105 ring-2 ring-white/30"
-                                : "bg-white/10 text-white/60 hover:bg-white/20"
-                            )}
-                            style={isSelected ? { background: wGrad } : undefined}
-                          >
-                            <span>Week {week.week}</span>
-                            {wDone === wTotal
-                              ? <span className="text-yellow-300">✓</span>
-                              : <span className="opacity-50 text-[10px]">{wDone}/{wTotal}</span>
-                            }
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Current week info */}
-                    <div className="px-4 pb-2">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/60">
-                        Week {currentWeek.week} · {currentWeek.focus}
-                      </p>
-                      <h3 className="text-lg font-extrabold text-white leading-tight mt-0.5">{currentWeek.theme}</h3>
-                      <p className="text-xs text-white/50 mt-0.5">{weekDone}/{weekTasks.length} completed{allDone ? " 🎉" : ""}</p>
-                    </div>
-
-                    {/* Week progress bar */}
-                    <div className="mx-4 mb-5 h-1.5 bg-black/20 rounded-full overflow-hidden">
-                      <div className="h-1.5 bg-white/60 rounded-full transition-all duration-500"
-                        style={{ width: `${(weekDone / weekTasks.length) * 100}%` }} />
-                    </div>
-
-                    {/* Horizontal node scroll */}
-                    <div className="overflow-x-auto pb-5 px-4 scrollbar-hide">
-                      <div className="relative flex items-start gap-1 min-w-max">
-                        {/* Horizontal dashed track */}
-                        <div className="absolute left-9 right-9 top-[52px] h-0 border-t-2 border-dashed border-white/20 pointer-events-none" />
-
-                        {weekTasks.map((task) => {
-                          const done = completedTasks.has(task.id);
-                          const isActive = task.id === globalActiveId;
-                          const { color, shadow, IconComponent } = getNodeInfo(task);
-                          const nodeColor = done ? "#22c55e" : color;
-                          const nodeShadow = done ? "#22c55e40" : shadow;
-
-                          return (
-                            <div key={task.id} className="flex flex-col items-center gap-1.5 w-[84px] shrink-0">
-                              {/* Stars */}
-                              <div className="flex gap-[2px] h-3.5">
-                                {[0,1,2].map(si => (
-                                  <span key={si} className="text-xs leading-none"
-                                    style={{ color: done && si===0 ? "#fbbf24" : "rgba(255,255,255,0.18)" }}>★</span>
-                                ))}
-                              </div>
-
-                              {/* Active tooltip */}
-                              <div className="relative">
-                                {isActive && (
-                                  <div className="absolute -top-9 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-                                    <div className="relative bg-white rounded-xl shadow-xl px-3 py-1.5 flex items-center gap-1.5 whitespace-nowrap">
-                                      <span className="text-xs font-extrabold text-[#0e3860]">
-                                        {weekDone === 0 ? "START" : "CONTINUE"}
-                                      </span>
-                                      <span className="text-sm">⭐</span>
-                                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-white" />
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* Node circle */}
-                                <button
-                                  onClick={() => setSelectedTask({ task, week: currentWeek })}
-                                  className={cn(
-                                    "relative w-[64px] h-[64px] rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none",
-                                    isActive && "scale-110",
-                                  )}
-                                  style={{
-                                    background: nodeColor,
-                                    boxShadow: isActive
-                                      ? `0 0 0 5px ${nodeShadow}, 0 0 0 12px ${nodeShadow.replace("40","18")}, 0 8px 28px ${nodeShadow}`
-                                      : `0 5px 16px ${nodeShadow}, 0 2px 4px rgba(0,0,0,0.18)`,
-                                  }}
-                                >
-                                  <div className="absolute inset-x-0 bottom-0 h-1/3 rounded-b-full bg-black/20 pointer-events-none" />
-                                  <div className="absolute inset-x-2 top-2 h-[28%] rounded-full bg-white/22 pointer-events-none" />
-                                  {done
-                                    ? <CheckCircle2 className="w-6 h-6 text-white relative z-10 drop-shadow" />
-                                    : <IconComponent className="w-6 h-6 text-white relative z-10 drop-shadow" />
-                                  }
-                                  {isActive && (
-                                    <span className="absolute inset-0 rounded-full animate-ping opacity-30 pointer-events-none"
-                                      style={{ background: nodeColor }} />
-                                  )}
-                                </button>
-                              </div>
-
-                              {/* Label */}
-                              <p className="text-[9.5px] text-center text-white/70 w-[80px] leading-tight line-clamp-2">
-                                {shortTaskLabel(task.label)}
-                              </p>
-                            </div>
-                          );
-                        })}
+                {/* Week label banners — pinned at the top of each section */}
+                {weekBoundaries.map(({ week, startIndex }) => {
+                  const pos = nodePositions[startIndex];
+                  const grad = WEEK_BANNER_GRADIENTS[week.color] ?? WEEK_BANNER_GRADIENTS.blue;
+                  const weekDone = week.tasks.filter(t => completedTasks.has(t.id)).length;
+                  return (
+                    <div key={week.week} style={{ position: "absolute", left: pos.x - 44, top: 4 }}>
+                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold text-white whitespace-nowrap"
+                        style={{ background: grad, boxShadow: "0 2px 8px rgba(0,0,0,0.18)" }}>
+                        Week {week.week}
+                        {weekDone === week.tasks.length
+                          ? <span className="text-yellow-300">✓</span>
+                          : <span className="opacity-70">{weekDone}/{week.tasks.length}</span>}
                       </div>
                     </div>
-                  </div>
+                  );
+                })}
 
-                  {/* Optional sources for current week */}
-                  {currentWeek.externalResources && currentWeek.externalResources.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 mb-2 flex items-center gap-1.5">
-                        <Newspaper className="w-3 h-3" /> Optional sources — Week {currentWeek.week}
+                {/* Nodes */}
+                {allTasksWithWeek.map(({ task, week }, i) => {
+                  const pos = nodePositions[i];
+                  const done = completedTasks.has(task.id);
+                  const isActive = task.id === globalActiveId;
+                  const { color, shadow, IconComponent } = getNodeInfo(task);
+                  const nodeColor = done ? "#22c55e" : color;
+                  const nodeShadow = done ? "#22c55e40" : shadow;
+                  const isWeekResourceTask = plan.tier === "Foundation" && !task.resourcePath && !task.sourceUrl && (week.externalResources?.length ?? 0) > 0;
+                  const showSource = isWeekResourceTask || (plan.tier === "Foundation" && !!task.sourceUrl);
+
+                  return (
+                    <div key={task.id} style={{ position: "absolute", left: pos.x - 32, top: pos.y - 52 }}>
+                      {/* Active tooltip */}
+                      {isActive && (
+                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                          <div className="relative bg-foreground text-background rounded-xl shadow-2xl px-3 py-1.5 flex items-center gap-1.5 whitespace-nowrap">
+                            <span className="text-xs font-extrabold">
+                              {completedCount === 0 ? "START" : "CONTINUE"}
+                            </span>
+                            <span className="text-sm">⭐</span>
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-foreground" />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Checkmark badge (completed only) */}
+                      {done && (
+                        <div className="absolute top-0 right-0 z-10 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center shadow-md border-2 border-background">
+                          <svg className="w-2.5 h-2.5" viewBox="0 0 10 8" fill="none">
+                            <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      )}
+
+                      {/* Node circle */}
+                      <button
+                        onClick={() => setSelectedTask({ task, week })}
+                        className={cn(
+                          "relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none mt-0",
+                          isActive && "scale-110",
+                        )}
+                        style={{
+                          background: nodeColor,
+                          boxShadow: isActive
+                            ? `0 0 0 6px ${nodeShadow}, 0 0 0 14px ${nodeShadow.replace("40","18")}, 0 10px 32px ${nodeShadow}`
+                            : `0 6px 20px ${nodeShadow}, 0 2px 6px rgba(0,0,0,0.14)`,
+                        }}
+                      >
+                        <div className="absolute inset-x-0 bottom-0 h-1/3 rounded-b-full bg-black/20 pointer-events-none" />
+                        <div className="absolute inset-x-3 top-2 h-[28%] rounded-full bg-white/20 pointer-events-none" />
+                        <IconComponent className="w-7 h-7 text-white relative z-10 drop-shadow" />
+                        {isActive && (
+                          <span className="absolute inset-0 rounded-full animate-ping opacity-20 pointer-events-none"
+                            style={{ background: nodeColor }} />
+                        )}
+                      </button>
+
+                      {/* Label */}
+                      <p className="absolute top-[70px] left-1/2 -translate-x-1/2 text-[9.5px] text-center text-muted-foreground w-20 leading-tight line-clamp-2 whitespace-normal">
+                        {shortTaskLabel(task.label)}
                       </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {currentWeek.externalResources.map((res, ri) => (
-                          <a key={ri} href={res.url} target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-accent border border-border/30 rounded-full px-2.5 py-1 bg-card/50 hover:border-accent/30 transition-colors"
-                          >
-                            {res.type === "video"
-                              ? <PlayCircle className="w-3 h-3 text-red-400 shrink-0" />
-                              : <ExternalLink className="w-3 h-3 shrink-0" />}
-                            {res.label.split(":")[1]?.trim() ?? res.label}
-                          </a>
-                        ))}
-                      </div>
+
+                      {/* Inline source indicator for Foundation tier */}
+                      {isWeekResourceTask && (
+                        <div className="absolute top-[90px] left-1/2 -translate-x-1/2 flex items-center gap-0.5 text-[8px] font-medium text-accent bg-accent/10 border border-accent/25 rounded-full px-2 py-0.5 whitespace-nowrap pointer-events-none">
+                          <Newspaper className="w-2.5 h-2.5 shrink-0" /> {week.externalResources!.length} sources
+                        </div>
+                      )}
+                      {!isWeekResourceTask && task.sourceUrl && (
+                        <a
+                          href={task.sourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          className="absolute top-[90px] left-1/2 -translate-x-1/2 flex items-center gap-0.5 text-[8px] font-medium text-accent bg-accent/10 border border-accent/25 rounded-full px-2 py-0.5 whitespace-nowrap hover:bg-accent/20 transition-colors"
+                        >
+                          {task.sourceType === "video"
+                            ? <><PlayCircle className="w-2.5 h-2.5 shrink-0" /> Watch</>
+                            : <><ExternalLink className="w-2.5 h-2.5 shrink-0" /> Read</>}
+                        </a>
+                      )}
                     </div>
-                  )}
-                </div>
-              );
-            })()}
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* ─── Task Detail Bottom Sheet ─── */}
+        {/* Retake CTA */}
+        <div className="relative z-10 px-5 pb-6 md:pb-4 pt-2">
+          <div className="rounded-2xl p-4 flex items-center justify-between gap-4 bg-card border border-border/40">
+            <div>
+              <p className="text-sm font-medium text-foreground">Retake the diagnostic?</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Your roadmap updates automatically based on your latest diagnostic result.</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/diagnostic")} className="gap-2 shrink-0">
+              <Target className="w-4 h-4" /> Retake
+            </Button>
+          </div>
+        </div>
+
+        <div className="h-28 md:h-0 shrink-0" />
+      </div>
+
+      {/* ─── Task Detail Bottom Sheet ─── */}
         <AnimatePresence>
           {selectedTask && (() => {
             const { task, week } = selectedTask;
@@ -2315,7 +2307,26 @@ export default function StudyPlanPage() {
                     {/* Worksheet */}
                     {task.worksheetPrompts && <ExternalSourceWorksheetCard task={task} />}
 
-                    {/* External resources for this task (if it has relatedSources shown in worksheet) */}
+                    {/* Week external resources (Foundation vocabulary/reading tasks) */}
+                    {plan.tier === "Foundation" && !task.resourcePath && !task.sourceUrl && week.externalResources && week.externalResources.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1.5">
+                          <Newspaper className="w-3 h-3" /> This week's resources ({week.weeklyTheme} theme)
+                        </p>
+                        <div className="space-y-2">
+                          {week.externalResources.map((res, ri) => (
+                            <a key={ri} href={res.url} target="_blank" rel="noopener noreferrer"
+                              className="w-full flex items-center gap-3 p-3 rounded-2xl border border-border/40 bg-card hover:bg-card/80 transition-colors">
+                              {res.type === "video"
+                                ? <PlayCircle className="w-5 h-5 text-red-400 shrink-0" />
+                                : <ExternalLink className="w-5 h-5 text-blue-400 shrink-0" />}
+                              <span className="text-sm text-foreground/80 flex-1 leading-snug">{res.label}</span>
+                              <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Mark complete CTA */}
                     <button
@@ -2340,17 +2351,6 @@ export default function StudyPlanPage() {
           })()}
         </AnimatePresence>
 
-        {/* Bottom retake CTA */}
-        <div className="glass-card p-5 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-foreground">Retake the diagnostic?</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Your roadmap updates automatically based on your latest diagnostic result.</p>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/diagnostic")} className="gap-2 shrink-0">
-            <Target className="w-4 h-4" /> Retake
-          </Button>
-        </div>
-      </div>
     </DashboardLayout>
   );
 }

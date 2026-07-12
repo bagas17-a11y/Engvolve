@@ -7,9 +7,10 @@ import { Loader2 } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: ReactNode;
+  noPadding?: boolean;
 }
 
-export function DashboardLayout({ children }: DashboardLayoutProps) {
+export function DashboardLayout({ children, noPadding }: DashboardLayoutProps) {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -35,8 +36,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen flex w-full bg-background">
       <AppSidebar />
-      <div className="flex-1 min-w-0 flex flex-col">
-        <main className="flex-1 p-6 pb-28 md:pb-6 overflow-x-hidden">
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+        <main className={noPadding ? "flex-1 flex flex-col overflow-hidden" : "flex-1 p-6 pb-28 md:pb-6 overflow-x-hidden"}>
           {children}
         </main>
       </div>
