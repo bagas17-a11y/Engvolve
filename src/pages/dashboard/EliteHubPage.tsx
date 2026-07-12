@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -54,8 +54,9 @@ const coaches = [
 export default function EliteHubPage() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("overview");
-  const [mudahinajaModule, setMudahinajaModule] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => searchParams.get("tab") ?? "overview");
+  const [mudahinajaModule, setMudahinajaModule] = useState<string | null>(() => searchParams.get("module"));
   // Overview state
   const [recentActivity, setRecentActivity] = useState<ActivityEntry[]>([]);
   const [savedNotes, setSavedNotes] = useState<{ id: string; title: string; savedAt: string }[]>([]);

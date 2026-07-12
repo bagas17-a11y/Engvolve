@@ -17,7 +17,7 @@ const GROUPS = [
     items: [
       { title: "Dashboard",     path: "/dashboard",            icon: LayoutDashboard },
       { title: "Diagnostic",    path: "/dashboard/diagnostic", icon: Target },
-      { title: "Study Plan",    path: "/dashboard/study-plan", icon: Map },
+      { title: "My Journey",    path: "/dashboard/study-plan", icon: Map },
       { title: "Progress Stats",path: "/dashboard/stats",      icon: BarChart3 },
       { title: "Settings",      path: "/dashboard/settings",   icon: Settings },
     ],

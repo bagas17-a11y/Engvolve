@@ -697,7 +697,7 @@ const FOUNDATION_PLAN: TierPlan = {
         {
           id: "f-w3-t2", label: "Day 2: MudahinAja — How to Answer Each Module",
           description: "Open MudahinAja and go through the interactive tutorials for Writing, Listening, Reading, and Speaking. Learn the strategies for each module — structure, timing, and what the examiner expects.",
-          resourcePath: "/dashboard/elite", resourceLabel: "Open MudahinAja", minutes: 30,
+          resourcePath: "/dashboard/elite?tab=mudahinaja", resourceLabel: "Open MudahinAja", minutes: 30,
         },
         {
           id: "f-w3-t3", label: "Day 3: Module Practice — Listening",
@@ -843,7 +843,7 @@ const DEVELOPING_PLAN: TierPlan = {
           id: "d-w2-mudahinaja-speaking",
           label: "Day 6: MudahinAja — Read the Speaking Module",
           description: "Open MudahinAja and work through the Speaking module tutorial. Study how to structure your Part 2 long turn and how to expand answers in Part 3 with reasons and examples. Take notes on any phrases or strategies you want to apply in this week's Speaking practice.",
-          resourcePath: "/dashboard/elite",
+          resourcePath: "/dashboard/elite?tab=mudahinaja&module=speaking",
           resourceLabel: "Open MudahinAja Speaking",
           minutes: 30,
         },
@@ -851,7 +851,7 @@ const DEVELOPING_PLAN: TierPlan = {
           id: "d-w2-mudahinaja-writing",
           label: "Day 6: MudahinAja — Read the Writing Module",
           description: "Open MudahinAja and work through the Writing module tutorial. Focus on the Task 2 argument structure guidance and compare it against your PEEL practice from Week 1. Note any new strategies for introductions, topic sentences, and conclusions.",
-          resourcePath: "/dashboard/elite",
+          resourcePath: "/dashboard/elite?tab=mudahinaja&module=writing",
           resourceLabel: "Open MudahinAja Writing",
           minutes: 30,
         },
@@ -896,7 +896,7 @@ const DEVELOPING_PLAN: TierPlan = {
           id: "d-w3-mudahinaja-reading",
           label: "Day 6: MudahinAja — Read the Reading Module",
           description: "Open MudahinAja and work through the Reading module tutorial. Study the strategies for True/False/Not Given and Matching question types. Focus on how to locate the relevant sentence in the passage and decide whether the text confirms, contradicts, or stays silent on each statement.",
-          resourcePath: "/dashboard/elite",
+          resourcePath: "/dashboard/elite?tab=mudahinaja&module=reading",
           resourceLabel: "Open MudahinAja Reading",
           minutes: 30,
         },
@@ -904,7 +904,7 @@ const DEVELOPING_PLAN: TierPlan = {
           id: "d-w3-mudahinaja-listening",
           label: "Day 6: MudahinAja — Read the Listening Module",
           description: "Open MudahinAja and work through the Listening module tutorial. Study the pre-reading strategy: how to use the time before each section to predict answer types and underline keywords in the questions. Apply this strategy in Day 7's listening test.",
-          resourcePath: "/dashboard/elite",
+          resourcePath: "/dashboard/elite?tab=mudahinaja&module=listening",
           resourceLabel: "Open MudahinAja Listening",
           minutes: 30,
         },
@@ -1011,7 +1011,7 @@ const POLISHING_PLAN: TierPlan = {
           id: "p-w1-reading-tutorial",
           label: "Day 3: MudahinAja — Study the Reading Module",
           description: "Open MudahinAja and work through the Reading module tutorial. At Band 8, focus on the inference strategies — the text implies rather than states, and the question tests whether you read the implication correctly. Pay close attention to the True/False/Not Given and matching headings sections.",
-          resourcePath: "/dashboard/elite",
+          resourcePath: "/dashboard/elite?tab=mudahinaja&module=reading",
           resourceLabel: "Open MudahinAja",
           minutes: 30,
         },
@@ -1122,7 +1122,7 @@ const POLISHING_PLAN: TierPlan = {
           id: "p-w2-writing-tutorial",
           label: "Day 6: MudahinAja — Study the Writing Module",
           description: "Open MudahinAja and work through the Writing module tutorial. Focus on the Task 2 counterargument structure and the Task 1 data selection strategy — specifically, how to choose which data to highlight and which to group. Compare the strategies against your PEEL practice from Day 1 and identify any gaps in your current approach.",
-          resourcePath: "/dashboard/elite",
+          resourcePath: "/dashboard/elite?tab=mudahinaja&module=writing",
           resourceLabel: "Open MudahinAja",
           minutes: 30,
         },
@@ -1201,7 +1201,7 @@ const POLISHING_PLAN: TierPlan = {
           id: "p-w3-listening-tutorial",
           label: "Day 2: MudahinAja — Study the Listening Module",
           description: "Open MudahinAja and work through the Listening module tutorial. Focus on the pre-reading strategy (reading questions before the audio plays) and the note-completion and multiple-choice sections, where Band 8 errors most often occur. Notice how the tutorial describes hedging and qualification — connect this to your Day 1 notes.",
-          resourcePath: "/dashboard/elite",
+          resourcePath: "/dashboard/elite?tab=mudahinaja&module=listening",
           resourceLabel: "Open MudahinAja",
           minutes: 30,
         },
@@ -1257,7 +1257,7 @@ const POLISHING_PLAN: TierPlan = {
           id: "p-w4-speaking-tutorial",
           label: "Day 3: MudahinAja — Study the Speaking Module",
           description: "Open MudahinAja and work through the Speaking module tutorial. At Band 8, the key is discourse management — using markers to signal shifts ('That said,', 'What is interesting, however,') and sustaining extended, coherent responses in Part 3 without relying on filler phrases. Notice where the tutorial overlaps with collocations and paraphrasing from Day 1.",
-          resourcePath: "/dashboard/elite",
+          resourcePath: "/dashboard/elite?tab=mudahinaja&module=speaking",
           resourceLabel: "Open MudahinAja",
           minutes: 30,
         },
@@ -1812,6 +1812,7 @@ export default function StudyPlanPage() {
   const [loading, setLoading] = useState(true);
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
   const [selectedTask, setSelectedTask] = useState<{ task: StudyTask; week: StudyWeek } | null>(null);
+  const [activeWeek, setActiveWeek] = useState<number>(1);
   const completedRef = useRef(completedTasks);
   completedRef.current = completedTasks;
 
@@ -2031,176 +2032,179 @@ export default function StudyPlanPage() {
 
           <div className={cn(profile?.subscription_tier !== "elite" && "blur-sm pointer-events-none select-none")}>
             {(() => {
-              // Compute the index of the first globally-incomplete task
               const allPlanTasks = plan.weeks.flatMap(w => w.tasks);
               const globalActiveId = allPlanTasks.find(t => !completedTasks.has(t.id))?.id ?? null;
+              const currentWeek = plan.weeks.find(w => w.week === activeWeek) ?? plan.weeks[0];
+              const weekTasks = currentWeek.tasks;
+              const weekDone = weekTasks.filter(t => completedTasks.has(t.id)).length;
+              const allDone = weekDone === weekTasks.length;
+              const FocusIcon = FOCUS_ICONS[currentWeek.focus] ?? BookOpen;
+              const bannerGrad = WEEK_BANNER_GRADIENTS[currentWeek.color] ?? WEEK_BANNER_GRADIENTS.blue;
 
-              return plan.weeks.map((week, wi) => {
-                const weekTasks = week.tasks;
-                const weekDone = weekTasks.filter(t => completedTasks.has(t.id)).length;
-                const allDone = weekDone === weekTasks.length;
-                const FocusIcon = FOCUS_ICONS[week.focus] ?? BookOpen;
-                const bannerGrad = WEEK_BANNER_GRADIENTS[week.color] ?? WEEK_BANNER_GRADIENTS.blue;
-                const ZIGZAG = ["justify-center", "justify-end pr-10", "justify-center", "justify-start pl-10"] as const;
-
-                return (
-                  <div key={week.week} className="mb-2">
-                    {/* Week banner */}
-                    <div className="rounded-2xl overflow-hidden mb-6" style={{ background: bannerGrad }}>
-                      <div className="flex items-center justify-between px-5 py-4 text-white">
-                        <div>
-                          <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-75">
-                            Week {week.week} · {week.focus}
-                          </p>
-                          <h3 className="text-lg font-extrabold mt-0.5 leading-tight">{week.theme}</h3>
-                          <p className="text-xs opacity-65 mt-1">{weekDone}/{weekTasks.length} completed</p>
-                        </div>
-                        <div className="flex flex-col items-center gap-1.5">
-                          <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center">
-                            <FocusIcon className="w-5 h-5 text-white" />
-                          </div>
-                          {allDone && (
-                            <span className="text-[10px] font-bold text-yellow-300 uppercase tracking-wider">Done!</span>
-                          )}
-                        </div>
-                      </div>
-                      {/* Progress bar */}
-                      <div className="h-1.5 bg-black/20">
-                        <div
-                          className="h-1.5 bg-white/70 transition-all duration-500"
-                          style={{ width: `${(weekDone / weekTasks.length) * 100}%` }}
-                        />
-                      </div>
+              return (
+                <div>
+                  {/* Sky background card */}
+                  <div className="relative rounded-3xl overflow-hidden mb-6" style={{
+                    background: "linear-gradient(180deg, #0e3860 0%, #1279A0 45%, #48A8CC 100%)",
+                    minHeight: 360,
+                  }}>
+                    {/* Stars */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                      {[
+                        [8,6],[15,18],[25,8],[35,22],[45,5],[55,15],[65,9],[75,20],[85,7],[92,17],
+                        [10,35],[20,42],[30,30],[50,38],[70,32],[80,45],[90,33],
+                      ].map(([x,y],i) => (
+                        <div key={i} className="absolute rounded-full bg-white"
+                          style={{ left:`${x}%`, top:`${y}%`, width: i%3===0?3:2, height: i%3===0?3:2, opacity: 0.25+Math.random()*0.4 }} />
+                      ))}
                     </div>
 
-                    {/* Node path */}
-                    <div className="relative max-w-xs mx-auto pb-4">
-                      {/* Vertical dashed track */}
-                      <div className="absolute left-1/2 top-8 bottom-8 w-0 border-l-2 border-dashed border-border/25 -translate-x-1/2 pointer-events-none" />
+                    {/* Rocket decoration */}
+                    <div className="absolute top-4 right-5 opacity-20 pointer-events-none select-none" style={{ fontSize: 52 }}>🚀</div>
+                    <div className="absolute bottom-8 left-4 opacity-10 pointer-events-none select-none" style={{ fontSize: 36 }}>⭐</div>
+                    <div className="absolute top-12 left-8 opacity-10 pointer-events-none select-none" style={{ fontSize: 28 }}>✦</div>
 
-                      <div className="space-y-2">
-                        {weekTasks.map((task, ti) => {
+                    {/* Week selector tabs */}
+                    <div className="flex gap-2 overflow-x-auto px-4 pt-4 pb-3 scrollbar-hide">
+                      {plan.weeks.map(week => {
+                        const wDone = week.tasks.filter(t => completedTasks.has(t.id)).length;
+                        const wTotal = week.tasks.length;
+                        const isSelected = week.week === activeWeek;
+                        const wGrad = WEEK_BANNER_GRADIENTS[week.color] ?? WEEK_BANNER_GRADIENTS.blue;
+                        return (
+                          <button
+                            key={week.week}
+                            onClick={() => setActiveWeek(week.week)}
+                            className={cn(
+                              "flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all duration-200",
+                              isSelected
+                                ? "text-white shadow-lg scale-105 ring-2 ring-white/30"
+                                : "bg-white/10 text-white/60 hover:bg-white/20"
+                            )}
+                            style={isSelected ? { background: wGrad } : undefined}
+                          >
+                            <span>Week {week.week}</span>
+                            {wDone === wTotal
+                              ? <span className="text-yellow-300">✓</span>
+                              : <span className="opacity-50 text-[10px]">{wDone}/{wTotal}</span>
+                            }
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Current week info */}
+                    <div className="px-4 pb-2">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/60">
+                        Week {currentWeek.week} · {currentWeek.focus}
+                      </p>
+                      <h3 className="text-lg font-extrabold text-white leading-tight mt-0.5">{currentWeek.theme}</h3>
+                      <p className="text-xs text-white/50 mt-0.5">{weekDone}/{weekTasks.length} completed{allDone ? " 🎉" : ""}</p>
+                    </div>
+
+                    {/* Week progress bar */}
+                    <div className="mx-4 mb-5 h-1.5 bg-black/20 rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-white/60 rounded-full transition-all duration-500"
+                        style={{ width: `${(weekDone / weekTasks.length) * 100}%` }} />
+                    </div>
+
+                    {/* Horizontal node scroll */}
+                    <div className="overflow-x-auto pb-5 px-4 scrollbar-hide">
+                      <div className="relative flex items-start gap-1 min-w-max">
+                        {/* Horizontal dashed track */}
+                        <div className="absolute left-9 right-9 top-[52px] h-0 border-t-2 border-dashed border-white/20 pointer-events-none" />
+
+                        {weekTasks.map((task) => {
                           const done = completedTasks.has(task.id);
                           const isActive = task.id === globalActiveId;
                           const { color, shadow, IconComponent } = getNodeInfo(task);
                           const nodeColor = done ? "#22c55e" : color;
                           const nodeShadow = done ? "#22c55e40" : shadow;
-                          const zigClass = ZIGZAG[ti % 4];
 
                           return (
-                            <div key={task.id} className={cn("flex items-center", zigClass)}>
-                              <div className="relative flex flex-col items-center gap-1">
-                                {/* Active tooltip */}
+                            <div key={task.id} className="flex flex-col items-center gap-1.5 w-[84px] shrink-0">
+                              {/* Stars */}
+                              <div className="flex gap-[2px] h-3.5">
+                                {[0,1,2].map(si => (
+                                  <span key={si} className="text-xs leading-none"
+                                    style={{ color: done && si===0 ? "#fbbf24" : "rgba(255,255,255,0.18)" }}>★</span>
+                                ))}
+                              </div>
+
+                              {/* Active tooltip */}
+                              <div className="relative">
                                 {isActive && (
-                                  <div className="absolute bottom-full mb-3 z-20 pointer-events-none">
-                                    <div className="relative bg-card border border-border rounded-2xl shadow-2xl px-4 py-2.5 flex items-center gap-2 whitespace-nowrap">
-                                      <span className="text-sm font-extrabold text-foreground">
+                                  <div className="absolute -top-9 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                                    <div className="relative bg-white rounded-xl shadow-xl px-3 py-1.5 flex items-center gap-1.5 whitespace-nowrap">
+                                      <span className="text-xs font-extrabold text-[#0e3860]">
                                         {weekDone === 0 ? "START" : "CONTINUE"}
                                       </span>
-                                      <span className="text-base">⭐</span>
-                                      {/* Caret shadow */}
-                                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0
-                                        border-l-[7px] border-r-[7px] border-t-[7px]
-                                        border-l-transparent border-r-transparent border-t-border" />
-                                      {/* Caret fill */}
-                                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 mt-[-1px]
-                                        border-l-[6px] border-r-[6px] border-t-[6px]
-                                        border-l-transparent border-r-transparent border-t-card" />
+                                      <span className="text-sm">⭐</span>
+                                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-white" />
                                     </div>
                                   </div>
                                 )}
 
-                                {/* Stars */}
-                                <div className="flex gap-[2px] h-3.5">
-                                  {[0, 1, 2].map(si => (
-                                    <span
-                                      key={si}
-                                      className="text-xs leading-none transition-colors"
-                                      style={{ color: done && si === 0 ? "#fbbf24" : "rgba(100,100,100,0.25)" }}
-                                    >★</span>
-                                  ))}
-                                </div>
-
                                 {/* Node circle */}
                                 <button
-                                  onClick={() => setSelectedTask({ task, week })}
+                                  onClick={() => setSelectedTask({ task, week: currentWeek })}
                                   className={cn(
-                                    "relative w-[72px] h-[72px] rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none",
+                                    "relative w-[64px] h-[64px] rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none",
                                     isActive && "scale-110",
                                   )}
                                   style={{
                                     background: nodeColor,
                                     boxShadow: isActive
-                                      ? `0 0 0 6px ${nodeShadow}, 0 0 0 14px ${nodeShadow.replace("40", "18")}, 0 10px 32px ${nodeShadow}`
-                                      : `0 6px 18px ${nodeShadow}, 0 2px 4px rgba(0,0,0,0.12)`,
+                                      ? `0 0 0 5px ${nodeShadow}, 0 0 0 12px ${nodeShadow.replace("40","18")}, 0 8px 28px ${nodeShadow}`
+                                      : `0 5px 16px ${nodeShadow}, 0 2px 4px rgba(0,0,0,0.18)`,
                                   }}
                                 >
-                                  {/* 3-D bottom tint */}
                                   <div className="absolute inset-x-0 bottom-0 h-1/3 rounded-b-full bg-black/20 pointer-events-none" />
-                                  {/* Top shine */}
-                                  <div className="absolute inset-x-3 top-2 h-[30%] rounded-full bg-white/20 pointer-events-none" />
-
+                                  <div className="absolute inset-x-2 top-2 h-[28%] rounded-full bg-white/22 pointer-events-none" />
                                   {done
-                                    ? <CheckCircle2 className="w-7 h-7 text-white relative z-10 drop-shadow" />
-                                    : <IconComponent className="w-7 h-7 text-white relative z-10 drop-shadow" />
+                                    ? <CheckCircle2 className="w-6 h-6 text-white relative z-10 drop-shadow" />
+                                    : <IconComponent className="w-6 h-6 text-white relative z-10 drop-shadow" />
                                   }
-
-                                  {/* Pulse ring for active node */}
                                   {isActive && (
-                                    <span
-                                      className="absolute inset-0 rounded-full animate-ping opacity-30 pointer-events-none"
-                                      style={{ background: nodeColor }}
-                                    />
+                                    <span className="absolute inset-0 rounded-full animate-ping opacity-30 pointer-events-none"
+                                      style={{ background: nodeColor }} />
                                   )}
                                 </button>
-
-                                {/* Short label below node */}
-                                <p className="text-[10px] text-center text-muted-foreground/70 max-w-[88px] leading-tight mt-0.5 line-clamp-2">
-                                  {shortTaskLabel(task.label)}
-                                </p>
                               </div>
+
+                              {/* Label */}
+                              <p className="text-[9.5px] text-center text-white/70 w-[80px] leading-tight line-clamp-2">
+                                {shortTaskLabel(task.label)}
+                              </p>
                             </div>
                           );
                         })}
                       </div>
                     </div>
+                  </div>
 
-                    {/* External resources row (compact chips) */}
-                    {week.externalResources && week.externalResources.length > 0 && (
-                      <div className="mt-1 mb-4 max-w-xs mx-auto">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 mb-2 flex items-center gap-1.5">
-                          <Newspaper className="w-3 h-3" /> Optional sources
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {week.externalResources.map((res, ri) => (
-                            <a
-                              key={ri}
-                              href={res.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-accent border border-border/30 rounded-full px-2.5 py-1 bg-card/50 hover:border-accent/30 transition-colors"
-                            >
-                              {res.type === "video"
-                                ? <PlayCircle className="w-3 h-3 text-red-400 shrink-0" />
-                                : <ExternalLink className="w-3 h-3 shrink-0" />}
-                              {res.label.split(":")[1]?.trim() ?? res.label}
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Inter-week dots */}
-                    {wi < plan.weeks.length - 1 && (
-                      <div className="flex flex-col items-center gap-2 py-3">
-                        {[0, 1, 2].map(i => (
-                          <div key={i} className="w-2 h-2 rounded-full bg-border/30" />
+                  {/* Optional sources for current week */}
+                  {currentWeek.externalResources && currentWeek.externalResources.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 mb-2 flex items-center gap-1.5">
+                        <Newspaper className="w-3 h-3" /> Optional sources — Week {currentWeek.week}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {currentWeek.externalResources.map((res, ri) => (
+                          <a key={ri} href={res.url} target="_blank" rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-accent border border-border/30 rounded-full px-2.5 py-1 bg-card/50 hover:border-accent/30 transition-colors"
+                          >
+                            {res.type === "video"
+                              ? <PlayCircle className="w-3 h-3 text-red-400 shrink-0" />
+                              : <ExternalLink className="w-3 h-3 shrink-0" />}
+                            {res.label.split(":")[1]?.trim() ?? res.label}
+                          </a>
                         ))}
                       </div>
-                    )}
-                  </div>
-                );
-              });
+                    </div>
+                  )}
+                </div>
+              );
             })()}
           </div>
         </div>
