@@ -71,6 +71,8 @@ export default function PricingSelection() {
 
   const registerPaidPlanRequest = async (plan: DisplayPlan) => {
     if (!user) return;
+    // pro_annual is still a 'pro' plan_type in the DB (constraint only allows 'pro'|'road_to_8')
+    const dbPlanType = plan.planKey === "pro_annual" ? "pro" : plan.planKey;
     const { data: existing } = await supabase
       .from("payment_verifications")
       .select("id")
@@ -80,7 +82,7 @@ export default function PricingSelection() {
     if (!existing) {
       const { error } = await supabase.from("payment_verifications").insert({
         user_id: user.id,
-        plan_type: plan.planKey,
+        plan_type: dbPlanType,
         amount: plan.computedAmount,
         receipt_url: WHATSAPP_RECEIPT_PLACEHOLDER,
         status: "pending",
