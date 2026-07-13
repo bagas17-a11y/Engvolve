@@ -41,9 +41,12 @@ export default function OnboardingPhone() {
       <div className="w-full max-w-md relative z-10">
         <div className="glass-card p-8 space-y-6">
           <div className="text-center">
-            <h1 className="text-2xl font-light tracking-tight">
-              Eng<span className="text-accent font-medium">volve</span>
-            </h1>
+            <div className="flex items-center justify-center gap-2">
+              <img src="/logo.png" alt="Engvolve" className="w-9 h-9 rounded-xl object-cover" />
+              <h1 className="text-2xl font-light tracking-tight">
+                Eng<span className="text-accent font-medium">volve</span>
+              </h1>
+            </div>
             <p className="text-base font-medium text-foreground mt-4">One last thing</p>
             <p className="text-sm text-muted-foreground mt-1">
               We use WhatsApp to process payments and send updates. Enter your number so we can reach you.

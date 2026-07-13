@@ -23,7 +23,8 @@ export const Footer = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <a href="#" className="text-2xl font-light tracking-tight text-foreground inline-block mb-4">
+            <a href="#" className="flex items-center gap-2 text-2xl font-light tracking-tight text-foreground mb-4 w-fit">
+              <img src="/logo.png" alt="Engvolve" className="w-8 h-8 rounded-lg object-cover" />
               Eng<span className="text-accent font-medium">volve</span>
             </a>
             <p className="text-foreground/60 max-w-sm mb-6">

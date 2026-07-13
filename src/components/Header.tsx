@@ -48,7 +48,8 @@ export const Header = () => {
           }}
         >
           {/* Logo */}
-          <a href="#" className="text-[17px] font-light tracking-tight mr-3" style={{ color: "#0A1C40" }}>
+          <a href="#" className="flex items-center gap-2 mr-3 text-[17px] font-light tracking-tight" style={{ color: "#0A1C40" }}>
+            <img src="/logo.png" alt="Engvolve" className="w-7 h-7 rounded-lg object-cover" />
             Eng<span style={{ color: "#48A8CC", fontWeight: 500 }}>volve</span>
           </a>
 
@@ -109,7 +110,8 @@ export const Header = () => {
         style={{ background: isScrolled ? "rgba(255,255,255,0.90)" : "transparent", backdropFilter: isScrolled ? "blur(16px)" : "none", borderBottom: isScrolled ? "1px solid rgba(14,56,96,0.08)" : "none" }}
       >
         <div className="flex items-center justify-between px-5">
-          <a href="#" className="text-xl font-light" style={{ color: isScrolled ? "#0A1C40" : "#FFFFFF" }}>
+          <a href="#" className="flex items-center gap-2 text-xl font-light" style={{ color: isScrolled ? "#0A1C40" : "#FFFFFF" }}>
+            <img src="/logo.png" alt="Engvolve" className="w-8 h-8 rounded-lg object-cover" />
             Eng<span style={{ color: isScrolled ? "#48A8CC" : "#FFE4A0", fontWeight: 500 }}>volve</span>
           </a>
           <button

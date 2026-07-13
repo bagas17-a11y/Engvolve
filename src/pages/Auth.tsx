@@ -216,9 +216,12 @@ export default function Auth() {
         <div className="glass-card p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-light tracking-tight">
-              Eng<span className="text-accent font-medium">volve</span>
-            </h1>
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <img src="/logo.png" alt="Engvolve" className="w-9 h-9 rounded-xl object-cover" />
+              <h1 className="text-2xl font-light tracking-tight">
+                Eng<span className="text-accent font-medium">volve</span>
+              </h1>
+            </div>
             <p className="text-sm text-muted-foreground mt-2">
               {isLogin ? "Welcome back" : "Create your account"}
             </p>

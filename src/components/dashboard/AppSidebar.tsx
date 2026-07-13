@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   LayoutDashboard, BookOpen, Headphones, PenTool, Mic,
-  BarChart3, Settings, LogOut, GraduationCap, Shield,
+  BarChart3, Settings, LogOut, Shield,
   Crown, Target, Map, Layers, FlipHorizontal, Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -88,9 +88,7 @@ export function AppSidebar() {
     >
       {/* ── Logo ─────────────────────────────────────────────────────────── */}
       <div className="h-12 flex items-center gap-3 px-3.5 border-b border-border/30 shrink-0">
-        <div className="w-7 h-7 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
-          <GraduationCap className="w-4 h-4 text-accent" />
-        </div>
+        <img src="/logo.png" alt="Engvolve" className="w-7 h-7 rounded-lg object-cover shrink-0" />
         <div className="overflow-hidden opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 whitespace-nowrap">
           <p className="text-sm font-semibold leading-none">Engvolve</p>
           <p className="text-[10px] text-muted-foreground mt-0.5">Study Dashboard</p>
