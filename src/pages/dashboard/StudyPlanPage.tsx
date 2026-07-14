@@ -2128,105 +2128,98 @@ export default function StudyPlanPage() {
                     </div>
                   </div>
 
-                  {/* Horizontal checkpoint nodes row */}
-                  <div className="overflow-x-auto py-5 px-3" style={{ WebkitOverflowScrolling: "touch" }}>
-                    <div className="flex items-start" style={{ minWidth: "max-content", gap: 0 }}>
-                      {week.tasks.map((task, ti) => {
-                        const done = completedTasks.has(task.id);
-                        const isActive = task.id === globalActiveId;
-                        const { color, shadow, IconComponent } = getNodeInfo(task);
-                        const nodeColor = done ? "#22c55e" : color;
-                        const nodeShadow = done ? "#22c55e40" : shadow;
-                        const dayLabel = extractDay(task.label);
-                        const isWeekResourceTask = plan.tier === "Foundation" && !task.resourcePath && !task.sourceUrl && (week.externalResources?.length ?? 0) > 0;
+                  {/* Vertical checkpoint list */}
+                  <div className="px-4 pt-3 pb-4">
+                    {week.tasks.map((task, ti) => {
+                      const done = completedTasks.has(task.id);
+                      const isActive = task.id === globalActiveId;
+                      const { color, shadow, IconComponent } = getNodeInfo(task);
+                      const nodeColor = done ? "#22c55e" : color;
+                      const nodeShadow = done ? "#22c55e40" : shadow;
+                      const dayLabel = extractDay(task.label);
+                      const fullTitle = task.label.replace(/^Day \d+:?\s*/i, "").replace(/^Optional [A-Z]?:?\s*/i, "Optional: ").trim();
+                      const isWeekResourceTask = plan.tier === "Foundation" && !task.resourcePath && !task.sourceUrl && (week.externalResources?.length ?? 0) > 0;
 
-                        return (
-                          <div key={task.id} className="flex items-start">
-                            {/* Node + label */}
-                            <div className="flex flex-col items-center relative" style={{ width: 84 }}>
-                              {/* Active tooltip */}
-                              {isActive && (
-                                <div className="absolute -top-9 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-                                  <div className="relative bg-foreground text-background rounded-xl shadow-2xl px-2.5 py-1 flex items-center gap-1 whitespace-nowrap">
-                                    <span className="text-[10px] font-extrabold">{completedCount === 0 ? "START" : "CONTINUE"}</span>
-                                    <span className="text-xs">⭐</span>
-                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-foreground" />
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Checkmark badge */}
+                      return (
+                        <div key={task.id}>
+                          {/* Task row */}
+                          <div className="flex items-center gap-3">
+                            {/* Circle node */}
+                            <div className="relative shrink-0">
                               {done && (
-                                <div className="absolute top-0 right-3 z-10 w-4.5 h-4.5 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center shadow border-2 border-card">
-                                  <svg className="w-2.5 h-2.5" viewBox="0 0 10 8" fill="none">
-                                    <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                                <div className="absolute -top-0.5 -right-0.5 z-10 w-4 h-4 rounded-full bg-green-500 flex items-center justify-center shadow border-2 border-card">
+                                  <svg className="w-2 h-2" viewBox="0 0 10 8" fill="none">
+                                    <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                   </svg>
                                 </div>
                               )}
-
-                              {/* Node circle */}
+                              {isActive && (
+                                <div className="absolute -inset-1.5 rounded-full pointer-events-none"
+                                  style={{ boxShadow: `0 0 0 3px ${nodeShadow}, 0 0 0 7px ${nodeShadow.replace("40","12")}` }} />
+                              )}
                               <button
                                 onClick={() => setSelectedTask({ task, week })}
-                                className={cn(
-                                  "relative w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none",
-                                  isActive && "scale-110",
-                                )}
+                                className="relative w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none active:scale-95"
                                 style={{
                                   background: nodeColor,
-                                  boxShadow: isActive
-                                    ? `0 0 0 5px ${nodeShadow}, 0 0 0 12px ${nodeShadow.replace("40","18")}, 0 8px 24px ${nodeShadow}`
-                                    : `0 4px 16px ${nodeShadow}, 0 2px 6px rgba(0,0,0,0.12)`,
+                                  boxShadow: `0 3px 12px ${nodeShadow}, 0 1px 4px rgba(0,0,0,0.12)`,
                                 }}
                               >
                                 <div className="absolute inset-x-0 bottom-0 h-1/3 rounded-b-full bg-black/20 pointer-events-none" />
-                                <div className="absolute inset-x-3 top-2 h-[28%] rounded-full bg-white/20 pointer-events-none" />
-                                <IconComponent className="w-6 h-6 text-white relative z-10 drop-shadow" />
+                                <div className="absolute inset-x-2 top-1.5 h-[28%] rounded-full bg-white/20 pointer-events-none" />
+                                <IconComponent className="w-5 h-5 text-white relative z-10 drop-shadow" />
                                 {isActive && (
                                   <span className="absolute inset-0 rounded-full animate-ping opacity-20 pointer-events-none"
                                     style={{ background: nodeColor }} />
                                 )}
                               </button>
+                            </div>
 
-                              {/* Day + title label */}
-                              <div className="mt-2 flex flex-col items-center" style={{ width: 80 }}>
+                            {/* Title + day */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-0.5">
                                 {dayLabel && (
-                                  <span className="text-[8.5px] font-semibold leading-none mb-0.5" style={{ color: accentColor }}>
+                                  <span className="text-[10px] font-bold shrink-0" style={{ color: accentColor }}>
                                     {dayLabel}
                                   </span>
                                 )}
-                                <p className="text-[9px] text-center text-muted-foreground leading-tight line-clamp-2 whitespace-normal px-1">
-                                  {shortTaskLabel(task.label)}
-                                </p>
+                                {done && (
+                                  <span className="text-[9px] text-green-400 font-medium shrink-0">Completed</span>
+                                )}
+                                {isActive && (
+                                  <span className="text-[9px] font-bold shrink-0" style={{ color: accentColor }}>← Continue here</span>
+                                )}
+                              </div>
+                              <p className="text-[12px] font-medium text-foreground leading-snug">{fullTitle}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                                  <Clock className="w-3 h-3" /> {task.minutes} min
+                                </span>
                                 {isWeekResourceTask && (
-                                  <div className="mt-1 flex items-center gap-0.5 text-[8px] font-medium text-accent bg-accent/10 border border-accent/25 rounded-full px-1.5 py-0.5 whitespace-nowrap pointer-events-none">
-                                    <Newspaper className="w-2 h-2 shrink-0" /> {week.externalResources!.length} sources
-                                  </div>
+                                  <span className="text-[10px] text-accent flex items-center gap-0.5">
+                                    <Newspaper className="w-3 h-3" /> {week.externalResources!.length} sources
+                                  </span>
                                 )}
                                 {!isWeekResourceTask && task.sourceUrl && (
                                   <a href={task.sourceUrl} target="_blank" rel="noopener noreferrer"
                                     onClick={e => e.stopPropagation()}
-                                    className="mt-1 flex items-center gap-0.5 text-[8px] font-medium text-accent bg-accent/10 border border-accent/25 rounded-full px-1.5 py-0.5 whitespace-nowrap hover:bg-accent/20 transition-colors">
+                                    className="text-[10px] text-accent flex items-center gap-0.5 hover:underline">
                                     {task.sourceType === "video"
-                                      ? <><PlayCircle className="w-2 h-2 shrink-0" /> Watch</>
-                                      : <><ExternalLink className="w-2 h-2 shrink-0" /> Read</>}
+                                      ? <><PlayCircle className="w-3 h-3" /> Watch</>
+                                      : <><ExternalLink className="w-3 h-3" /> Read article</>}
                                   </a>
                                 )}
                               </div>
                             </div>
-
-                            {/* Connector arrow */}
-                            {ti < week.tasks.length - 1 && (
-                              <div className="flex items-center shrink-0 mt-[26px]" style={{ width: 20 }}>
-                                <div className="flex-1 h-[1.5px]" style={{ background: accentColor + "40" }} />
-                                <svg width="6" height="8" viewBox="0 0 6 8" fill="none" className="shrink-0">
-                                  <path d="M1 1l4 3-4 3" stroke={accentColor} strokeOpacity="0.5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                              </div>
-                            )}
                           </div>
-                        );
-                      })}
-                    </div>
+
+                          {/* Vertical connector to next task */}
+                          {ti < week.tasks.length - 1 && (
+                            <div className="ml-[21px] w-[2px] h-5 rounded-full" style={{ background: accentColor + "30" }} />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
