@@ -63,6 +63,12 @@ export interface StudyTask {
   sourceType?: "video" | "article";
   worksheetPrompts?: WorksheetPrompt[];
   relatedSources?: ExternalResource[];  // inline sources shown at top of worksheet
+  additionalLinks?: Array<{
+    path: string;
+    label: string;
+    external?: boolean;
+    icon?: "video" | "article" | "worksheet" | "resource";
+  }>;
 }
 
 interface ExternalResource {
@@ -608,165 +614,309 @@ const FOUNDATION_PLAN: TierPlan = {
       week: 1, theme: "Grammar — Tenses & Agreement", focus: "Grammar",
       color: "blue",
       weeklyTheme: "Technology",
-      rationale: "Tense consistency and subject-verb agreement are the two most penalised grammar errors at Band 4–5. Fixing these first gives every sentence you write a reliable structure before you layer in exam technique.",
+      rationale: "Tense consistency and subject-verb agreement are the two most penalised grammar errors at Band 4–5. This week builds your grammatical foundation across three key topics — Parts of Speech, Verb Tenses, and Subject-Verb Agreement — and applies each to real-world technology-themed articles and videos.",
       tasks: [
         {
-          id: "f-w1-t1", label: "Day 1: Revision Notes — Verb Tenses (Parts 1–5 + Mini Practice)",
-          description: "Work through all five parts of the Verb Tenses notes covering present, past, future, perfect, and continuous tenses. Complete the mini practice at the end to check your understanding.",
-          resourcePath: "/dashboard/revision-notes?topic=verb-tenses", resourceLabel: "Open Verb Tenses", minutes: 45,
+          id: "f-w1-t1", label: "Day 1: Revision Notes — Parts of Speech: Parts 1–4",
+          description: "Read through Parts 1–4 of the Parts of Speech notes: Overview, Subjects, Verbs, and Pronouns. Then open Worksheet 1 and complete the Worksheet 1a section, which covers Parts 1–4.",
+          resourcePath: "/dashboard/revision-notes?topic=parts-of-speech",
+          resourceLabel: "Open Parts of Speech Notes",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=parts-of-speech&subtopic=worksheet-1", label: "Open Worksheet 1 — do section 1a (Parts 1–4)", icon: "worksheet" },
+          ],
+          minutes: 45,
         },
         {
-          id: "f-w1-t2", label: "Day 2: Revision Notes — Subject-Verb Agreement (All Parts + Mini Practice)",
-          description: "Study all parts including singular/plural subjects, special patterns (there is/are, subjects joined by 'and'), and the mini practice. Pay attention to collective nouns like 'government' and 'number of'.",
-          resourcePath: "/dashboard/revision-notes?topic=subject-verb-agreement", resourceLabel: "Open SVA Notes", minutes: 40,
+          id: "f-w1-t2", label: "Day 2: Revision Notes — Parts of Speech: Parts 5–8",
+          description: "Continue with Parts 5–8 of the Parts of Speech notes: Adjectives, Adverbs, Imperatives, and Practice. Then return to Worksheet 1 and complete the Worksheet 1b section, which covers Parts 5–8.",
+          resourcePath: "/dashboard/revision-notes?topic=parts-of-speech",
+          resourceLabel: "Open Parts of Speech Notes",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=parts-of-speech&subtopic=worksheet-1", label: "Open Worksheet 1 — do section 1b (Parts 5–8)", icon: "worksheet" },
+          ],
+          minutes: 45,
         },
         {
-          id: "f-w1-t3", label: "Day 3: Vocabulary Expansion",
-          description: "Read all of this week's external resources (Technology theme). Note down any new words, look up their collocations, and write one sentence using each.",
-          minutes: 30,
+          id: "f-w1-t3", label: "Day 3: External Resource Practice",
+          description: "Read the article and watch the video below, both on a Technology theme. Then open the External Resource Worksheet for Band 4–5 Week 1: list new vocabulary from each source, write definitions, and use the words in your own sentences.",
+          additionalLinks: [
+            { path: "https://english-online.at/news-articles/business-economy/ford-to-invest-11-billion-in-electric-cars.htm", label: "Article: Ford To Invest $11 Billion in Electric Cars", external: true, icon: "article" },
+            { path: "https://youtu.be/2FZEznNC-Fs", label: "Video: Is social media 'the new smoking'?", external: true, icon: "video" },
+            { path: "/dashboard/external-worksheets?band=4-5&week=1&ws=main", label: "External Resource Worksheet — Band 4–5, Week 1", icon: "worksheet" },
+          ],
+          minutes: 40,
         },
         {
-          id: "f-w1-t4", label: "Day 4: Worksheet — Verb Tenses & Subject-Verb Agreement",
-          description: "Open the revision notes for each topic and complete the worksheets at the bottom of the page. Verb Tenses worksheet has 3 parts: tense correction, tense choice, and write-your-own. SVA worksheet has 2 parts: fix the error, and choose the correct verb.",
+          id: "f-w1-t4", label: "Day 4: Revision Notes — Verb Tenses: ALL",
+          description: "Work through all parts of the Verb Tenses notes, covering present, past, future, perfect, and continuous tenses. Complete the mini practice at the end. Then open Worksheet 1 and complete all three parts: tense correction, tense choice, and write-your-own.",
           resourcePath: "/dashboard/revision-notes?topic=verb-tenses",
-          resourceLabel: "Open Verb Tenses Worksheet",
+          resourceLabel: "Open Verb Tenses Notes",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=verb-tenses&subtopic=worksheet-1", label: "Open Verb Tenses — Worksheet 1", icon: "worksheet" },
+          ],
+          minutes: 50,
+        },
+        {
+          id: "f-w1-t5", label: "Day 5: External Resource Practice",
+          description: "Read the article and watch the video below. Then open the External Resource Worksheet for Band 4–5 Week 1: list new vocabulary from each source, write definitions, and use the words in your own sentences.",
+          additionalLinks: [
+            { path: "https://learnenglish.britishcouncil.org/free-resources/reading/b1/robot-teachers", label: "Article: Robot Teachers", external: true, icon: "article" },
+            { path: "https://youtu.be/-T__YWoq45I", label: "Video: Is AI the most important technology of the century?", external: true, icon: "video" },
+            { path: "/dashboard/external-worksheets?band=4-5&week=1&ws=main", label: "External Resource Worksheet — Band 4–5, Week 1", icon: "worksheet" },
+          ],
+          minutes: 40,
+        },
+        {
+          id: "f-w1-t6", label: "Day 6: Revision Notes — Subject-Verb Agreement: ALL",
+          description: "Study all parts of the Subject-Verb Agreement notes including singular/plural subjects, special patterns (there is/are, collective nouns), and the mini practice. Then complete Worksheet 1: error correction and verb choice.",
+          resourcePath: "/dashboard/revision-notes?topic=subject-verb-agreement",
+          resourceLabel: "Open Subject-Verb Agreement Notes",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=subject-verb-agreement&subtopic=worksheet-1", label: "Open Subject-Verb Agreement — Worksheet 1", icon: "worksheet" },
+          ],
+          minutes: 45,
+        },
+        {
+          id: "f-w1-t7", label: "Day 7: External Resource Practice",
+          description: "Read the article and watch the video below. Then open the External Resource Worksheet for Band 4–5 Week 1: list new vocabulary, write definitions, and use the words in your own sentences.",
+          additionalLinks: [
+            { path: "https://newsinlevels.com/products/screens-and-ai-toys-hurt-children-level-3/", label: "Article: Screens and AI Toys Hurt Children", external: true, icon: "article" },
+            { path: "https://youtu.be/ua-b9L9LDXQ", label: "Video: How AI Can Improve Your Life", external: true, icon: "video" },
+            { path: "/dashboard/external-worksheets?band=4-5&week=1&ws=main", label: "External Resource Worksheet — Band 4–5, Week 1", icon: "worksheet" },
+          ],
           minutes: 40,
         },
       ],
-      externalResources: [
-        { label: "Electric Cars", url: "https://english-online.at/news-articles/business-economy/ford-to-invest-11-billion-in-electric-cars.htm", type: "article" },
-        { label: "Robot Teachers", url: "https://learnenglish.britishcouncil.org/free-resources/reading/b1/robot-teachers", type: "article" },
-        { label: "AI and Health", url: "https://newsinlevels.com/products/screens-and-ai-toys-hurt-children-level-3/", type: "article" },
-        { label: "Technology and Health", url: "https://youtu.be/2FZEznNC-Fs?si=MLZJwqXKzIIblxVt", type: "video" },
-        { label: "AI and the Future", url: "https://youtu.be/-T__YWoq45I?si=s5NFNTBqV0qu74nU", type: "video" },
-      ],
+      externalResources: [],
     },
     {
       week: 2, theme: "Grammar — Articles & Sentence Structures", focus: "Grammar",
       color: "purple",
       weeklyTheme: "Health",
-      rationale: "Articles (a/an/the) are the most systematic Band 4–5 error in writing. Sentence structure variety is required to reach Band 6. Adding conjunctions and linking words directly addresses two of the four IELTS Writing criteria.",
+      rationale: "Articles (a/an/the) are the most systematic Band 4–5 writing error. Sentence structure variety is required to reach Band 6. Adding relative clauses, linking words, and accurate punctuation directly addresses multiple IELTS Writing criteria. Health-themed resources this week build topical vocabulary for a commonly tested topic.",
       tasks: [
         {
-          id: "f-w2-t1", label: "Day 1: Revision Notes — Articles (All Parts + Mini Practice)",
-          description: "Work through all parts covering when to use a/an, the, or no article. Complete the mini practice — focus especially on uncountable nouns and general statements ('Education is important' vs 'The education system…').",
-          resourcePath: "/dashboard/revision-notes?topic=articles", resourceLabel: "Open Articles Notes", minutes: 40,
-        },
-        {
-          id: "f-w2-t2", label: "Day 2: Revision Notes — Sentence Structure & Conjunctions",
-          description: "Read through the Sentence Structure notes focusing on compound and complex sentences. Pay attention to the 'See: Coordinating/Subordinating Conjunctions' links within those notes.",
-          resourcePath: "/dashboard/revision-notes?topic=sentence-structure", resourceLabel: "Open Sentence Structure", minutes: 35,
-        },
-        {
-          id: "f-w2-t3", label: "Day 3: Revision Notes — Linking Words, Referencing & Coherence",
-          description: "Study coordinating conjunctions (FANBOYS) and subordinating conjunctions. Practise writing 3 compound sentences and 3 complex sentences using different conjunctions from the tables.",
-          resourcePath: "/dashboard/revision-notes?topic=linking-words-coherence", resourceLabel: "Open Linking Words", minutes: 35,
-        },
-        {
-          id: "f-w2-t4", label: "Day 4: Vocabulary Expansion",
-          description: "Read all of this week's external resources (Health theme). For each article or video, write a 2–3 sentence summary using at least one linking word from your notes.",
-          minutes: 30,
-        },
-        {
-          id: "f-w2-t5", label: "Day 5: Worksheet — Articles & Sentence Structures",
-          description: "Open the revision notes for each topic and complete the worksheets at the bottom of the page. Articles worksheet has 2 parts: gap-fill and error spotting. Linking Words worksheet has 2 parts: joining sentences with conjunctions and fixing conjunction errors.",
+          id: "f-w2-t1", label: "Day 1: Revision Notes — Articles: ALL",
+          description: "Work through all parts of the Articles notes covering when to use a/an, the, or no article. Complete the mini practice — pay special attention to uncountable nouns and general statements. Then complete Worksheet 1.",
           resourcePath: "/dashboard/revision-notes?topic=articles",
-          resourceLabel: "Open Articles Worksheet",
+          resourceLabel: "Open Articles Notes",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=articles&subtopic=worksheet-1", label: "Open Articles — Worksheet 1", icon: "worksheet" },
+          ],
           minutes: 45,
         },
+        {
+          id: "f-w2-t2", label: "Day 2: Revision Notes — Sentence Structure & Conjunctions: ALL",
+          description: "Work through the full Sentence Structure notes: active/passive voice, simple, compound, and complex sentences. Focus on how conjunctions connect clauses. Complete the mini practice and Worksheet 1.",
+          resourcePath: "/dashboard/revision-notes?topic=sentence-structure",
+          resourceLabel: "Open Sentence Structure Notes",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=sentence-structure&subtopic=worksheet-1", label: "Open Sentence Structure — Worksheet 1", icon: "worksheet" },
+          ],
+          minutes: 45,
+        },
+        {
+          id: "f-w2-t3", label: "Day 3: External Resource Practice",
+          description: "Read the article and watch the video below (Health theme). Then open the External Resource Worksheet for Band 4–5 Week 2: write down the main points, list new vocabulary with definitions, and form sentences combining your new words.",
+          additionalLinks: [
+            { path: "https://lingua.com/english/reading/doctor/", label: "Article: Going to the Doctor", external: true, icon: "article" },
+            { path: "https://youtu.be/R4B9BPBiIHo", label: "Video: How Does Therapy Work?", external: true, icon: "video" },
+            { path: "/dashboard/external-worksheets?band=4-5&week=2&ws=main", label: "External Resource Worksheet — Band 4–5, Week 2", icon: "worksheet" },
+          ],
+          minutes: 40,
+        },
+        {
+          id: "f-w2-t4", label: "Day 4: Revision Notes — Relative Clauses: ALL",
+          description: "Study all parts of the Relative Clauses notes: defining and non-defining clauses, relative pronouns (who, which, that, whose), and where/when/why clauses. Complete the mini practice and Worksheet 1.",
+          resourcePath: "/dashboard/revision-notes?topic=relative-clauses",
+          resourceLabel: "Open Relative Clauses Notes",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=relative-clauses&subtopic=worksheet-1", label: "Open Relative Clauses — Worksheet 1", icon: "worksheet" },
+          ],
+          minutes: 45,
+        },
+        {
+          id: "f-w2-t5", label: "Day 5: Revision Notes — Linking Words, Referencing & Coherence: ALL",
+          description: "Study the full Linking Words notes: coordinating conjunctions (FANBOYS), subordinating conjunctions, reference words, and paragraph flow techniques. Complete the mini practice and Worksheet 1.",
+          resourcePath: "/dashboard/revision-notes?topic=linking-words-coherence",
+          resourceLabel: "Open Linking Words Notes",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=linking-words-coherence&subtopic=worksheet-1", label: "Open Linking Words — Worksheet 1", icon: "worksheet" },
+          ],
+          minutes: 45,
+        },
+        {
+          id: "f-w2-t6", label: "Day 6: External Resource Practice",
+          description: "Read the article and watch the video below (Health theme). Then open the External Resource Worksheet for Band 4–5 Week 2: write down the main points, list new vocabulary with definitions, and form sentences combining your new words.",
+          additionalLinks: [
+            { path: "https://learningenglish.voanews.com/a/how-physical-therapists-can-prevent-future-health-problems/7921334.html", label: "Article: How Physical Therapists Can Prevent Future Health Problems", external: true, icon: "article" },
+            { path: "https://youtu.be/iNyUmbmQQZg", label: "Video: Is It Normal To Talk To Yourself?", external: true, icon: "video" },
+            { path: "/dashboard/external-worksheets?band=4-5&week=2&ws=main", label: "External Resource Worksheet — Band 4–5, Week 2", icon: "worksheet" },
+          ],
+          minutes: 40,
+        },
+        {
+          id: "f-w2-t7", label: "Day 7: Revision Notes — Punctuation: ALL + External Resource Practice",
+          description: "Study all Punctuation notes: commas, colons, semicolons, quotation marks, and dashes. Complete Worksheet 1. Then read the Yoga article below and complete the External Resource Worksheet for Band 4–5 Week 2.",
+          resourcePath: "/dashboard/revision-notes?topic=punctuation",
+          resourceLabel: "Open Punctuation Notes",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=punctuation&subtopic=worksheet-1", label: "Open Punctuation — Worksheet 1", icon: "worksheet" },
+            { path: "https://learnenglish.britishcouncil.org/free-resources/general/magazine-zone/yoga", label: "Article: Yoga", external: true, icon: "article" },
+            { path: "/dashboard/external-worksheets?band=4-5&week=2&ws=main", label: "External Resource Worksheet — Band 4–5, Week 2", icon: "worksheet" },
+          ],
+          minutes: 50,
+        },
       ],
-      externalResources: [
-        { label: "Going to the Doctor", url: "https://lingua.com/english/reading/doctor/", type: "article" },
-        { label: "Health & Lifestyle", url: "https://learningenglish.voanews.com/a/how-physical-therapists-can-prevent-future-health-problems/7921334.html", type: "article" },
-        { label: "Exercise and Health", url: "https://learnenglish.britishcouncil.org/free-resources/general/magazine-zone/yoga", type: "article" },
-        { label: "Mental Health", url: "https://youtu.be/R4B9BPBiIHo?si=dRmfnVDHUdIIwJvq", type: "video" },
-        { label: "Personal Health", url: "https://youtu.be/iNyUmbmQQZg?si=8tbpIGJrvt0qSQfc", type: "video" },
-      ],
+      externalResources: [],
     },
     {
-      week: 3, theme: "Exam Strategy", focus: "Exam Strategy",
+      week: 3, theme: "Concept Revision", focus: "Grammar",
       color: "amber",
-      weeklyTheme: "Careers",
-      rationale: "By Week 3 you have strong grammar foundations. Now you shift to understanding the exam format for all four modules and start practising them. Seeing the test format removes fear and lets you apply your grammar knowledge strategically.",
+      weeklyTheme: "Environment",
+      rationale: "By Week 3 you have completed all core grammar topics and their initial worksheets. This week consolidates that knowledge through Worksheet 2 for each topic — the same skills tested in new contexts. Three external resource practice sessions use environment-themed articles and videos to build topical vocabulary and reinforce reading comprehension.",
       tasks: [
         {
-          id: "f-w3-t1", label: "Day 1: Revision Notes — Verb Tenses, Part 6",
-          description: "Return to the Verb Tenses notes and complete Part 6, which covers the most advanced tense patterns. This builds directly on Week 1 and prepares you for complex sentences in Writing and Speaking.",
-          resourcePath: "/dashboard/revision-notes?topic=verb-tenses", resourceLabel: "Open Verb Tenses", minutes: 30,
+          id: "f-w3-t1", label: "Day 1: Worksheet 2 — Parts of Speech & Verb Tenses",
+          description: "Complete Worksheet 2 for Parts of Speech and Worksheet 2 for Verb Tenses. These revision worksheets test the same grammar in new contexts — treat any errors as areas to re-read in the notes before moving on.",
+          resourcePath: "/dashboard/revision-notes?topic=parts-of-speech&subtopic=worksheet-2",
+          resourceLabel: "Open Parts of Speech — Worksheet 2",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=verb-tenses&subtopic=worksheet-2", label: "Open Verb Tenses — Worksheet 2", icon: "worksheet" },
+          ],
+          minutes: 45,
         },
         {
-          id: "f-w3-t2", label: "Day 2: MudahinAja — How to Answer Each Module",
-          description: "Open MudahinAja and go through the interactive tutorials for Writing, Listening, Reading, and Speaking. Learn the strategies for each module — structure, timing, and what the examiner expects.",
-          resourcePath: "/dashboard/elite?tab=mudahinaja", resourceLabel: "Open MudahinAja", minutes: 30,
+          id: "f-w3-t2", label: "Day 2: External Resource Practice",
+          description: "Read the article and watch the video below (Environment theme). Then open the External Resource Worksheet for Band 4–5 Week 3: write a 3–5 sentence summary covering the main point, evidence, and your own explanation. Also list new vocabulary.",
+          additionalLinks: [
+            { path: "https://english-online.at/news-articles/environment/coca-cola-to-recycle-all-packaging-by-2030.htm", label: "Article: Coca-Cola Wants To Recycle All Packaging By 2030", external: true, icon: "article" },
+            { path: "https://youtu.be/RnvCbquYeIM", label: "Video: Can 100% Renewable Energy Power the World?", external: true, icon: "video" },
+            { path: "/dashboard/external-worksheets?band=4-5&week=3&ws=main", label: "External Resource Worksheet — Band 4–5, Week 3", icon: "worksheet" },
+          ],
+          minutes: 40,
         },
         {
-          id: "f-w3-t3", label: "Day 3: Module Practice — Listening",
-          description: "Complete one full Listening test. Use the pre-reading strategy: read the questions before the audio plays. Write your answers during the audio, not after.",
-          resourcePath: "/dashboard/listening", resourceLabel: "Open Listening Module", minutes: 40,
+          id: "f-w3-t3", label: "Day 3: Worksheet 2 — Articles & Sentence Structure",
+          description: "Complete Worksheet 2 for Articles and Worksheet 2 for Sentence Structure. Focus on questions where you are unsure — these reveal the gaps that are most likely to cost marks in the real exam.",
+          resourcePath: "/dashboard/revision-notes?topic=articles&subtopic=worksheet-2",
+          resourceLabel: "Open Articles — Worksheet 2",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=sentence-structure&subtopic=worksheet-2", label: "Open Sentence Structure — Worksheet 2", icon: "worksheet" },
+          ],
+          minutes: 45,
         },
         {
-          id: "f-w3-t4", label: "Day 4: Module Practice — Reading",
-          description: "Complete one full Reading test. Focus on identifying the question type first (True/False/Not Given, matching headings, etc.) before searching for the answer.",
-          resourcePath: "/dashboard/reading", resourceLabel: "Open Reading Module", minutes: 60,
+          id: "f-w3-t4", label: "Day 4: Worksheet 2 — Relative Clauses & Subject-Verb Agreement",
+          description: "Complete Worksheet 2 for Relative Clauses and Worksheet 2 for Subject-Verb Agreement. Pay attention to tricky subjects like collective nouns and relative pronouns in complex sentences.",
+          resourcePath: "/dashboard/revision-notes?topic=relative-clauses&subtopic=worksheet-2",
+          resourceLabel: "Open Relative Clauses — Worksheet 2",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=subject-verb-agreement&subtopic=worksheet-2", label: "Open Subject-Verb Agreement — Worksheet 2", icon: "worksheet" },
+          ],
+          minutes: 45,
         },
         {
-          id: "f-w3-t5", label: "Day 5: Module Practice — Writing",
-          description: "Attempt one Writing task (Task 1 or Task 2). Don't aim for perfection — focus on applying correct grammar from Weeks 1–2 and using linking words from your notes.",
-          resourcePath: "/dashboard/writing", resourceLabel: "Open Writing Module", minutes: 40,
+          id: "f-w3-t5", label: "Day 5: External Resource Practice",
+          description: "Read the article and watch the video below (Environment theme). Then open the External Resource Worksheet for Band 4–5 Week 3: write a 3–5 sentence summary and list new vocabulary.",
+          additionalLinks: [
+            { path: "https://www.dcceew.gov.au/environment/protection/npi/reducing-pollution", label: "Article: Reducing Pollution", external: true, icon: "article" },
+            { path: "https://youtu.be/qdxEG-3GRVs", label: "Video: I Thought Plastic Pollution Wasn't My Problem", external: true, icon: "video" },
+            { path: "/dashboard/external-worksheets?band=4-5&week=3&ws=main", label: "External Resource Worksheet — Band 4–5, Week 3", icon: "worksheet" },
+          ],
+          minutes: 40,
         },
         {
-          id: "f-w3-t6", label: "Day 6: Module Practice — Speaking",
-          description: "Complete a full Speaking session covering Parts 1, 2, and 3. Focus on answer length — Part 1: 2–4 sentences, Part 2: at least 90 seconds, Part 3: 3–4 sentences with reasons.",
-          resourcePath: "/dashboard/speaking", resourceLabel: "Open Speaking Module", minutes: 30,
+          id: "f-w3-t6", label: "Day 6: Worksheet 2 — Linking Words & Punctuation",
+          description: "Complete Worksheet 2 for Linking Words, Referencing & Coherence and Worksheet 2 for Punctuation. These topics work together: strong linking words with accurate punctuation produce coherent, high-scoring paragraphs.",
+          resourcePath: "/dashboard/revision-notes?topic=linking-words-coherence&subtopic=worksheet-2",
+          resourceLabel: "Open Linking Words — Worksheet 2",
+          additionalLinks: [
+            { path: "/dashboard/revision-notes?topic=punctuation&subtopic=worksheet-2", label: "Open Punctuation — Worksheet 2", icon: "worksheet" },
+          ],
+          minutes: 45,
+        },
+        {
+          id: "f-w3-t7", label: "Day 7: External Resource Practice",
+          description: "Read the article and watch the video below (Environment theme). Then open the External Resource Worksheet for Band 4–5 Week 3: write your 3–5 sentence summary, list new vocabulary, and form sentences using your new words.",
+          additionalLinks: [
+            { path: "https://www.bbc.com/news/articles/cn4g41n9j4lo", label: "Article: Forty Years After the Last One Was Poached, Rhinos Are Back in Uganda", external: true, icon: "article" },
+            { path: "https://youtu.be/8q7_aV8eLUE", label: "Video: Climate Change: Your Carbon Footprint Explained", external: true, icon: "video" },
+            { path: "/dashboard/external-worksheets?band=4-5&week=3&ws=main", label: "External Resource Worksheet — Band 4–5, Week 3", icon: "worksheet" },
+          ],
+          minutes: 40,
         },
       ],
-      externalResources: [
-        { label: "AI and Careers", url: "https://www.bbc.com/news/articles/ceqdrw2yy3vo", type: "article" },
-        { label: "Work from Home", url: "https://youtu.be/03V6p7EZ6G8?si=2dC35HT3bg0zhQus", type: "video" },
-        { label: "Work-Life Balance", url: "https://youtu.be/4c_xYLwOx-g?si=dT4LMsRoWE9GSzwe", type: "video" },
-        { label: "Job Satisfaction", url: "https://youtu.be/PYJ22-YYNW8?si=rUALJfjN0ULFIcX2", type: "video" },
-        { label: "Freelancers", url: "https://www.bbc.com/news/uk-england-bristol-63483597", type: "article" },
-      ],
+      externalResources: [],
     },
     {
       week: 4, theme: "Exam Integration", focus: "Exam Practice",
       color: "green",
-      weeklyTheme: "Environment",
-      rationale: "Week 4 is full exam integration — all four modules under realistic conditions. You are not learning new grammar; you are applying everything from Weeks 1–3 at once. Use this week to identify which module still needs the most attention.",
+      weeklyTheme: "Exam",
+      rationale: "Week 4 is full exam integration — all four IELTS modules using the MudahinAja platform and Engvolve's practice modules. You are not learning new grammar; you are applying everything from Weeks 1–3 under exam-like conditions. Days 5 and 6 give extra practice to the two skill pairs most tested together: comprehension (Reading + Listening) and idea development (Writing + Speaking).",
       tasks: [
         {
-          id: "f-w4-t1", label: "Day 1: Full Module Practice — Listening",
-          description: "Complete one full Listening test under timed conditions. After finishing, review every error and ask: was it a mishearing (strategy) or a spelling/grammar error (knowledge)?",
-          resourcePath: "/dashboard/listening", resourceLabel: "Open Listening Module", minutes: 40,
+          id: "f-w4-t1", label: "Day 1: Reading Module",
+          description: "Open MudahinAja and study the Reading module strategy guide — learn how to approach each question type, manage time, and avoid common traps. Then do a Reading practice session (Easy difficulty) in the Reading module.",
+          resourcePath: "/dashboard/elite?tab=mudahinaja",
+          resourceLabel: "Open MudahinAja — Reading Strategy",
+          additionalLinks: [
+            { path: "/dashboard/reading", label: "Reading Module Practice (Easy)", icon: "resource" },
+          ],
+          minutes: 60,
         },
         {
-          id: "f-w4-t2", label: "Day 2: Full Module Practice — Reading",
-          description: "Complete one full Reading test under timed conditions. After finishing, review errors and note whether they came from misreading the question, rushing, or vocabulary gaps.",
-          resourcePath: "/dashboard/reading", resourceLabel: "Open Reading Module", minutes: 60,
+          id: "f-w4-t2", label: "Day 2: Listening Module",
+          description: "Open MudahinAja and study the Listening module strategy — pre-reading questions, identifying signpost words, and handling different question types. Then do a Listening practice session (Easy difficulty).",
+          resourcePath: "/dashboard/elite?tab=mudahinaja",
+          resourceLabel: "Open MudahinAja — Listening Strategy",
+          additionalLinks: [
+            { path: "/dashboard/listening", label: "Listening Module Practice (Easy)", icon: "resource" },
+          ],
+          minutes: 50,
         },
         {
-          id: "f-w4-t3", label: "Day 3: Full Module Practice — Writing",
-          description: "Attempt both Task 1 and Task 2 in a single session. Use the grammar rules from Weeks 1–2. After the AI feedback, identify the one grammar category you still need to improve.",
-          resourcePath: "/dashboard/writing", resourceLabel: "Open Writing Module", minutes: 60,
+          id: "f-w4-t3", label: "Day 3: Writing Module",
+          description: "Open MudahinAja and study the Writing module strategy — Task 1 and Task 2 structures, timing, and what examiners look for in each band. Then do a Writing practice session (Easy difficulty) applying the grammar from Weeks 1–3.",
+          resourcePath: "/dashboard/elite?tab=mudahinaja",
+          resourceLabel: "Open MudahinAja — Writing Strategy",
+          additionalLinks: [
+            { path: "/dashboard/writing", label: "Writing Module Practice (Easy)", icon: "resource" },
+          ],
+          minutes: 60,
         },
         {
-          id: "f-w4-t4", label: "Day 4: Full Module Practice — Speaking",
-          description: "Complete a full Speaking session. Record yourself for Part 2. Listen back and count how many times you correctly used a linking word or complex sentence.",
-          resourcePath: "/dashboard/speaking", resourceLabel: "Open Speaking Module", minutes: 30,
+          id: "f-w4-t4", label: "Day 4: Speaking Module",
+          description: "Open MudahinAja and study the Speaking module strategy — Part 1, 2, and 3 formats, answer length targets, and how to extend your responses naturally. Then do a Speaking practice session (Easy difficulty).",
+          resourcePath: "/dashboard/elite?tab=mudahinaja",
+          resourceLabel: "Open MudahinAja — Speaking Strategy",
+          additionalLinks: [
+            { path: "/dashboard/speaking", label: "Speaking Module Practice (Easy)", icon: "resource" },
+          ],
+          minutes: 45,
         },
         {
-          id: "f-w4-t5", label: "Day 5: Reflection — Plan Your Next Step",
-          description: "After all four modules, rank them from strongest to weakest. Return to the revision notes for your weakest grammar area and do one more mini practice. Set a clear goal for the next study cycle.",
-          minutes: 20,
+          id: "f-w4-t5", label: "Day 5: Comprehension Review",
+          description: "Complete a Reading practice session and a Listening practice session (both Easy difficulty). After each, review every error: was it a comprehension gap, a vocabulary gap, or a strategy issue? Focus on not repeating the same mistake twice.",
+          resourcePath: "/dashboard/reading",
+          resourceLabel: "Reading Module Practice (Easy)",
+          additionalLinks: [
+            { path: "/dashboard/listening", label: "Listening Module Practice (Easy)", icon: "resource" },
+          ],
+          minutes: 60,
+        },
+        {
+          id: "f-w4-t6", label: "Day 6: Idea Development Review",
+          description: "Complete a Writing practice session and a Speaking practice session (both Easy difficulty). For Writing, apply at least two grammar rules from Weeks 1–3. For Speaking, aim for longer answers using linking words and complete sentences.",
+          resourcePath: "/dashboard/writing",
+          resourceLabel: "Writing Module Practice (Easy)",
+          additionalLinks: [
+            { path: "/dashboard/speaking", label: "Speaking Module Practice (Easy)", icon: "resource" },
+          ],
+          minutes: 60,
         },
       ],
-      externalResources: [
-        { label: "Recycling", url: "https://english-online.at/news-articles/environment/coca-cola-to-recycle-all-packaging-by-2030.htm", type: "article" },
-        { label: "Renewable Energy", url: "https://youtu.be/RnvCbquYeIM?si=6Ido2p5vqqjSd8iE", type: "video" },
-        { label: "Plastic Pollution", url: "https://youtu.be/qdxEG-3GRVs?si=IzQEBRfq3mh1qSLi", type: "video" },
-        { label: "Solutions to Pollution", url: "https://www.dcceew.gov.au/environment/protection/npi/reducing-pollution", type: "article" },
-        { label: "Endangered Species", url: "https://www.bbc.com/news/articles/cn4g41n9j4lo", type: "article" },
-      ],
+      externalResources: [],
     },
   ],
 };
@@ -1568,7 +1718,7 @@ function VocabSlideshow({ items }: { items: VocabItem[] }) {
 
       {/* Scrollable body */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-lg mx-auto px-5 py-8 space-y-5">
+        <div className="max-w-2xl mx-auto px-5 py-8 space-y-5">
           {/* Term */}
           <div>
             <h2 className="text-2xl font-bold text-foreground leading-tight">{item.term}</h2>
@@ -1915,7 +2065,7 @@ export default function StudyPlanPage() {
   if (!diagnosticBand) {
     return (
       <DashboardLayout>
-        <div className="max-w-lg mx-auto text-center py-20 space-y-6">
+        <div className="max-w-2xl mx-auto text-center py-20 space-y-6">
           <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto">
             <Brain className="w-10 h-10 text-accent" />
           </div>
@@ -1969,7 +2119,7 @@ export default function StudyPlanPage() {
 
         {/* ── Header stats ── */}
         <div className="relative z-10 px-4 pt-5 pb-3">
-          <div className="max-w-lg mx-auto">
+          <div className="max-w-2xl mx-auto">
             <Breadcrumb className="mb-3">
               <BreadcrumbList>
                 <BreadcrumbItem>
@@ -2062,7 +2212,7 @@ export default function StudyPlanPage() {
 
         {/* ─── Vertical week cards ─── */}
         <div className="relative z-10 px-4 pb-8">
-          <div className="max-w-lg mx-auto">
+          <div className="max-w-2xl mx-auto">
           {/* Elite gate overlay */}
           {profile?.subscription_tier !== "elite" && (
             <div className="absolute inset-0 z-20 flex items-center justify-center">
@@ -2234,7 +2384,7 @@ export default function StudyPlanPage() {
 
         {/* Retake CTA */}
         <div className="relative z-10 px-4 pb-6 md:pb-4 pt-2">
-          <div className="max-w-lg mx-auto rounded-2xl p-4 flex items-center justify-between gap-4 bg-card border border-border/40">
+          <div className="max-w-2xl mx-auto rounded-2xl p-4 flex items-center justify-between gap-4 bg-card border border-border/40">
             <div>
               <p className="text-sm font-medium text-foreground">Retake the diagnostic?</p>
               <p className="text-xs text-muted-foreground mt-0.5">Your roadmap updates automatically based on your latest diagnostic result.</p>
@@ -2346,6 +2496,41 @@ export default function StudyPlanPage() {
                           Open {task.sourceType === "video" ? "video" : "article"}: {shortTaskLabel(task.label)}
                         </span>
                       </a>
+                    )}
+
+                    {/* Additional links (secondary resources, worksheets, external pages) */}
+                    {task.additionalLinks?.map((link, li) =>
+                      link.external ? (
+                        link.path ? (
+                          <a
+                            key={li}
+                            href={link.path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center gap-3 p-3.5 rounded-2xl border border-border/30 bg-card/60 hover:bg-card transition-colors"
+                          >
+                            {link.icon === "video"
+                              ? <PlayCircle className="w-5 h-5 text-red-400 shrink-0" />
+                              : <ExternalLink className="w-5 h-5 text-blue-400 shrink-0" />}
+                            <span className="text-sm text-foreground/80 flex-1 leading-snug">{link.label}</span>
+                            <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                          </a>
+                        ) : null
+                      ) : (
+                        <button
+                          key={li}
+                          onClick={() => { navigate(link.path); setSelectedTask(null); }}
+                          className="w-full flex items-center gap-3 p-3.5 rounded-2xl border border-indigo-500/25 bg-indigo-500/5 hover:bg-indigo-500/10 transition-colors text-left"
+                        >
+                          <div className="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center shrink-0">
+                            {link.icon === "worksheet"
+                              ? <ClipboardList className="w-4 h-4 text-indigo-400" />
+                              : <BookOpen className="w-4 h-4 text-indigo-400" />}
+                          </div>
+                          <span className="text-sm font-semibold text-indigo-400 flex-1 leading-snug">{link.label}</span>
+                          <ArrowRight className="w-4 h-4 text-indigo-400/60 shrink-0" />
+                        </button>
+                      )
                     )}
 
                     {/* Vocab slideshow */}
