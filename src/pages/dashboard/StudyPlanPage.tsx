@@ -1957,31 +1957,8 @@ export default function StudyPlanPage() {
     polishing: "bg-amber-500/20 text-amber-400 border-amber-500/30",
   };
 
-  // ─── Continuous journey map geometry ──────────────────────────────────────
-  const NODE_SPACING = 148;
-  const MAP_HEIGHT = 460;
-  const WAVE_Y = [120, 180, 250, 300, 250, 180];
-
   const allTasksWithWeek = plan.weeks.flatMap(w => w.tasks.map(t => ({ task: t, week: w })));
   const globalActiveId = allTasksWithWeek.find(({ task }) => !completedTasks.has(task.id))?.task.id ?? null;
-
-  const nodePositions = allTasksWithWeek.map((_, i) => ({
-    x: 90 + i * NODE_SPACING,
-    y: WAVE_Y[i % WAVE_Y.length],
-  }));
-  const totalMapWidth = Math.max(90 + (allTasksWithWeek.length - 1) * NODE_SPACING + 90, 400);
-
-  const smoothPath = nodePositions.reduce((d, pos, i) => {
-    if (i === 0) return `M ${pos.x},${pos.y}`;
-    const prev = nodePositions[i - 1];
-    const cx = (prev.x + pos.x) / 2;
-    return `${d} C ${cx},${prev.y} ${cx},${pos.y} ${pos.x},${pos.y}`;
-  }, "");
-
-  const weekBoundaries = plan.weeks.map(w => ({
-    week: w,
-    startIndex: allTasksWithWeek.findIndex(({ week }) => week.week === w.week),
-  }));
 
   return (
     <DashboardLayout noPadding>
@@ -2080,8 +2057,8 @@ export default function StudyPlanPage() {
           </div>
         </div>
 
-        {/* ─── Continuous journey map ─── */}
-        <div className="relative flex-1 z-10 min-h-[460px]">
+        {/* ─── Vertical week cards with horizontal checkpoint nodes ─── */}
+        <div className="relative z-10 px-5 pb-6">
           {/* Elite gate overlay */}
           {profile?.subscription_tier !== "elite" && (
             <div className="absolute inset-0 z-20 flex items-center justify-center">
@@ -2105,135 +2082,155 @@ export default function StudyPlanPage() {
             </div>
           )}
 
-          <div className={cn("h-full", profile?.subscription_tier !== "elite" && "blur-sm pointer-events-none select-none")}>
-            <div className="overflow-x-auto overflow-y-visible h-full pb-10" style={{ WebkitOverflowScrolling: "touch" }}>
-              <div className="relative" style={{ width: totalMapWidth, height: MAP_HEIGHT, minWidth: "100%" }}>
+          <div className={cn("space-y-4", profile?.subscription_tier !== "elite" && "blur-sm pointer-events-none select-none")}>
+            {plan.weeks.map((week) => {
+              const grad = WEEK_BANNER_GRADIENTS[week.color] ?? WEEK_BANNER_GRADIENTS.blue;
+              const accentColor = grad.match(/#[0-9a-fA-F]{6}/g)?.[1] ?? "#48A8CC";
+              const weekDone = week.tasks.filter(t => completedTasks.has(t.id)).length;
+              const allWeekDone = weekDone === week.tasks.length;
+              const weekMinutes = week.tasks.reduce((s, t) => s + t.minutes, 0);
 
-                {/* SVG: week band backgrounds + dashed connector path */}
-                <svg className="absolute inset-0 pointer-events-none" width={totalMapWidth} height={MAP_HEIGHT}
-                  style={{ overflow: "visible" }}>
-                  {weekBoundaries.map(({ week, startIndex }, bi) => {
-                    const nextStart = weekBoundaries[bi + 1]?.startIndex ?? allTasksWithWeek.length;
-                    const x1 = startIndex === 0 ? 0 : nodePositions[startIndex].x - NODE_SPACING / 2;
-                    const x2 = nextStart < allTasksWithWeek.length
-                      ? nodePositions[nextStart].x - NODE_SPACING / 2
-                      : totalMapWidth;
-                    const grad = WEEK_BANNER_GRADIENTS[week.color] ?? WEEK_BANNER_GRADIENTS.blue;
-                    const baseColor = grad.match(/#[0-9a-fA-F]{6}/)?.[0] ?? "#48A8CC";
-                    return (
-                      <rect key={week.week} x={x1} y={0} width={x2 - x1} height={MAP_HEIGHT}
-                        fill={baseColor} fillOpacity={0.06} rx={0} />
-                    );
-                  })}
-                  <path d={smoothPath} stroke="var(--border)" strokeWidth="3"
-                    strokeDasharray="8,7" fill="none" strokeLinecap="round" />
-                </svg>
+              return (
+                <div key={week.week} className="rounded-2xl border border-border/40 bg-card overflow-hidden">
 
-                {/* Week label banners */}
-                {weekBoundaries.map(({ week, startIndex }) => {
-                  const pos = nodePositions[startIndex];
-                  const grad = WEEK_BANNER_GRADIENTS[week.color] ?? WEEK_BANNER_GRADIENTS.blue;
-                  const weekDone = week.tasks.filter(t => completedTasks.has(t.id)).length;
-                  return (
-                    <div key={week.week} style={{ position: "absolute", left: pos.x - 44, top: 4 }}>
-                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold text-white whitespace-nowrap"
-                        style={{ background: grad, boxShadow: "0 2px 8px rgba(0,0,0,0.18)" }}>
-                        Week {week.week}
-                        {weekDone === week.tasks.length
-                          ? <span className="text-yellow-300">✓</span>
-                          : <span className="opacity-70">{weekDone}/{week.tasks.length}</span>}
-                      </div>
+                  {/* Week header */}
+                  <div className="flex items-center gap-3.5 px-4 py-3.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                    {/* Numbered circle */}
+                    <div className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-sm font-bold text-white"
+                      style={{ background: grad }}>
+                      {week.week}
                     </div>
-                  );
-                })}
-
-                {/* Nodes */}
-                {allTasksWithWeek.map(({ task, week }, i) => {
-                  const pos = nodePositions[i];
-                  const done = completedTasks.has(task.id);
-                  const isActive = task.id === globalActiveId;
-                  const { color, shadow, IconComponent } = getNodeInfo(task);
-                  const nodeColor = done ? "#22c55e" : color;
-                  const nodeShadow = done ? "#22c55e40" : shadow;
-                  const dayLabel = extractDay(task.label);
-                  const isWeekResourceTask = plan.tier === "Foundation" && !task.resourcePath && !task.sourceUrl && (week.externalResources?.length ?? 0) > 0;
-
-                  return (
-                    <div key={task.id} style={{ position: "absolute", left: pos.x - 32, top: pos.y - 52 }}>
-                      {/* Active tooltip */}
-                      {isActive && (
-                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-                          <div className="relative bg-foreground text-background rounded-xl shadow-2xl px-3 py-1.5 flex items-center gap-1.5 whitespace-nowrap">
-                            <span className="text-xs font-extrabold">
-                              {completedCount === 0 ? "START" : "CONTINUE"}
-                            </span>
-                            <span className="text-sm">⭐</span>
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-foreground" />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Checkmark badge */}
-                      {done && (
-                        <div className="absolute top-0 right-0 z-10 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center shadow-md border-2 border-background">
-                          <svg className="w-2.5 h-2.5" viewBox="0 0 10 8" fill="none">
-                            <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                      )}
-
-                      {/* Node circle */}
-                      <button
-                        onClick={() => setSelectedTask({ task, week })}
-                        className={cn(
-                          "relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none mt-0",
-                          isActive && "scale-110",
-                        )}
-                        style={{
-                          background: nodeColor,
-                          boxShadow: isActive
-                            ? `0 0 0 6px ${nodeShadow}, 0 0 0 14px ${nodeShadow.replace("40","18")}, 0 10px 32px ${nodeShadow}`
-                            : `0 6px 20px ${nodeShadow}, 0 2px 6px rgba(0,0,0,0.14)`,
-                        }}
-                      >
-                        <div className="absolute inset-x-0 bottom-0 h-1/3 rounded-b-full bg-black/20 pointer-events-none" />
-                        <div className="absolute inset-x-3 top-2 h-[28%] rounded-full bg-white/20 pointer-events-none" />
-                        <IconComponent className="w-7 h-7 text-white relative z-10 drop-shadow" />
-                        {isActive && (
-                          <span className="absolute inset-0 rounded-full animate-ping opacity-20 pointer-events-none"
-                            style={{ background: nodeColor }} />
-                        )}
-                      </button>
-
-                      {/* Label: day + title */}
-                      <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center" style={{ top: 72, width: 100 }}>
-                        {dayLabel && (
-                          <span className="text-[8.5px] font-semibold text-accent/90 leading-none mb-0.5">{dayLabel}</span>
-                        )}
-                        <p className="text-[9px] text-center text-muted-foreground leading-tight line-clamp-2 whitespace-normal">
-                          {shortTaskLabel(task.label)}
-                        </p>
-                        {/* Source badges */}
-                        {isWeekResourceTask && (
-                          <div className="mt-1 flex items-center gap-0.5 text-[8px] font-medium text-accent bg-accent/10 border border-accent/25 rounded-full px-2 py-0.5 whitespace-nowrap pointer-events-none">
-                            <Newspaper className="w-2.5 h-2.5 shrink-0" /> {week.externalResources!.length} sources
-                          </div>
-                        )}
-                        {!isWeekResourceTask && task.sourceUrl && (
-                          <a href={task.sourceUrl} target="_blank" rel="noopener noreferrer"
-                            onClick={e => e.stopPropagation()}
-                            className="mt-1 flex items-center gap-0.5 text-[8px] font-medium text-accent bg-accent/10 border border-accent/25 rounded-full px-2 py-0.5 whitespace-nowrap hover:bg-accent/20 transition-colors">
-                            {task.sourceType === "video"
-                              ? <><PlayCircle className="w-2.5 h-2.5 shrink-0" /> Watch</>
-                              : <><ExternalLink className="w-2.5 h-2.5 shrink-0" /> Read</>}
-                          </a>
+                    {/* Title + meta */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-semibold text-foreground leading-tight">{week.theme}</p>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-white shrink-0"
+                          style={{ background: accentColor + "cc" }}>
+                          {week.focus}
+                        </span>
+                        {allWeekDone && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-500/15 text-green-400 border border-green-500/25 shrink-0">
+                            Completed ✓
+                          </span>
                         )}
                       </div>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-[11px] text-muted-foreground">{weekDone}/{week.tasks.length} tasks</span>
+                        <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                          <Clock className="w-3 h-3" />{Math.round(weekMinutes / 60 * 10) / 10}h
+                        </span>
+                      </div>
+                      {/* Week progress bar */}
+                      <div className="mt-1.5 w-full h-1 rounded-full bg-border/40">
+                        <div className="h-1 rounded-full transition-all duration-500"
+                          style={{ width: `${(weekDone / week.tasks.length) * 100}%`, background: accentColor }} />
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                  </div>
+
+                  {/* Horizontal checkpoint nodes row */}
+                  <div className="overflow-x-auto py-5 px-3" style={{ WebkitOverflowScrolling: "touch" }}>
+                    <div className="flex items-start" style={{ minWidth: "max-content", gap: 0 }}>
+                      {week.tasks.map((task, ti) => {
+                        const done = completedTasks.has(task.id);
+                        const isActive = task.id === globalActiveId;
+                        const { color, shadow, IconComponent } = getNodeInfo(task);
+                        const nodeColor = done ? "#22c55e" : color;
+                        const nodeShadow = done ? "#22c55e40" : shadow;
+                        const dayLabel = extractDay(task.label);
+                        const isWeekResourceTask = plan.tier === "Foundation" && !task.resourcePath && !task.sourceUrl && (week.externalResources?.length ?? 0) > 0;
+
+                        return (
+                          <div key={task.id} className="flex items-start">
+                            {/* Node + label */}
+                            <div className="flex flex-col items-center relative" style={{ width: 84 }}>
+                              {/* Active tooltip */}
+                              {isActive && (
+                                <div className="absolute -top-9 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                                  <div className="relative bg-foreground text-background rounded-xl shadow-2xl px-2.5 py-1 flex items-center gap-1 whitespace-nowrap">
+                                    <span className="text-[10px] font-extrabold">{completedCount === 0 ? "START" : "CONTINUE"}</span>
+                                    <span className="text-xs">⭐</span>
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-foreground" />
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Checkmark badge */}
+                              {done && (
+                                <div className="absolute top-0 right-3 z-10 w-4.5 h-4.5 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center shadow border-2 border-card">
+                                  <svg className="w-2.5 h-2.5" viewBox="0 0 10 8" fill="none">
+                                    <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                </div>
+                              )}
+
+                              {/* Node circle */}
+                              <button
+                                onClick={() => setSelectedTask({ task, week })}
+                                className={cn(
+                                  "relative w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none",
+                                  isActive && "scale-110",
+                                )}
+                                style={{
+                                  background: nodeColor,
+                                  boxShadow: isActive
+                                    ? `0 0 0 5px ${nodeShadow}, 0 0 0 12px ${nodeShadow.replace("40","18")}, 0 8px 24px ${nodeShadow}`
+                                    : `0 4px 16px ${nodeShadow}, 0 2px 6px rgba(0,0,0,0.12)`,
+                                }}
+                              >
+                                <div className="absolute inset-x-0 bottom-0 h-1/3 rounded-b-full bg-black/20 pointer-events-none" />
+                                <div className="absolute inset-x-3 top-2 h-[28%] rounded-full bg-white/20 pointer-events-none" />
+                                <IconComponent className="w-6 h-6 text-white relative z-10 drop-shadow" />
+                                {isActive && (
+                                  <span className="absolute inset-0 rounded-full animate-ping opacity-20 pointer-events-none"
+                                    style={{ background: nodeColor }} />
+                                )}
+                              </button>
+
+                              {/* Day + title label */}
+                              <div className="mt-2 flex flex-col items-center" style={{ width: 80 }}>
+                                {dayLabel && (
+                                  <span className="text-[8.5px] font-semibold leading-none mb-0.5" style={{ color: accentColor }}>
+                                    {dayLabel}
+                                  </span>
+                                )}
+                                <p className="text-[9px] text-center text-muted-foreground leading-tight line-clamp-2 whitespace-normal px-1">
+                                  {shortTaskLabel(task.label)}
+                                </p>
+                                {isWeekResourceTask && (
+                                  <div className="mt-1 flex items-center gap-0.5 text-[8px] font-medium text-accent bg-accent/10 border border-accent/25 rounded-full px-1.5 py-0.5 whitespace-nowrap pointer-events-none">
+                                    <Newspaper className="w-2 h-2 shrink-0" /> {week.externalResources!.length} sources
+                                  </div>
+                                )}
+                                {!isWeekResourceTask && task.sourceUrl && (
+                                  <a href={task.sourceUrl} target="_blank" rel="noopener noreferrer"
+                                    onClick={e => e.stopPropagation()}
+                                    className="mt-1 flex items-center gap-0.5 text-[8px] font-medium text-accent bg-accent/10 border border-accent/25 rounded-full px-1.5 py-0.5 whitespace-nowrap hover:bg-accent/20 transition-colors">
+                                    {task.sourceType === "video"
+                                      ? <><PlayCircle className="w-2 h-2 shrink-0" /> Watch</>
+                                      : <><ExternalLink className="w-2 h-2 shrink-0" /> Read</>}
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Connector arrow */}
+                            {ti < week.tasks.length - 1 && (
+                              <div className="flex items-center shrink-0 mt-[26px]" style={{ width: 20 }}>
+                                <div className="flex-1 h-[1.5px]" style={{ background: accentColor + "40" }} />
+                                <svg width="6" height="8" viewBox="0 0 6 8" fill="none" className="shrink-0">
+                                  <path d="M1 1l4 3-4 3" stroke={accentColor} strokeOpacity="0.5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
