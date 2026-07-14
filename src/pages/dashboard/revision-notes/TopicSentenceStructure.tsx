@@ -172,6 +172,85 @@ export function TopicSentenceStructure() {
         </WorksheetBlock>
 
       </WorksheetContainer>
+
+      <SectionTitle number={6} title="Worksheet 2 — Sentence Structure Practice" />
+      <WorksheetContainer topicName="Sentence Structure & Conjunctions — Worksheet 2">
+
+        <WorksheetBlock
+          title="Part A — Identify and correct the error"
+          instruction="Each sentence has a structural or conjunction error. Rewrite the corrected version, then click Check answer."
+        >
+          <WorksheetQuestion id="ss2-a-1" number={1} multiline
+            question='Because of the government failed to act early, the crisis became far more severe than it needed to be.'
+            modelAnswer={`"Because the government failed to act early, the crisis became far more severe than it needed to be." OR "Because of the government's failure to act early, the crisis became far more severe." ("Because of" must be followed by a noun/noun phrase. To use a full clause, use "because" alone.)`}
+          />
+          <WorksheetQuestion id="ss2-a-2" number={2} multiline
+            question='The policy was effective; however but it proved too costly for most developing nations to adopt.'
+            modelAnswer='"The policy was effective; however, it proved too costly for most developing nations to adopt." — Remove "but". "However" and "but" both show contrast and cannot be used together.'
+          />
+          <WorksheetQuestion id="ss2-a-3" number={3} multiline
+            question='Whilst technological advancement has accelerated, but few governments have implemented meaningful policy responses.'
+            modelAnswer='"Whilst technological advancement has accelerated, few governments have implemented meaningful policy responses." — Remove "but". "Whilst" (= although/while) already expresses contrast; adding "but" creates a double conjunction error.'
+          />
+          <WorksheetQuestion id="ss2-a-4" number={4} multiline
+            question='The reason why inequality has widened is because of neoliberal policies have prioritised profit over social welfare.'
+            modelAnswer='"The reason why inequality has widened is that neoliberal policies have prioritised profit over social welfare." ("The reason is because" is grammatically incorrect in formal writing. Use "the reason is that" + subject + verb. Also, "because of" requires a noun phrase, not a clause.)'
+          />
+          <WorksheetQuestion id="ss2-a-5" number={5} multiline
+            question='There have been built many new schools across the region during this sustained period of government investment.'
+            modelAnswer='"Many new schools have been built across the region during this sustained period of government investment." (In passive voice, the subject comes first. "There have been built" is incorrect word order — the passive subject "many new schools" must precede the verb.)'
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part B — Choose the correct structure"
+          instruction="Select the correct or most appropriate option, then click Check answer."
+        >
+          <WorksheetQuestion id="ss2-b-1" number={1}
+            question='Which sentence correctly uses "despite" followed by a noun phrase?'
+            choices={["Despite it was expensive, the results justified the investment.", "Despite of the high cost, the results justified the investment.", "Despite the high cost, the results justified the investment.", "Despite being expensive cost, the results justified the investment."]}
+            accepted={["Despite the high cost, the results justified the investment."]}
+            modelAnswer={'"Despite" must be followed by a noun or noun phrase — not a clause. "Despite the high cost" is correct (noun phrase). "Despite it was expensive" uses a clause. "Despite of" does not exist. "Despite being expensive cost" is grammatically garbled.'}
+          />
+          <WorksheetQuestion id="ss2-b-2" number={2}
+            question='Which sentence shows a grammatically correct contrast structure?'
+            choices={["Although the evidence is compelling, however policymakers remain unconvinced.", "The evidence is compelling; although policymakers remain unconvinced.", "Although the evidence is compelling, policymakers remain unconvinced.", "Policymakers remain unconvinced, although however the evidence is compelling."]}
+            accepted={["Although the evidence is compelling, policymakers remain unconvinced."]}
+            modelAnswer={'"Although" is a subordinating conjunction introducing a dependent clause. It is followed by a comma, then the main clause. You cannot combine "although" with "however" in the same sentence.'}
+          />
+          <WorksheetQuestion id="ss2-b-3" number={3}
+            question='Which sentence correctly uses passive voice?'
+            choices={["The study was conducted by researchers over a three-year period.", "Researchers was conducted the study over a three-year period.", "The study conducted by researchers over a three-year period.", "Researchers have been conducted the study over three years."]}
+            accepted={["The study was conducted by researchers over a three-year period."]}
+            modelAnswer={'"The study was conducted by researchers over a three-year period." — Passive: was + past participle. The subject ("the study") receives the action. The other options have verb agreement errors, are missing the auxiliary, or incorrectly use passive with an active-voice agent structure.'}
+          />
+          <WorksheetQuestion id="ss2-b-4" number={4}
+            question='Which sentence best demonstrates sophisticated sentence variety appropriate for IELTS Band 7+?'
+            choices={["Technology is changing things a lot and it is very fast.", "Technology changes things and it is happening very quickly.", "Rapid advances in technology are transforming industries, creating both economic opportunities and social challenges that require careful policy responses.", "Technology is advancing rapidly and it is creating opportunities and challenges for everyone."]}
+            accepted={["Rapid advances in technology are transforming industries, creating both economic opportunities and social challenges that require careful policy responses."]}
+            modelAnswer={'This sentence demonstrates complex sentence structure: a noun phrase subject, present continuous verb, participial phrase ("creating..."), parallel structure ("both...and"), and an embedded relative clause ("that require..."). It shows the range of structures valued at Band 7+.'}
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part C — Write your own sentences"
+          instruction="Write full sentences using the structure described. Click Check answer to compare with the model."
+        >
+          <WorksheetQuestion id="ss2-c-1" number={1} multiline
+            question="Write a passive sentence describing a data trend or process that is appropriate for IELTS Task 1 (where the action is more important than who performed it)."
+            modelAnswer='"Between 1990 and 2020, global average temperatures were estimated to have risen by approximately 0.5°C, a trend that has since been confirmed by multiple independent studies." [Passive: "were estimated" + passive infinitive "to have risen"; this focuses on the trend rather than the scientists doing the estimating.]'
+          />
+          <WorksheetQuestion id="ss2-c-2" number={2} multiline
+            question='Combine these three ideas into one complex sentence using at least two different conjunctions or connectors: "Many young people cannot afford housing." + "Wages have stagnated." + "Living costs have risen sharply."'
+            modelAnswer='"Because wages have stagnated while living costs have risen sharply, many young people find themselves unable to afford adequate housing, despite working full-time." [Uses "because" (cause), "while" (simultaneous contrast), and "despite" (concession) — three different connectors.]'
+          />
+          <WorksheetQuestion id="ss2-c-3" number={3} multiline
+            question='Write one sentence using "despite" + noun phrase, then write the same idea using "although" + clause. Both should express the same concession.'
+            modelAnswer='"Despite significant investment in renewable energy, global carbon emissions have continued to rise. / Although governments have invested significantly in renewable energy, global carbon emissions have continued to rise." ["Despite" + noun phrase vs "Although" + subject + verb — same meaning, different grammatical structure]'
+          />
+        </WorksheetBlock>
+
+      </WorksheetContainer>
     </div>
   );
 }

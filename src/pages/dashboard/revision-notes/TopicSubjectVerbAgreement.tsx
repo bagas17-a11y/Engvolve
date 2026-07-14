@@ -312,6 +312,91 @@ export function TopicSubjectVerbAgreement() {
           <>&quot;There <strong>are</strong> several reasons why people prefer working from home.&quot; — &quot;several reasons&quot; is plural, so use &quot;are&quot;.</>,
         ]}
       />
+
+      <SectionTitle number={9} title="Worksheet 2 — Subject-Verb Agreement Practice" />
+      <WorksheetContainer topicName="Subject-Verb Agreement — Worksheet 2">
+
+        <WorksheetBlock
+          title="Part A — Fix the SVA error"
+          instruction="Each sentence has one subject-verb agreement error. Rewrite the full corrected sentence, then click Check answer."
+        >
+          <WorksheetQuestion id="sva2-a-1" number={1} multiline
+            question='The quality of public services provided in rural areas are significantly lower than in most urban centres.'
+            modelAnswer='"The quality of public services provided in rural areas is significantly lower than in most urban centres." (The subject is "the quality" — singular. "Of public services provided in rural areas" is a prepositional phrase modifying "quality"; it does not change the number of the verb.)'
+          />
+          <WorksheetQuestion id="sva2-a-2" number={2} multiline
+            question='A number of studies has shown a clear and consistent link between poor diet and long-term health outcomes.'
+            modelAnswer='"A number of studies have shown a clear and consistent link between poor diet and long-term health outcomes." ("A number of" means several/many and is always treated as plural. Compare: "The number of studies has shown..." — "the number of" is singular.)'
+          />
+          <WorksheetQuestion id="sva2-a-3" number={3} multiline
+            question='The percentage of adults who own smartphones have risen to over 80% in most developed countries.'
+            modelAnswer='"The percentage of adults who own smartphones has risen to over 80% in most developed countries." (The subject is "the percentage" — singular. "Of adults who own smartphones" is a relative clause modifying "percentage".)'
+          />
+          <WorksheetQuestion id="sva2-a-4" number={4} multiline
+            question='Not only the economy but also social inequality were highlighted as major concerns in the annual report.'
+            modelAnswer='"Not only the economy but also social inequality was highlighted as a major concern in the annual report." (With "not only...but also", the verb agrees with the closer subject — "social inequality" is singular, so use "was".)'
+          />
+          <WorksheetQuestion id="sva2-a-5" number={5} multiline
+            question='The committee, along with several external advisers, have decided to postpone the decision until further notice.'
+            modelAnswer='"The committee, along with several external advisers, has decided to postpone the decision until further notice." ("Along with" does not change the subject. The subject remains "the committee" — singular collective noun — so use "has".)'
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part B — Choose the correct verb form"
+          instruction="Select the correct option, then click Check answer."
+        >
+          <WorksheetQuestion id="sva2-b-1" number={1}
+            question='Statistics on climate change ___ that average temperatures are rising at an unprecedented rate.'
+            choices={["proves", "prove", "has proven", "is proving"]}
+            accepted={["prove"]}
+            modelAnswer={'"prove" — "Statistics" ends in -s but is plural (multiple data points). It takes a plural verb. Compare with "data" which is also treated as plural in modern academic English.'}
+          />
+          <WorksheetQuestion id="sva2-b-2" number={2}
+            question='The committee ___ reached a unanimous decision after three days of deliberations.'
+            choices={["have", "has", "having", "are having"]}
+            accepted={["has"]}
+            modelAnswer={'"has" — "committee" is a singular collective noun in formal British and academic English. It takes singular verbs: "the committee has", "the team has", "the government has".'}
+          />
+          <WorksheetQuestion id="sva2-b-3" number={3}
+            question='Neither the minister nor her advisers ___ willing to comment on the contents of the leaked documents.'
+            choices={["was", "were", "is", "are"]}
+            accepted={["were"]}
+            modelAnswer={'"were" — With "neither...nor", the verb agrees with the subject closest to it. The closer subject is "advisers" (plural), so use "were". If it were "neither the advisers nor the minister", you would use "was".'}
+          />
+          <WorksheetQuestion id="sva2-b-4" number={4}
+            question='The news that oil prices have fallen dramatically ___ surprised many senior analysts across the industry.'
+            choices={["have", "has", "were", "are"]}
+            accepted={["has"]}
+            modelAnswer={'"has" — "news" is an uncountable noun and always takes a singular verb, regardless of the content of the relative clause that follows ("that oil prices have fallen"). The subject of the main clause is "the news" — singular.'}
+          />
+          <WorksheetQuestion id="sva2-b-5" number={5}
+            question='Forty percent of the student body ___ expected to graduate with first-class honours this academic year.'
+            choices={["is", "are", "has been", "have been"]}
+            accepted={["is"]}
+            modelAnswer={'"is" — when a percentage is followed by a collective or singular noun ("student body" treated as a single unit), use a singular verb. Compare: "Forty percent of the students are expected..." where "students" is countable plural.'}
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part C — Write your own sentences"
+          instruction="Write full sentences using the guideline shown. Click Check answer to compare with the model."
+        >
+          <WorksheetQuestion id="sva2-c-1" number={1} multiline
+            question='Write two sentences — one using "a number of" and one using "the number of" — with the correct verb form for each. Explain your choices briefly.'
+            modelAnswer='"A number of researchers have questioned the validity of the methodology. The number of studies supporting the original findings, however, remains impressively large." ["A number of" = several/many → plural verb "have" | "The number of" = a specific count → singular verb "remains"]'
+          />
+          <WorksheetQuestion id="sva2-c-2" number={2} multiline
+            question='Write a sentence using "neither...nor" with correct subject-verb agreement, about a social, environmental, or political issue.'
+            modelAnswer='"Neither the proposed tax reforms nor the new investment incentive has been sufficient to address the structural causes of long-term unemployment." [Verb agrees with the closer subject: "incentive" (singular) → "has been". If "reforms" were closer: "have been".]'
+          />
+          <WorksheetQuestion id="sva2-c-3" number={3} multiline
+            question='Write a first or second conditional sentence where both clauses demonstrate correct subject-verb agreement, about a global challenge.'
+            modelAnswer='"If the number of countries committing to zero-carbon targets increases significantly, global warming will slow more quickly than current projections suggest." [Subject: "the number of countries" (singular) → "increases" | "global warming" (singular) → "will slow" | "projections" (plural) → "suggest"]'
+          />
+        </WorksheetBlock>
+
+      </WorksheetContainer>
     </div>
   );
 }

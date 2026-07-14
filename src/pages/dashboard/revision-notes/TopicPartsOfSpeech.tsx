@@ -549,6 +549,91 @@ export function TopicPartsOfSpeech() {
         </WorksheetBlock>
 
       </WorksheetContainer>
+
+      <SectionTitle number={10} title="Worksheet 2 — Parts of Speech Practice" />
+      <WorksheetContainer topicName="Parts of Speech — Worksheet 2">
+
+        <WorksheetBlock
+          title="Part A — Identify and correct the error"
+          instruction="Each sentence contains one error related to parts of speech. Rewrite the full corrected sentence, then click Check answer."
+        >
+          <WorksheetQuestion id="pos2-a-1" number={1} multiline
+            question='The data collected across all five regions clearly show that urban temperatures are rising faster than rural ones.'
+            modelAnswer={"The data collected across all five regions clearly shows that urban temperatures are rising faster than rural ones. (\"Data\" used as an academic mass noun is singular in formal writing — \"shows\", not \"show\".)"}
+          />
+          <WorksheetQuestion id="pos2-a-2" number={2} multiline
+            question='The policy has been successful implemented, generating positive outcomes for local communities across the region.'
+            modelAnswer='"The policy has been successfully implemented, generating positive outcomes for local communities across the region." ("Successful" is an adjective; the adverb "successfully" is needed to modify the past participle "implemented".)'
+          />
+          <WorksheetQuestion id="pos2-a-3" number={3} multiline
+            question='This results contradict the findings of the previous study conducted in 2018 by the same research team.'
+            modelAnswer='"These results contradict the findings of the previous study conducted in 2018 by the same research team." ("Results" is plural, so the demonstrative must be "These", not "This".)'
+          />
+          <WorksheetQuestion id="pos2-a-4" number={4} multiline
+            question='The government acted extreme cautiously following the initial outbreak of the disease to avoid public panic.'
+            modelAnswer='"The government acted extremely cautiously following the initial outbreak of the disease to avoid public panic." ("Extreme" is an adjective; you need "extremely" (adverb) to modify the adverb "cautiously".)'
+          />
+          <WorksheetQuestion id="pos2-a-5" number={5} multiline
+            question='Obvious, the evidence suggests that far more investment is needed for medical research and public health systems.'
+            modelAnswer={"\"Obviously, the evidence suggests that far more investment is needed for medical research and public health systems.\" (\"Obvious\" is an adjective. The sentence adverb \"Obviously\" is needed to show the speaker's stance — it must end in -ly.)"}
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part B — Choose the correct option"
+          instruction="Select the correct word or sentence, then click Check answer."
+        >
+          <WorksheetQuestion id="pos2-b-1" number={1}
+            question='What is the grammatical role of "remarkably" in: "The treatment proved remarkably effective in clinical trials."?'
+            choices={["Manner adverb — modifies the verb 'proved'", "Degree adverb — modifies the adjective 'effective'", "Sentence adverb — shows the speaker's attitude", "Adjective — modifies 'treatment'"]}
+            accepted={["Degree adverb — modifies the adjective 'effective'"]}
+            modelAnswer='"remarkably" is a degree adverb. It tells us to what extent the treatment was effective — it modifies the adjective "effective", not the verb "proved".'
+          />
+          <WorksheetQuestion id="pos2-b-2" number={2}
+            question='Which sentence correctly uses passive voice in a formal IELTS Task 1 context?'
+            choices={["The chart showing a steady decline in carbon emissions.", "A steady decline in carbon emissions is shown by the chart.", "Carbon emissions was shown to be declining by the chart.", "The chart shown a steady decline in carbon emissions."]}
+            accepted={["A steady decline in carbon emissions is shown by the chart."]}
+            modelAnswer={'"A steady decline in carbon emissions is shown by the chart." — Passive: subject ("A steady decline") receives the action. The chart is the agent. The other options have structural errors.'}
+          />
+          <WorksheetQuestion id="pos2-b-3" number={3}
+            question='Which sentence uses a demonstrative pronoun clearly, following the "this + noun" technique?'
+            choices={["Global inequality is worsening. This problem requires urgent attention.", "Technology has transformed education. This is changing how students learn.", "Renewable energy is growing. This are creating new job opportunities.", "Many people are moving to cities. They are causing overcrowding."]}
+            accepted={["Global inequality is worsening. This problem requires urgent attention."]}
+            modelAnswer={'"This problem" explicitly names what "this" refers to, avoiding ambiguity. "This is changing" and "This are" leave the referent unclear. "They" has no clear plural antecedent.'}
+          />
+          <WorksheetQuestion id="pos2-b-4" number={4}
+            question='What part of speech is "steadily" in: "The economy has grown steadily over the past decade"?'
+            choices={["Degree adverb — modifies an adjective", "Manner adverb — modifies the verb 'grown'", "Sentence adverb — shows the speaker's view", "Adjective — modifies 'economy'"]}
+            accepted={["Manner adverb — modifies the verb 'grown'"]}
+            modelAnswer={'"steadily" answers HOW the economy has grown — it modifies the verb "grown", making it a manner adverb. Degree adverbs modify adjectives or other adverbs (e.g. "extremely rapid"). Sentence adverbs come first and modify the whole clause (e.g. "Obviously, …").'}
+          />
+          <WorksheetQuestion id="pos2-b-5" number={5}
+            question='Which sentence most appropriately converts an imperative into formal academic register?'
+            choices={["Study the data carefully before drawing any conclusions.", "You should study the data carefully before drawing conclusions.", "It is advisable to analyse the data carefully before drawing any conclusions.", "Let us study the data carefully before we draw conclusions."]}
+            accepted={["It is advisable to analyse the data carefully before drawing any conclusions."]}
+            modelAnswer={'"It is advisable to..." uses a dummy subject + passive-style structure, removing any direct imperative or informal "you". This is the most formal and academic option and is ideal for IELTS Writing Task 2.'}
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part C — Write your own sentences"
+          instruction="Write sentences using the structure described. Click Check answer to compare with the model."
+        >
+          <WorksheetQuestion id="pos2-c-1" number={1} multiline
+            question="Write 3 connected sentences on any IELTS topic using: (a) a measurement-word subject (e.g., proportion, number, amount), (b) a modal auxiliary to hedge a claim, and (c) a demonstrative pronoun ('this', 'these', or 'such') to link ideas."
+            modelAnswer='Example: "The proportion of urban residents worldwide has exceeded 55% for the first time in history. This demographic shift could place unprecedented pressure on housing, infrastructure, and natural resources. Such challenges require coordinated international responses if sustainable development goals are to be met." [Measurement subject: "The proportion" / Modal: "could place" / Demonstrative link: "This demographic shift" + "Such challenges"]'
+          />
+          <WorksheetQuestion id="pos2-c-2" number={2} multiline
+            question="Write a sentence that uses at least one manner adverb AND one degree adverb. Label each adverb in brackets at the end."
+            modelAnswer='Example: "Global temperatures are rising increasingly rapidly, which is particularly alarming for scientists studying long-term climate patterns." [Manner adverb: "rapidly" (how temperatures are rising) | Degree adverbs: "increasingly" (modifies "rapidly"), "particularly" (modifies "alarming")]'
+          />
+          <WorksheetQuestion id="pos2-c-3" number={3} multiline
+            question={`Rewrite this informal imperative passage in formal academic style: "Don't ignore the data. Look at the graphs. They clearly show the problem."`}
+            modelAnswer={`"The data should not be ignored. A careful analysis of the graphs reveals a clear and significant trend that warrants immediate attention." [Imperatives → declarative/passive; "Don't" → "should not be"; "Look at" → "A careful analysis of"; informal tone → academic register]`}
+          />
+        </WorksheetBlock>
+
+      </WorksheetContainer>
     </div>
   );
 }

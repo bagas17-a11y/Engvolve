@@ -445,6 +445,91 @@ export function TopicVerbTenses() {
         </WorksheetBlock>
 
       </WorksheetContainer>
+
+      <SectionTitle number={9} title="Worksheet 2 — Verb Tenses Practice" />
+      <WorksheetContainer topicName="Verb Tenses — Worksheet 2">
+
+        <WorksheetBlock
+          title="Part A — Identify and correct the tense error"
+          instruction="Each sentence has one verb tense error. Rewrite the full corrected sentence, then click Check answer."
+        >
+          <WorksheetQuestion id="vt2-a-1" number={1} multiline
+            question='By the time the new hospital opens next year, doctors will treat thousands of patients since it was founded.'
+            modelAnswer='"By the time the new hospital opens next year, doctors will have treated thousands of patients since it was founded." (Future perfect — "will have treated" describes an action completed by a specific future point.)'
+          />
+          <WorksheetQuestion id="vt2-a-2" number={2} multiline
+            question='She has submitted the report yesterday afternoon, just before the deadline closed.'
+            modelAnswer='"She submitted the report yesterday afternoon, just before the deadline closed." (Past simple — "yesterday" pins the action to a specific finished time; present perfect is incompatible with specific past time expressions.)'
+          />
+          <WorksheetQuestion id="vt2-a-3" number={3} multiline
+            question='When the team announced the discovery, the researchers were working on the project since 2015.'
+            modelAnswer='"When the team announced the discovery, the researchers had been working on the project since 2015." (Past perfect continuous — an ongoing action that started before and continued up to the past announcement.)'
+          />
+          <WorksheetQuestion id="vt2-a-4" number={4} multiline
+            question='If the government will invest in renewable energy now, it will significantly reduce carbon emissions within a decade.'
+            modelAnswer='"If the government invests in renewable energy now, it will significantly reduce carbon emissions within a decade." (First conditional: the if-clause uses present simple — "if + present simple, will + base verb". Never use "will" in the if-clause of a first conditional.)'
+          />
+          <WorksheetQuestion id="vt2-a-5" number={5} multiline
+            question='The climate has been changing steadily since the industrial revolution began, and it was continuing to affect communities today.'
+            modelAnswer='"The climate has been changing steadily since the industrial revolution began, and it continues to affect communities today." (Present simple "continues" — for an ongoing general truth in the present; "was continuing" is past continuous and does not fit a present-tense context.)'
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part B — Choose the correct tense"
+          instruction="Click the correct option, then click Check answer."
+        >
+          <WorksheetQuestion id="vt2-b-1" number={1}
+            question='By 2030, most analysts predict that renewable energy ___ fossil fuels as the primary global energy source.'
+            choices={["replaces", "has replaced", "will replace", "will have replaced"]}
+            accepted={["will have replaced"]}
+            modelAnswer='"will have replaced" — future perfect. The action (replacing fossil fuels) will be complete by a specific future point (2030). Compare: "will replace" simply states a future action without the "completed by" nuance.'
+          />
+          <WorksheetQuestion id="vt2-b-2" number={2}
+            question='The city ___ dramatic changes since the new transport network was completed five years ago.'
+            choices={["has undergone", "underwent", "had undergone", "was undergoing"]}
+            accepted={["has undergone"]}
+            modelAnswer='"has undergone" — present perfect. "Since + a past event" always requires present perfect, connecting the past starting point to the present.'
+          />
+          <WorksheetQuestion id="vt2-b-3" number={3}
+            question={`While the annual report ___, senior management received news of the company's unexpected collapse.`}
+            choices={["is being presented", "was being presented", "has been presented", "had been presented"]}
+            accepted={["was being presented"]}
+            modelAnswer={"\"was being presented\" — past continuous passive. An ongoing action (the presentation) was interrupted by a past event (the news). The passive shows that the report was being presented by someone (the agent is implied)."}
+          />
+          <WorksheetQuestion id="vt2-b-4" number={4}
+            question='The regulation ___ before the crisis erupted, which is why it failed to address the new challenges.'
+            choices={["was designed", "is designed", "has been designed", "had been designed"]}
+            accepted={["had been designed"]}
+            modelAnswer='"had been designed" — past perfect passive. The regulation was designed (completed) before the crisis (another past event). Past perfect passive: had + been + past participle.'
+          />
+          <WorksheetQuestion id="vt2-b-5" number={5}
+            question='Unless stricter pollution controls ___, the problem will continue to worsen over the next decade.'
+            choices={["introduced", "will be introduced", "are introduced", "were introduced"]}
+            accepted={["are introduced"]}
+            modelAnswer='"are introduced" — present simple passive in an "unless" clause. Real conditionals use present simple in the if/unless clause. Passive is used because "controls" are introduced by an agent (governments/authorities) that we do not need to name.'
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part C — Write your own sentences"
+          instruction="Write full sentences using the tense structure shown. Click Check answer to compare with the model."
+        >
+          <WorksheetQuestion id="vt2-c-1" number={1} multiline
+            question="Write 3 connected sentences about a historical development with present-day consequences, using each tense once: past simple → present perfect → present simple."
+            modelAnswer='Example: "The industrial revolution began in Britain in the late 18th century, fundamentally altering the global economy. Since then, it has contributed to both unprecedented prosperity and serious environmental challenges. Today, its legacy — including climate change and urban inequality — continues to shape political debate worldwide." [Past simple: "began" | Present perfect: "has contributed" | Present simple: "continues"]'
+          />
+          <WorksheetQuestion id="vt2-c-2" number={2} multiline
+            question="Write a third conditional sentence describing a hypothetical past situation and its different outcome."
+            modelAnswer='"If governments had invested more heavily in renewable energy research during the 1990s, carbon dioxide levels would have been considerably lower today." (Third conditional: if + past perfect → would have + past participle. Used for imaginary past situations and their different results.)'
+          />
+          <WorksheetQuestion id="vt2-c-3" number={3} multiline
+            question="Write an IELTS Task 1 sentence describing a data trend that uses the past perfect to show one event preceded another."
+            modelAnswer='"By 2015, the proportion of households with internet access had already doubled from the figure recorded in 2005, reflecting a rapid transformation in digital connectivity." (Past perfect "had doubled" shows completion before the reference point "By 2015".)'
+          />
+        </WorksheetBlock>
+
+      </WorksheetContainer>
     </div>
   );
 }

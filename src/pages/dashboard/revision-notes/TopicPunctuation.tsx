@@ -214,6 +214,85 @@ export function TopicPunctuation() {
         </WorksheetBlock>
 
       </WorksheetContainer>
+
+      <SectionTitle number={8} title="Worksheet 2 — Punctuation Practice" />
+      <WorksheetContainer topicName="Punctuation — Worksheet 2">
+
+        <WorksheetBlock
+          title="Part A — Identify and correct the punctuation error(s)"
+          instruction="Each sentence contains one or more punctuation errors. Rewrite the fully corrected version, then click Check answer."
+        >
+          <WorksheetQuestion id="punc2-a-1" number={1} multiline
+            question='The government introduced three new initiatives education healthcare and housing however none of them received adequate long-term funding.'
+            modelAnswer='"The government introduced three new initiatives: education, healthcare, and housing; however, none of them received adequate long-term funding." [Colon introduces the list after a complete clause; commas separate list items; semicolon + comma frame "however" between two independent clauses.]'
+          />
+          <WorksheetQuestion id="punc2-a-2" number={2} multiline
+            question='The study which was conducted over five years found strong evidence linking levels of air pollution to increased rates of respiratory disease.'
+            modelAnswer='"The study, which was conducted over five years, found strong evidence linking levels of air pollution to increased rates of respiratory disease." [Non-defining relative clause: commas required on both sides. Without the commas, "which was conducted over five years" reads as a defining clause, implying there are other studies not conducted over five years.]'
+          />
+          <WorksheetQuestion id="punc2-a-3" number={3} multiline
+            question='Therefore the researchers concluded, that further investigation was necessary before any policy changes could be responsibly recommended.'
+            modelAnswer='"Therefore, the researchers concluded that further investigation was necessary before any policy changes could be responsibly recommended." [Comma after "Therefore" (sentence adverb); no comma before "that" (it introduces a complement clause, not a non-essential phrase).]'
+          />
+          <WorksheetQuestion id="punc2-a-4" number={4} multiline
+            question='The new law — introduced after years of public debate has received mixed reviews from both industry groups and consumer advocates.'
+            modelAnswer='"The new law — introduced after years of public debate — has received mixed reviews from both industry groups and consumer advocates." [The parenthetical phrase "introduced after years of public debate" must be closed with a second dash before the main verb "has received".]'
+          />
+          <WorksheetQuestion id="punc2-a-5" number={5} multiline
+            question='Scientists agree that the solution requires: international cooperation sustained investment and political will from governments at every level.'
+            modelAnswer='"Scientists agree that the solution requires international cooperation, sustained investment, and political will from governments at every level." [Remove the colon — it incorrectly interrupts "requires" + its objects. A colon must follow a grammatically complete clause. Add commas to separate the three items in the list.]'
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part B — Choose the correctly punctuated sentence"
+          instruction="Select the sentence with correct punctuation, then click Check answer."
+        >
+          <WorksheetQuestion id="punc2-b-1" number={1}
+            question='Which sentence uses dashes as a parenthetical interruptor correctly?'
+            choices={["The findings — which challenged existing theory — prompted widespread debate among scholars.", "The findings — which challenged existing theory prompted widespread debate among scholars.", "The findings, which challenged existing theory — prompted widespread debate among scholars.", "The findings — which challenged existing theory, prompted widespread debate among scholars."]}
+            accepted={["The findings — which challenged existing theory — prompted widespread debate among scholars."]}
+            modelAnswer={'A parenthetical interruptor must be enclosed with a dash on BOTH sides. The sentence must read correctly if the dashed phrase is removed: "The findings prompted widespread debate among scholars." Options B, C, and D are missing or misplacing the closing dash.'}
+          />
+          <WorksheetQuestion id="punc2-b-2" number={2}
+            question='Which sentence correctly uses a colon?'
+            choices={["The researcher concluded: that more data was needed.", "Three issues were identified: funding, staffing, and access.", "The main obstacle is: a lack of political will.", "Scientists have shown: that pollution is linked to disease."]}
+            accepted={["Three issues were identified: funding, staffing, and access."]}
+            modelAnswer={'A colon must follow a grammatically complete independent clause. "Three issues were identified" is a complete sentence. The other options all have colons interrupting the sentence structure mid-clause (after "concluded", "is", and "shown"), which is incorrect.'}
+          />
+          <WorksheetQuestion id="punc2-b-3" number={3}
+            question='Which sentence handles "however" with correct punctuation?'
+            choices={["The results were promising, however the sample size was too small.", "The results were promising however the sample size was too small.", "The results were promising; however, the sample size was too small.", "The results were promising; however the sample size was too small."]}
+            accepted={["The results were promising; however, the sample size was too small."]}
+            modelAnswer={'"However" is an adverb, not a conjunction. It cannot join two independent clauses with only a comma (comma splice). Correct structure: semicolon before "however" (joining the clauses) + comma after "however" (separating it from the rest of the clause).'}
+          />
+          <WorksheetQuestion id="punc2-b-4" number={4}
+            question='Which sentence uses a semicolon correctly?'
+            choices={["The data was clear; and the policy needed to change.", "The data was clear; the policy needed to change.", "The data; was clear and the policy needed to change.", "The data was; clear and the policy needed to change."]}
+            accepted={["The data was clear; the policy needed to change."]}
+            modelAnswer={'A semicolon joins two complete, closely related independent clauses without a conjunction. "The data was clear" and "the policy needed to change" are both complete sentences. Never place a semicolon before "and", "but", or "so", or in the middle of a clause.'}
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part C — Write your own sentences"
+          instruction="Write sentences using the punctuation mark shown. Click Check answer to compare with the model."
+        >
+          <WorksheetQuestion id="punc2-c-1" number={1} multiline
+            question="Write a sentence with a parenthetical interruptor using dashes. The main clause must remain complete and grammatically correct if the dashed phrase is removed."
+            modelAnswer={`"The government's new infrastructure plan — designed to address decades of underinvestment in public transport — has been broadly welcomed by business leaders and commuters alike." [Remove the dashed phrase: "The government's new infrastructure plan has been broadly welcomed by business leaders and commuters alike." ✓]`}
+          />
+          <WorksheetQuestion id="punc2-c-2" number={2} multiline
+            question="Write a sentence using a colon to introduce an explanation or elaboration. Make sure the clause before the colon is grammatically complete."
+            modelAnswer='"The consequences of inaction are clear: rising sea levels, more frequent extreme weather events, and the irreversible loss of biodiversity across the planet." ["The consequences of inaction are clear" is a complete clause. The colon then introduces the elaboration.]'
+          />
+          <WorksheetQuestion id="punc2-c-3" number={3} multiline
+            question="Write a short paragraph of 2–3 sentences that uses each of the following correctly: a comma, a semicolon, a colon, and a dash."
+            modelAnswer='"Addressing climate change requires action at multiple levels: local, national, and international. [colon] Individuals can reduce their carbon footprint through small daily choices; however, systemic change is far more impactful. [semicolon] The real obstacle — political short-termism — must be overcome if any meaningful progress is to be made. [dash] Commas appear throughout to separate clauses and list items."'
+          />
+        </WorksheetBlock>
+
+      </WorksheetContainer>
     </div>
   );
 }

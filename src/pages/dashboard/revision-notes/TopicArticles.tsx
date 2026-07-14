@@ -198,6 +198,95 @@ export function TopicArticles() {
         </WorksheetBlock>
 
       </WorksheetContainer>
+
+      <SectionTitle number={8} title="Worksheet 2 — Articles Practice" />
+      <WorksheetContainer topicName="Articles (a / an / the / Ø) — Worksheet 2">
+
+        <WorksheetBlock
+          title="Part A — Fill in the gap (a / an / the / Ø)"
+          instruction='Type a, an, the, or Ø (no article) for each gap. For multiple gaps, separate with commas e.g. "the, Ø, a".'
+        >
+          <WorksheetQuestion id="art2-a-1" number={1}
+            question='"___ majority of economists agree that ___ access to education is key to reducing ___ poverty."'
+            modelAnswer={'"The" majority (specific group identified by "of economists") / Ø access (uncountable general concept) / Ø poverty (uncountable general concept — poverty as a phenomenon, not a specific instance)'}
+            accepted={["the, ø, ø", "the, Ø, Ø", "the,ø,ø", "the,Ø,Ø"]}
+          />
+          <WorksheetQuestion id="art2-a-2" number={2}
+            question='"It is ___ honour to receive ___ award on behalf of ___ entire research team."'
+            modelAnswer={'"an" honour ("honour" starts with vowel sound /ɒ/) / "the" award (specific award being presented) / "the" entire research team (specific, identified group)'}
+            accepted={["an, the, the", "an,the,the"]}
+          />
+          <WorksheetQuestion id="art2-a-3" number={3}
+            question='"There was ___ significant rise in ___ number of people working from home, and ___ trend is likely to continue."'
+            modelAnswer={'"a" significant rise (first mention, one instance) / "the" number (specific — the number of people working from home) / "the" trend (second mention — now specific, previously introduced as "a significant rise")'}
+            accepted={["a, the, the", "a,the,the"]}
+          />
+          <WorksheetQuestion id="art2-a-4" number={4}
+            question='"___ information provided in ___ report contradicted what ___ government had previously stated."'
+            modelAnswer={'"The" information (specific — the information in the report) / "the" report (specific document) / "the" government (specific governing body)'}
+            accepted={["the, the, the", "the,the,the"]}
+          />
+          <WorksheetQuestion id="art2-a-5" number={5}
+            question='"She applied for ___ position at ___ international organisation and was invited to ___ interview within ___ week."'
+            modelAnswer={'"a" position (first mention, any one position) / "an" international organisation ("international" starts with vowel sound /ɪ/) / "an" interview (vowel sound /ɪ/) / "a" week (first mention, one week)'}
+            accepted={["a, an, an, a", "a,an,an,a"]}
+          />
+          <WorksheetQuestion id="art2-a-6" number={6}
+            question='"___ data from ___ latest census indicates ___ steady increase in ___ average household size."'
+            modelAnswer={'"The" data (specific dataset from a census) / "the" latest census (specific, most recent one) / "a" steady increase (first mention) / "the" average household size (specific measurement being referenced)'}
+            accepted={["the, the, a, the", "the,the,a,the"]}
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part B — Spot and fix the article error"
+          instruction="Each sentence has one article error. Rewrite the full corrected sentence, then click Check answer."
+        >
+          <WorksheetQuestion id="art2-b-1" number={1} multiline
+            question='"Studies show that an access to quality healthcare is a key determinant of life expectancy."'
+            modelAnswer='"Studies show that access to quality healthcare is a key determinant of life expectancy." — Remove "an". "Access" is an uncountable noun — it never takes an indefinite article.'
+          />
+          <WorksheetQuestion id="art2-b-2" number={2} multiline
+            question='"The rise in a remote working has transformed corporate culture across many industries worldwide."'
+            modelAnswer='"The rise in remote working has transformed corporate culture across many industries worldwide." — Remove "a". "Remote working" is a general uncountable concept and takes no article in this context.'
+          />
+          <WorksheetQuestion id="art2-b-3" number={3} multiline
+            question='"A percentage of students who pursue postgraduate degrees immediately after finishing undergraduate study is surprisingly low."'
+            modelAnswer='"The percentage of students who pursue postgraduate degrees immediately after finishing undergraduate study is surprisingly low." — Use "The", not "A". We are referring to one specific, measurable proportion — a statistic — not just any percentage.'
+          />
+          <WorksheetQuestion id="art2-b-4" number={4} multiline
+            question='"He is the youngest person ever to receive an Nobel Prize in Literature."'
+            modelAnswer='"He is the youngest person ever to receive a Nobel Prize in Literature." — Use "a", not "an". "Nobel" starts with the consonant sound /n/, so use "a".'
+          />
+          <WorksheetQuestion id="art2-b-5" number={5} multiline
+            question={`"The government's decision to cut a funding for public transport was widely criticised by opposition parties."`}
+            modelAnswer={"\"The government's decision to cut funding for public transport was widely criticised by opposition parties.\" — Remove \"a\". \"Funding\" is an uncountable noun and takes no article when used in this general sense."}
+          />
+          <WorksheetQuestion id="art2-b-6" number={6} multiline
+            question='"An information gathered during the five-year study proved crucial to the final policy recommendations."'
+            modelAnswer='"The information gathered during the five-year study proved crucial to the final policy recommendations." — Replace "An" with "The". "Information" is uncountable (never "an information"). Use "the" because the information is specific — the data gathered in this particular study.'
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part C — Write your own sentences"
+          instruction="Write full sentences using the guideline shown. Click Check answer to compare with the model."
+        >
+          <WorksheetQuestion id="art2-c-1" number={1} multiline
+            question='Write two connected sentences: the first introduces a new issue using "a/an", and the second refers back to it specifically using "the".'
+            modelAnswer='"A growing number of graduates are finding it difficult to secure employment in their chosen field. The challenge is particularly acute in regions where the local economy depends on industries that are declining." ["A growing number" = first mention / "The challenge" = second mention, now specific]'
+          />
+          <WorksheetQuestion id="art2-c-2" number={2} multiline
+            question='Write one sentence that correctly uses all three articles (a, an, and the) in a single sentence about an academic topic.'
+            modelAnswer='"The scientists published an ambitious study that proposed a novel solution to the problem of antibiotic resistance." ["the scientists" = specific group / "an ambitious" = first mention + vowel sound / "a novel" = first mention]'
+          />
+          <WorksheetQuestion id="art2-c-3" number={3} multiline
+            question="Write a sentence about an academic topic using no article (Ø) for a general concept. Then explain in brackets why no article is needed."
+            modelAnswer='"Poverty remains one of the most complex challenges facing policymakers in the 21st century. [No article before "Poverty" — it is used as a general, uncountable concept referring to poverty as a phenomenon, not a specific instance. Compare: "The poverty experienced in rural areas..." which would be specific.]"'
+          />
+        </WorksheetBlock>
+
+      </WorksheetContainer>
     </div>
   );
 }

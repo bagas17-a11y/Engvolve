@@ -211,6 +211,85 @@ export function TopicLinkingWordsCoherence() {
         </WorksheetBlock>
 
       </WorksheetContainer>
+
+      <SectionTitle number={7} title="Worksheet 2 — Linking Words & Cohesion Practice" />
+      <WorksheetContainer topicName="Linking Words, Referencing & Coherence — Worksheet 2">
+
+        <WorksheetBlock
+          title="Part A — Find and fix the error"
+          instruction="Each sentence contains a linking word or referencing error. Rewrite the corrected version, then click Check answer."
+        >
+          <WorksheetQuestion id="lw2-a-1" number={1} multiline
+            question='The results were positive, despite the funding was insufficient for the full scope of the project.'
+            modelAnswer='"The results were positive, despite the insufficient funding for the full scope of the project." OR "The results were positive, despite the fact that the funding was insufficient." OR "The results were positive, although the funding was insufficient." ("Despite" must be followed by a noun/gerund — not a subject + verb clause. Use "despite the fact that" or switch to "although" if you need a clause.)'
+          />
+          <WorksheetQuestion id="lw2-a-2" number={2} multiline
+            question='The study revealed several important findings; in addition, the methodology had significant flaws that undermined the conclusions.'
+            modelAnswer='"The study revealed several important findings; however, the methodology had significant flaws that undermined the conclusions." ("In addition" signals that you are adding more of the same — but "having significant flaws" contradicts "important findings". "However" correctly signals the contrast.)'
+          />
+          <WorksheetQuestion id="lw2-a-3" number={3} multiline
+            question='She worked diligently for three months in order to she could qualify for the highly competitive scholarship.'
+            modelAnswer='"She worked diligently for three months in order to qualify for the highly competitive scholarship." ("In order to" is followed directly by a base verb — not subject + modal. Remove "she could".)'
+          />
+          <WorksheetQuestion id="lw2-a-4" number={4} multiline
+            question='The government introduced stricter environmental laws. On the other hand, air quality improved significantly within two years.'
+            modelAnswer='"The government introduced stricter environmental laws. As a result, air quality improved significantly within two years." OR "...Consequently, air quality improved..." ("On the other hand" signals contrast, but improved air quality is a positive result of the new laws — not a contrasting fact. Use a result linker.)'
+          />
+          <WorksheetQuestion id="lw2-a-5" number={5} multiline
+            question='She excelled in all four IELTS modules, due to she had practised consistently throughout the entire academic year.'
+            modelAnswer='"She excelled in all four IELTS modules due to her consistent practice throughout the entire academic year." OR "...because she had practised consistently..." ("Due to" must be followed by a noun/noun phrase — not a clause. Use "due to + noun" or "because + clause".)'
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part B — Choose the correct linking word"
+          instruction="Select the best option, then click Check answer."
+        >
+          <WorksheetQuestion id="lw2-b-1" number={1}
+            question='"The proposal has faced significant opposition from industry groups. ___, many analysts believe it represents the only viable long-term solution."'
+            choices={["Furthermore", "Nevertheless", "As a result", "Similarly"]}
+            accepted={["Nevertheless"]}
+            modelAnswer={'"Nevertheless" — shows that despite the opposition (stated in the first sentence), the proposal is still seen as viable. It signals an unexpected or contrasting continuation. "Furthermore" adds, "As a result" shows consequence, "Similarly" compares.'}
+          />
+          <WorksheetQuestion id="lw2-b-2" number={2}
+            question='"We must act immediately. ___ inaction will lead to consequences that cannot be reversed."'
+            choices={["Although", "For instance", "Otherwise", "Similarly"]}
+            accepted={["Otherwise"]}
+            modelAnswer={'"Otherwise" — signals a conditional negative consequence: "if we do not act immediately, then inaction will lead to irreversible consequences." It is the only option that logically connects the call to action with its failure case.'}
+          />
+          <WorksheetQuestion id="lw2-b-3" number={3}
+            question='Which sentence uses referencing correctly to maintain cohesion?'
+            choices={["The government announced reforms. They changed society significantly.", "Urbanisation has accelerated globally. This phenomenon is now studied by urban planners worldwide.", "The scientists found new data. This are changing how we understand the issue.", "Climate change is a serious threat. They require urgent international action."]}
+            accepted={["Urbanisation has accelerated globally. This phenomenon is now studied by urban planners worldwide."]}
+            modelAnswer={'"This phenomenon" clearly identifies what "this" refers to (the global acceleration of urbanisation). "They changed society" — who is "they"? "This are" has SVA error. "They require" — climate change is singular, not plural.'}
+          />
+          <WorksheetQuestion id="lw2-b-4" number={4}
+            question='"___ technological unemployment is a serious concern, history suggests that new industries have always created replacement jobs."'
+            choices={["Although", "Furthermore", "Consequently", "Due to"]}
+            accepted={["Although"]}
+            modelAnswer={'"Although" — introduces a concession (acknowledging the concern) before the main contrasting claim (that new jobs are always created). It is a subordinating conjunction and takes a full clause. "Due to" requires a noun phrase; "Furthermore" adds information; "Consequently" shows result.'}
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part C — Write your own sentences"
+          instruction="Write sentences or a short paragraph using the structure shown. Click Check answer to compare with the model."
+        >
+          <WorksheetQuestion id="lw2-c-1" number={1} multiline
+            question="Write a 3-sentence academic paragraph using: (1) one coordinating conjunction, (2) one subordinating conjunction, and (3) one referencing device (e.g., this, these, it, such). The paragraph should flow logically."
+            modelAnswer='"Many countries have invested heavily in renewable energy, yet the transition away from fossil fuels remains frustratingly slow. Although public support for clean energy is growing, powerful economic interests continue to delay meaningful policy change. This tension between public demand and political will represents one of the defining challenges of the coming decades." [Coordinating: "yet" | Subordinating: "Although" | Referencing: "This tension"]'
+          />
+          <WorksheetQuestion id="lw2-c-2" number={2} multiline
+            question='Express the same idea twice — once using "despite" + noun phrase, and once using "although" + clause: "Many nations pledged to cut emissions. Carbon output has continued to rise."'
+            modelAnswer='"Despite pledging to cut emissions, many nations have seen their carbon output continue to rise. / Although many nations pledged to cut emissions, their carbon output has continued to rise." ["Despite" + gerund phrase (no subject + verb) vs "Although" + subject + verb — same meaning, different grammatical structure.]'
+          />
+          <WorksheetQuestion id="lw2-c-3" number={3} multiline
+            question='Write a sentence linking cause and effect using a formal academic phrase such as "as a consequence of", "which has resulted in", "thereby", or "consequently".'
+            modelAnswer='"The rapid expansion of digital platforms has fundamentally transformed the media landscape, consequently reducing the influence of traditional print journalism and reshaping how public opinion is formed." [Formal cause-effect linker "consequently" + participial phrase to show the result.]'
+          />
+        </WorksheetBlock>
+
+      </WorksheetContainer>
     </div>
   );
 }

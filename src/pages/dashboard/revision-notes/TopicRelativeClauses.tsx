@@ -242,6 +242,91 @@ export function TopicRelativeClauses() {
         </WorksheetBlock>
 
       </WorksheetContainer>
+
+      <SectionTitle number={7} title="Worksheet 2 — Relative Clauses Practice" />
+      <WorksheetContainer topicName="Relative Clauses — Worksheet 2">
+
+        <WorksheetBlock
+          title="Part A — Identify and correct the error"
+          instruction="Each sentence contains a relative clause error. Rewrite the corrected sentence, then click Check answer."
+        >
+          <WorksheetQuestion id="rc2-a-1" number={1} multiline
+            question='The researcher whom published the groundbreaking paper on climate change has since joined a different institution.'
+            modelAnswer='"The researcher who published the groundbreaking paper on climate change has since joined a different institution." ("whom" is used in object position. Here, the relative pronoun is the subject of "published" — so "who" is correct.)'
+          />
+          <WorksheetQuestion id="rc2-a-2" number={2} multiline
+            question={`This is the company which CEO was awarded the prize for innovation at last year's annual conference.`}
+            modelAnswer={"\"This is the company whose CEO was awarded the prize for innovation at last year's annual conference.\" (Use \"whose\" to show possession — the CEO belongs to the company. \"Which CEO\" is not grammatically valid.)"}
+          />
+          <WorksheetQuestion id="rc2-a-3" number={3} multiline
+            question='The policy, that was introduced in 2018, has succeeded in reducing traffic congestion in the city by 30%.'
+            modelAnswer='"The policy, which was introduced in 2018, has succeeded in reducing traffic congestion in the city by 30%." ("That" cannot be used in non-defining relative clauses — those set off by commas. Use "which".)'
+          />
+          <WorksheetQuestion id="rc2-a-4" number={4} multiline
+            question='The students, most of which struggled with the final assessment, showed remarkable improvement after attending additional tutorials.'
+            modelAnswer='"The students, most of whom struggled with the final assessment, showed remarkable improvement after attending additional tutorials." (Use "whom", not "which" — we are referring to people. "Most of whom" = most of the students.)'
+          />
+          <WorksheetQuestion id="rc2-a-5" number={5} multiline
+            question='The city where I was born in it is now one of the most rapidly growing urban centres in the entire region.'
+            modelAnswer='"The city where I was born is now one of the most rapidly growing urban centres in the entire region." (Remove "in it". "Where" already includes the meaning of "in which". Adding "in it" creates a double reference error. Alternatively: "The city in which I was born is now...")'
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part B — Choose the correct relative word"
+          instruction="Select the correct word, then click Check answer."
+        >
+          <WorksheetQuestion id="rc2-b-1" number={1}
+            question='"The award was presented to the scientist ___ research had most significantly advanced the field of genetics."'
+            choices={["which", "who", "whose", "whom"]}
+            accepted={["whose"]}
+            modelAnswer={'"whose" — possessive relative pronoun. The research belongs to the scientist. "Who" is subject, "whom" is object, "which" is for things — none of these show possession.'}
+          />
+          <WorksheetQuestion id="rc2-b-2" number={2}
+            question='"The person to ___ the Nobel Prize was awarded has dedicated thirty years to cancer research."'
+            choices={["who", "whom", "whose", "which"]}
+            accepted={["whom"]}
+            modelAnswer={'"whom" — used when the relative pronoun is the object of a preposition ("to whom"). This is the formal, written style. Informally, you might say "The person who/that the Nobel Prize was awarded to", but in academic IELTS writing "to whom" is preferred.'}
+          />
+          <WorksheetQuestion id="rc2-b-3" number={3}
+            question='Which sentence uses a reduced relative clause correctly?'
+            choices={["The policy which introduced last year was effective.", "The policy introduced last year was effective.", "The policy that it was introduced last year was effective.", "The policy, introduced last year, which was effective."]}
+            accepted={["The policy introduced last year was effective."]}
+            modelAnswer={'"The policy introduced last year was effective." — Reduced relative: "which was introduced" → "introduced" (drop the relative pronoun and auxiliary). This is a common, concise structure in academic writing. The version with "which" and no "was" is incomplete; the third has a double subject; the fourth is structurally incomplete.'}
+          />
+          <WorksheetQuestion id="rc2-b-4" number={4}
+            question='Which sentence uses a non-defining relative clause with correct punctuation and pronoun choice?'
+            choices={["My colleague, who works in the research department, has published three papers this year.", "My colleague who works in the research department has published three papers this year.", "My colleague, that works in the research department, has published three papers this year.", "My colleague, who works in the research department has published three papers this year."]}
+            accepted={["My colleague, who works in the research department, has published three papers this year."]}
+            modelAnswer={'Non-defining relative clauses require commas on BOTH sides (before and after the clause). "That" cannot be used in non-defining clauses. "Who" is correct for a person. The missing closing comma in the last option makes it incorrect.'}
+          />
+          <WorksheetQuestion id="rc2-b-5" number={5}
+            question='In which sentence can the relative pronoun be correctly omitted?'
+            choices={["The scientist who discovered the vaccine works at this university.", "The city where she grew up has changed dramatically.", "The experiment which we conducted last month yielded surprising results.", "The professor whose lecture I attended is an expert in neuroscience."]}
+            accepted={["The experiment which we conducted last month yielded surprising results."]}
+            modelAnswer={'"which" can be omitted here because it is in object position (we conducted the experiment). Result: "The experiment we conducted last month yielded surprising results." You cannot omit "who" (subject), "where" (adverb), or "whose" (possessive).'}
+          />
+        </WorksheetBlock>
+
+        <WorksheetBlock
+          title="Part C — Write your own sentences"
+          instruction="Write full sentences using the structure shown. Click Check answer to compare with the model."
+        >
+          <WorksheetQuestion id="rc2-c-1" number={1} multiline
+            question='"Whose": Write a sentence using "whose" about a country, organisation, or policy to show possession, in IELTS academic style.'
+            modelAnswer='"Countries whose energy sectors remain heavily dependent on fossil fuels will face increasing international pressure to accelerate their transition to renewable alternatives." ("whose energy sectors" = the energy sectors belonging to those countries — possession shown by "whose").'
+          />
+          <WorksheetQuestion id="rc2-c-2" number={2} multiline
+            question='Write a sentence using the formal structure "preposition + which" or "preposition + whom" — as you might see in IELTS Task 2 academic writing.'
+            modelAnswer='"The framework within which international climate negotiations take place has been significantly reshaped by the Paris Agreement of 2015." OR "The scientist to whom the award was presented has dedicated her career to developing affordable treatments for tropical diseases." [Both use preposition + relative pronoun rather than ending the clause with a preposition — the more formal written style.]'
+          />
+          <WorksheetQuestion id="rc2-c-3" number={3} multiline
+            question='Combine these two sentences using a non-defining relative clause: "The Amazon rainforest covers over 5.5 million square kilometres." + "It is home to approximately 10% of all species on Earth."'
+            modelAnswer='"The Amazon rainforest, which is home to approximately 10% of all species on Earth, covers over 5.5 million square kilometres." [Non-defining clause (extra info, not essential): commas on both sides, "which" for a thing. The sentence still makes sense without the clause.]'
+          />
+        </WorksheetBlock>
+
+      </WorksheetContainer>
     </div>
   );
 }
