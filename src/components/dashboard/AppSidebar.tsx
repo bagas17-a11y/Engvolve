@@ -42,13 +42,13 @@ const GROUPS = [
       { title: "Revision Notes",              path: "/dashboard/revision-notes",          icon: Layers },
       { title: "Flashcards",                 path: "/dashboard/flashcards",              icon: FlipHorizontal },
       { title: "Study Groups",               path: "/dashboard/group",                   icon: Users },
-      { title: "External Resource Worksheets", path: "/dashboard/external-worksheets", icon: FolderOpen },
     ],
   },
   {
     label: "Elite",
     items: [
-      { title: "Elite Hub", path: "/dashboard/elite", icon: Crown },
+      { title: "Elite Hub",                    path: "/dashboard/elite",                icon: Crown },
+      { title: "External Resource Worksheets", path: "/dashboard/external-worksheets", icon: FolderOpen },
     ],
   },
 ];
