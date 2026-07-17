@@ -5,12 +5,11 @@
 
 // Production and development allowed origins
 const ALLOWED_ORIGINS = [
-  // Production domains (update with your actual domain)
+  // Production domains
+  'https://engvolve.com',
+  'https://www.engvolve.com',
   'https://ieltsinja.com',
   'https://www.ieltsinja.com',
-
-  // Supabase hosted frontend
-  'https://jryjpjkutwrieneuaoxv.supabase.co',
 
   // Development (only if not in production)
   ...(Deno.env.get('ENVIRONMENT') !== 'production' ? [
