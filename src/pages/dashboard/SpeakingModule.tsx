@@ -4,7 +4,8 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import {
   Mic, Loader2, Play, Square, Volume2, VolumeX, RefreshCw,
-  ChevronRight, Download, CheckCircle, ArrowRight,
+  Download, CheckCircle, ArrowRight,
+  MessageCircle, BookOpen, Users, Info,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -81,6 +82,29 @@ interface TestSet {
   part1: Array<{ topic: string; question: string }>;
   part2: { topic: string; cueCard: string; prepTime: string; speakTime: string };
   part3: { topic: string; questions: string[] };
+}
+
+// ── Part visual theme — kept in sync with the model-answer colors on the
+// results page (blue/purple/cyan) so the color language is consistent
+// end-to-end across the test. ─────────────────────────────────────────────
+const PART_THEME = {
+  1: { icon: MessageCircle, text: 'text-blue-400',   chip: 'bg-blue-500/15 text-blue-400',   border: 'border-blue-500/30',   bg: 'bg-blue-500/5',   iconBg: 'bg-blue-500/10' },
+  2: { icon: BookOpen,      text: 'text-purple-400', chip: 'bg-purple-500/15 text-purple-400', border: 'border-purple-500/30', bg: 'bg-purple-500/5', iconBg: 'bg-purple-500/10' },
+  3: { icon: Users,         text: 'text-cyan-400',   chip: 'bg-cyan-500/15 text-cyan-400',   border: 'border-cyan-500/30',   bg: 'bg-cyan-500/5',   iconBg: 'bg-cyan-500/10' },
+} as const;
+
+// Splits a "Describe X.\n\nYou should say:\n• a\n• b\n\nAnd explain Y."
+// cue card into a prompt line, bullet points, and a closing prompt — falls
+// back gracefully (bullets: []) for any cue card that doesn't match the shape.
+function parseCueCard(cueCard: string) {
+  const blocks = cueCard.split(/\n\n+/).map(b => b.trim()).filter(Boolean);
+  const prompt = blocks[0] ?? cueCard;
+  const bulletBlock = blocks.find(b => b.includes('•'));
+  const bullets = bulletBlock
+    ? bulletBlock.split('\n').map(l => l.trim()).filter(l => l.startsWith('•')).map(l => l.replace(/^•\s*/, ''))
+    : [];
+  const explain = blocks.find(b => /^and explain/i.test(b));
+  return { prompt, bullets, explain };
 }
 
 // ── Helpers (module-level, stable references) ─────────────────────────────
@@ -379,10 +403,16 @@ export default function SpeakingModule() {
                       </span>
                     )}
                   </div>
-                  <div className="space-y-1 text-xs text-muted-foreground">
-                    <p><span className="text-foreground/60">Part 1:</span> {test.part1.map(q => q.topic).join(', ')}</p>
-                    <p><span className="text-foreground/60">Part 2:</span> {test.part2.topic}</p>
-                    <p><span className="text-foreground/60">Part 3:</span> {test.part3.topic}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>3 parts</span>
+                    <span className="opacity-40">·</span>
+                    <span>~15 min</span>
+                  </div>
+
+                  <div className="space-y-1.5 text-xs text-muted-foreground">
+                    <p><span className={cn("font-semibold", PART_THEME[1].text)}>Part 1</span> · {test.part1.map(q => q.topic).join(', ')}</p>
+                    <p><span className={cn("font-semibold", PART_THEME[2].text)}>Part 2</span> · {test.part2.topic}</p>
+                    <p><span className={cn("font-semibold", PART_THEME[3].text)}>Part 3</span> · {test.part3.topic}</p>
                   </div>
                   <Button variant="outline" size="sm" className="mt-auto w-full group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
                     <Play className="w-3.5 h-3.5 mr-1.5" />
@@ -410,9 +440,14 @@ export default function SpeakingModule() {
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => { setPhase('library'); resetTranscript(); }}
               className="text-muted-foreground hover:text-foreground shrink-0">← Tests</Button>
-            <div>
-              <h1 className="text-lg font-light">{activeTest.label} — Part 1</h1>
-              <p className="text-xs text-muted-foreground">Introduction</p>
+            <div className="flex items-center gap-2.5">
+              <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0", PART_THEME[1].iconBg)}>
+                <MessageCircle className={cn("w-4 h-4", PART_THEME[1].text)} />
+              </div>
+              <div>
+                <h1 className="text-lg font-light">{activeTest.label} — Part 1</h1>
+                <p className="text-xs text-muted-foreground">Introduction</p>
+              </div>
             </div>
           </div>
 
@@ -437,9 +472,9 @@ export default function SpeakingModule() {
           ))}
 
           {/* Current question */}
-          <div className="glass-card p-6">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">{q.topic}</span>
-            <p className="text-lg text-foreground/90 leading-relaxed mt-2">{q.question}</p>
+          <div className={cn("glass-card p-6 border", PART_THEME[1].border)}>
+            <span className={cn("inline-block text-[11px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full", PART_THEME[1].chip)}>{q.topic}</span>
+            <p className="text-lg text-foreground/90 leading-relaxed mt-3">{q.question}</p>
             <p className="text-xs text-muted-foreground mt-3">Answer in 2–3 sentences.</p>
           </div>
 
@@ -507,9 +542,14 @@ export default function SpeakingModule() {
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => { setPhase('part1'); setP1Index(3); resetTranscript(); }}
               className="text-muted-foreground hover:text-foreground shrink-0">← Part 1</Button>
-            <div>
-              <h1 className="text-lg font-light">{activeTest.label} — Part 2</h1>
-              <p className="text-xs text-muted-foreground">Long Turn (Cue Card)</p>
+            <div className="flex items-center gap-2.5">
+              <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0", PART_THEME[2].iconBg)}>
+                <BookOpen className={cn("w-4 h-4", PART_THEME[2].text)} />
+              </div>
+              <div>
+                <h1 className="text-lg font-light">{activeTest.label} — Part 2</h1>
+                <p className="text-xs text-muted-foreground">Long Turn (Cue Card)</p>
+              </div>
             </div>
           </div>
 
@@ -520,16 +560,37 @@ export default function SpeakingModule() {
             <span className="text-xs text-muted-foreground shrink-0">Part 2/3</span>
           </div>
 
-          <div className="glass-card p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground">{activeTest.part2.topic}</span>
-              <span className="text-xs text-muted-foreground">Prep: {activeTest.part2.prepTime} · Speak: {activeTest.part2.speakTime}</span>
-            </div>
-            <div className="bg-secondary/30 rounded-xl p-4">
-              <pre className="whitespace-pre-wrap text-foreground/80 leading-relaxed font-sans text-sm">{activeTest.part2.cueCard}</pre>
-            </div>
-            <p className="text-xs text-muted-foreground mt-3">Take a moment to prepare, then speak for 1–2 minutes.</p>
-          </div>
+          {(() => {
+            const { prompt, bullets, explain } = parseCueCard(activeTest.part2.cueCard);
+            return (
+              <div className={cn("glass-card p-6 border", PART_THEME[2].border)}>
+                <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+                  <span className={cn("text-[11px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full", PART_THEME[2].chip)}>{activeTest.part2.topic}</span>
+                  <span className="text-xs text-muted-foreground">Prep: {activeTest.part2.prepTime} · Speak: {activeTest.part2.speakTime}</span>
+                </div>
+                {bullets.length > 0 ? (
+                  <>
+                    <p className="text-base text-foreground/90 leading-relaxed mb-3">{prompt}</p>
+                    <p className="text-xs text-muted-foreground mb-2">You should say:</p>
+                    <div className="space-y-2">
+                      {bullets.map((b, i) => (
+                        <div key={i} className="flex items-start gap-2.5">
+                          <span className={cn("w-5 h-5 rounded-full text-[10px] font-semibold flex items-center justify-center shrink-0 mt-0.5", PART_THEME[2].chip)}>{i + 1}</span>
+                          <p className="text-sm text-foreground/80 leading-relaxed">{b}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {explain && <p className="text-sm text-foreground/70 italic mt-3">{explain}</p>}
+                  </>
+                ) : (
+                  <div className="bg-secondary/30 rounded-xl p-4">
+                    <pre className="whitespace-pre-wrap text-foreground/80 leading-relaxed font-sans text-sm">{activeTest.part2.cueCard}</pre>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground mt-4">Take a moment to prepare, then speak for 1–2 minutes.</p>
+              </div>
+            );
+          })()}
 
           {/* Recording controls — inlined */}
           <div className="glass-card p-8">
@@ -593,9 +654,14 @@ export default function SpeakingModule() {
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => { setPhase('part2'); resetTranscript(); }}
               className="text-muted-foreground hover:text-foreground shrink-0">← Part 2</Button>
-            <div>
-              <h1 className="text-lg font-light">{activeTest.label} — Part 3</h1>
-              <p className="text-xs text-muted-foreground">Discussion</p>
+            <div className="flex items-center gap-2.5">
+              <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0", PART_THEME[3].iconBg)}>
+                <Users className={cn("w-4 h-4", PART_THEME[3].text)} />
+              </div>
+              <div>
+                <h1 className="text-lg font-light">{activeTest.label} — Part 3</h1>
+                <p className="text-xs text-muted-foreground">Discussion</p>
+              </div>
             </div>
           </div>
 
@@ -606,17 +672,25 @@ export default function SpeakingModule() {
             <span className="text-xs text-muted-foreground shrink-0">Part 3/3</span>
           </div>
 
-          <div className="glass-card p-6">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">{activeTest.part3.topic}</span>
-            <div className="space-y-3 mt-3">
+          <div className={cn("glass-card p-6 border", PART_THEME[3].border)}>
+            <span className={cn("inline-block text-[11px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full", PART_THEME[3].chip)}>{activeTest.part3.topic}</span>
+
+            <div className={cn("flex items-start gap-2.5 rounded-lg p-3 mt-4 border", PART_THEME[3].bg, PART_THEME[3].border)}>
+              <Info className={cn("w-4 h-4 mt-0.5 shrink-0", PART_THEME[3].text)} />
+              <p className="text-xs text-foreground/80 leading-relaxed">
+                Answer these one at a time, in order — like a real conversation with an examiner. Finish your thought on Q1, then move to Q2, then Q3, all within a single recording.
+              </p>
+            </div>
+
+            <div className="space-y-3 mt-4">
               {activeTest.part3.questions.map((q, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <ChevronRight className="w-4 h-4 text-accent mt-0.5 shrink-0" />
-                  <p className="text-sm text-foreground/80">{q}</p>
+                <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-secondary/20 border border-border/30">
+                  <span className={cn("w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5", PART_THEME[3].chip)}>{i + 1}</span>
+                  <p className="text-sm text-foreground/80 leading-relaxed">{q}</p>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground mt-3">Discuss analytically. Aim for detailed responses.</p>
+            <p className="text-xs text-muted-foreground mt-4">Discuss analytically. Aim for detailed responses — roughly 30–45 seconds per question.</p>
           </div>
 
           {/* Recording controls — inlined */}
