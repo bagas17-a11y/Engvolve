@@ -882,7 +882,7 @@ export default function WritingModule() {
     ].map((c) => `<tr><td>${c.label}</td><td>${grid[c.key]?.score ?? "—"}</td><td>${Array.isArray(grid[c.key]?.justification) ? (grid[c.key]?.justification as string[]).join(" ") : (grid[c.key]?.justification ?? "")}</td></tr>`).join("");
 
     const fixesHtml = (feedbackData.criticalFixes ?? []).map((f: string, i: number) => `<li>${i + 1}. ${f}</li>`).join("");
-    const modelHtml = feedbackData.enhancedSpeechNextBand ? `<h3>Model Answer (Band ${Math.min(9, (feedbackData.overallBand ?? 6) + 1)})</h3><div class="essay">${feedbackData.enhancedSpeechNextBand.replace(/\n/g, "<br>")}</div>` : "";
+    const modelHtml = feedbackData.nextBandModelAnswer ? `<h3>Your Essay, Elevated to Band ${Math.min(9, (feedbackData.overallBand ?? 6) + 2)}</h3><div class="essay">${feedbackData.nextBandModelAnswer.replace(/\n/g, "<br>")}</div>` : "";
 
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Writing Feedback — Engvolve</title>
 <style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;color:#111;line-height:1.6}h1{font-size:1.4em}h2{font-size:1.1em;margin-top:1.5em;border-bottom:1px solid #ccc}h3{font-size:1em;margin-top:1em}table{width:100%;border-collapse:collapse;margin:1em 0}th,td{border:1px solid #ccc;padding:8px;text-align:left;font-size:0.9em}th{background:#f5f5f5}.score{font-size:2em;font-weight:bold;color:#0ea5e9}.essay{background:#f9f9f9;padding:12px;border-left:3px solid #0ea5e9;font-size:0.9em;white-space:pre-wrap}ul,ol{padding-left:1.5em}@media print{body{margin:20px}}</style></head>
@@ -1117,16 +1117,16 @@ ${modelHtml}</body></html>`;
         </div>
       )}
 
-      {/* +1 Band model answer */}
+      {/* +2 Band model answer — the student's own essay, elevated */}
       {feedbackData.nextBandModelAnswer && (
         <div className="p-4 bg-blue-500/5 rounded-xl border border-blue-500/20">
           <div className="flex items-center gap-2 mb-3">
-            <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wide">How it looks at</h3>
+            <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wide">Your essay, elevated to</h3>
             <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-medium">
-              Band {Math.min(9, (feedbackData.overallBand ?? 6) + 1).toFixed(1)}
+              Band {Math.min(9, (feedbackData.overallBand ?? 6) + 2).toFixed(1)}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mb-3">Same question — written one band above your score</p>
+          <p className="text-xs text-muted-foreground mb-3">Your ideas, structure and examples — rewritten two bands above your score</p>
           <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-line">{feedbackData.nextBandModelAnswer}</p>
         </div>
       )}

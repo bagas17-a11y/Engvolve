@@ -793,7 +793,7 @@ Provide your response in this EXACT JSON format:
   ],
   "criticalFixes": ["Most impactful fix based on the rubric", "Second fix", "Third fix if applicable"],
   "actionableNextStep": "One specific, concrete practice task to do before next attempt",
-  "nextBandModelAnswer": "A complete Task 1 report written at exactly one band above the student's overallBand. Same data and topic, but elevated to that band level. Must be a full report with intro, overview, and two body paragraphs — not a fragment."
+  "nextBandModelAnswer": "Take the student's ACTUAL report above and rewrite/elevate it to exactly TWO full bands above their overallBand (cap at 9.0). Keep their chosen data points, structure, and overall approach — do not write a generic report from scratch on the same topic. Upgrade vocabulary, sentence variety, cohesion, and strengthen the overview/key features coverage wherever theirs was weak. It should read like their own writing, improved — not a textbook answer. Must be a full report with intro, overview, and two body paragraphs — not a fragment."
 }
 IMPORTANT: overallBand MUST equal the mathematically averaged and IELTS-rounded result of your 4 scoringGrid scores. It is NOT subjective — calculate it precisely.`;
       } else {
@@ -867,7 +867,7 @@ Provide your response in this EXACT JSON format:
   ],
   "criticalFixes": ["Most impactful fix tied to the lowest-scoring rubric criterion", "Second fix", "Third fix if applicable"],
   "actionableNextStep": "One specific, concrete practice task to do before next attempt",
-  "nextBandModelAnswer": "A complete Task 2 essay written at exactly one band above the student's overallBand. Same question and position, but elevated to that band level. Must be a full essay with intro, two body paragraphs, and conclusion — not a fragment."
+  "nextBandModelAnswer": "Take the student's ACTUAL essay above and rewrite/elevate it to exactly TWO full bands above their overallBand (cap at 9.0). Keep their position, arguments, and examples — do not write a generic essay from scratch on the same question. Upgrade vocabulary, sentence variety, cohesion, and idea development wherever theirs was weak. It should read like their own writing, improved — not a textbook answer. Must be a full essay with intro, two body paragraphs, and conclusion — not a fragment."
 }
 IMPORTANT: overallBand MUST equal the mathematically averaged and IELTS-rounded result of your 4 scoringGrid scores. It is NOT subjective — calculate it precisely.`;
       }
@@ -1000,8 +1000,16 @@ Provide your response in this JSON format:
         model: analysisModel,
         max_tokens: maxTokens,
         temperature: 0.3,
+        // systemPrompt (the multi-thousand-token band descriptors + calibration
+        // examples) is identical across the vast majority of requests for a given
+        // type/taskType — marking it cacheable means repeat requests skip
+        // reprocessing it, cutting latency and cost. Only the userPrompt (the
+        // student's actual submission) varies per request.
+        system: [
+          { type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } },
+        ],
         messages: [
-          { role: "user", content: `${systemPrompt}\n\n${userPrompt}` },
+          { role: "user", content: userPrompt },
         ],
       }),
     });
