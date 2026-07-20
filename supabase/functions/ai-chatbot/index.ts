@@ -13,6 +13,7 @@ import {
 } from "../shared/errors.ts";
 import { verifyUser } from "../shared/auth.ts";
 import { checkRateLimit } from "../shared/rate-limit.ts";
+import { logAiUsage } from "../shared/usage-log.ts";
 
 const SYSTEM_PROMPT_EN = `You are a helpful AI assistant for IELTSinAja, an IELTS preparation platform. You help users understand the platform's features and answer their questions in English.
 
@@ -154,6 +155,14 @@ serve(async (req) => {
 
     const data = await response.json();
     const reply = data.content?.[0]?.text || 'Sorry, I could not process your request.';
+
+    await logAiUsage({
+      userId: auth.userId!,
+      endpoint: "ai-chatbot",
+      model: "claude-haiku-4-5-20251001",
+      inputTokens: data.usage?.input_tokens,
+      outputTokens: data.usage?.output_tokens,
+    });
 
     return successResponse({ reply }, 200, corsHeaders);
   } catch (error) {

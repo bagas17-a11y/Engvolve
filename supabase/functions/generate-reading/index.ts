@@ -12,6 +12,7 @@ import {
 } from "../shared/errors.ts";
 import { verifyUser } from "../shared/auth.ts";
 import { checkRateLimit } from "../shared/rate-limit.ts";
+import { logAiUsage } from "../shared/usage-log.ts";
 import { getMockReadingTest } from "./mock-data.ts";
 
 // ============================================================
@@ -122,6 +123,7 @@ async function generateOneSection(
   topic: string,
   difficulty: string,
   apiKey: string,
+  userId: string,
   maxAttempts = 3,
 ): Promise<Record<string, unknown> | null> {
   const difficultyNote =
@@ -162,6 +164,14 @@ Question numbers start at ${questionStart}.`;
       }
 
       const data = await res.json();
+      await logAiUsage({
+        userId,
+        endpoint: "generate-reading",
+        model: "claude-haiku-4-5-20251001",
+        inputTokens: data.usage?.input_tokens,
+        outputTokens: data.usage?.output_tokens,
+        metadata: { sectionNumber, attempt, difficulty },
+      });
       const text: string = data.content?.[0]?.text ?? "";
       const match = text.match(/\{[\s\S]*\}/);
       if (!match) {
@@ -255,7 +265,7 @@ serve(async (req) => {
       console.log("Generating AI reading test:", { difficulty, topics });
 
       const results = await Promise.all(
-        [1, 2, 3].map((n) => generateOneSection(n, topics[n - 1], difficulty, ANTHROPIC_API_KEY)),
+        [1, 2, 3].map((n) => generateOneSection(n, topics[n - 1], difficulty, ANTHROPIC_API_KEY, auth.userId!)),
       );
 
       if (results.every((r) => r !== null)) {

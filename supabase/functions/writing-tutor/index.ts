@@ -10,6 +10,7 @@ import {
 } from "../shared/errors.ts";
 import { verifyUser } from "../shared/auth.ts";
 import { checkRateLimit } from "../shared/rate-limit.ts";
+import { logAiUsage } from "../shared/usage-log.ts";
 
 interface Message {
   role: "user" | "assistant";
@@ -118,6 +119,14 @@ serve(async (req) => {
 
     const data = await response.json();
     const reply = data.content?.[0]?.text ?? "Sorry, I couldn't process that. Please try again.";
+
+    await logAiUsage({
+      userId: auth.userId!,
+      endpoint: "writing-tutor",
+      model: "claude-haiku-4-5-20251001",
+      inputTokens: data.usage?.input_tokens,
+      outputTokens: data.usage?.output_tokens,
+    });
 
     return successResponse({ reply }, 200, corsHeaders);
   } catch (error) {

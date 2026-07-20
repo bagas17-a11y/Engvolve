@@ -12,6 +12,7 @@ import {
 } from "../shared/errors.ts";
 import { verifyUser } from "../shared/auth.ts";
 import { checkRateLimit } from "../shared/rate-limit.ts";
+import { logAiUsage } from "../shared/usage-log.ts";
 
 // ============================================================
 // IELTS Speaking Generator — System Prompt
@@ -284,6 +285,15 @@ Return ONLY valid JSON matching the schema. No markdown.`;
 
     const data = await response.json();
     const aiText = data.content?.[0]?.text;
+
+    await logAiUsage({
+      userId: auth.userId!,
+      endpoint: "generate-speaking",
+      model: "claude-sonnet-4-6",
+      inputTokens: data.usage?.input_tokens,
+      outputTokens: data.usage?.output_tokens,
+      metadata: { theme, difficulty },
+    });
 
     let parsed;
     try {

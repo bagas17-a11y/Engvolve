@@ -13,6 +13,7 @@ import {
 import { extractJsonObject } from "../shared/json-utils.ts";
 import { verifyUser } from "../shared/auth.ts";
 import { checkRateLimit } from "../shared/rate-limit.ts";
+import { logAiUsage } from "../shared/usage-log.ts";
 
 // Band Examples for Calibration — based on official IELTS Cambridge sample responses
 const BAND_EXAMPLES = {
@@ -711,6 +712,15 @@ Write only the model answer, formatted as a proper IELTS response.`;
       const data = await response.json();
       const modelAnswerText = data.content?.[0]?.text;
 
+      await logAiUsage({
+        userId: auth.userId!,
+        endpoint: "ai-analyze",
+        model: "claude-haiku-4-5-20251001",
+        inputTokens: data.usage?.input_tokens,
+        outputTokens: data.usage?.output_tokens,
+        metadata: { type: "generate-model", taskType },
+      });
+
       return successResponse({ modelAnswer: modelAnswerText }, 200, corsHeaders);
     }
     
@@ -1031,6 +1041,15 @@ Provide your response in this JSON format:
     const data = await response.json();
     const aiResponse = data.content?.[0]?.text;
     console.log("AI Response received:", aiResponse?.substring(0, 200));
+
+    await logAiUsage({
+      userId: auth.userId!,
+      endpoint: "ai-analyze",
+      model: analysisModel,
+      inputTokens: data.usage?.input_tokens,
+      outputTokens: data.usage?.output_tokens,
+      metadata: { type, taskType, speakingPart },
+    });
 
     // Try to parse JSON from response using robust extraction
     const parsedResponse = extractJsonObject(aiResponse);

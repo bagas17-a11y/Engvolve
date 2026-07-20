@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { logAiUsage } from "../shared/usage-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -165,6 +166,14 @@ serve(async (req) => {
     }
 
     const aiData = await aiRes.json();
+    await logAiUsage({
+      userId: user.id,
+      endpoint: "generate-reading-admin",
+      model: "claude-sonnet-4-6",
+      inputTokens: aiData.usage?.input_tokens,
+      outputTokens: aiData.usage?.output_tokens,
+      metadata: { difficulty },
+    });
     let rawText: string = aiData.content?.[0]?.text ?? "";
 
     // Strip any accidental markdown fences

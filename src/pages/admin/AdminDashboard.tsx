@@ -323,6 +323,13 @@ export default function AdminDashboard() {
       path: "/admin/diagnostic-results",
       color: "text-accent",
     },
+    {
+      title: "API Usage",
+      description: "Claude API token usage per user — testing/beta cost visibility",
+      icon: <Zap className="w-6 h-6" />,
+      path: "/admin/api-usage",
+      color: "text-elite-gold",
+    },
   ];
 
   const getStatusBadge = (status: string) => {

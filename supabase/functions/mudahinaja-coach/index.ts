@@ -11,6 +11,7 @@ import {
 } from "../shared/errors.ts";
 import { verifyUser } from "../shared/auth.ts";
 import { checkRateLimit } from "../shared/rate-limit.ts";
+import { logAiUsage } from "../shared/usage-log.ts";
 
 const MODULE_LABELS: Record<string, string> = {
   reading: "Reading",
@@ -130,6 +131,15 @@ Jika exam dalam < 14 hari, tambahkan urgency yang membantu (bukan menakutkan).`;
 
     const data = await response.json();
     const reply = data.content?.[0]?.text ?? "";
+
+    await logAiUsage({
+      userId: auth.userId!,
+      endpoint: "mudahinaja-coach",
+      model: "claude-haiku-4-5-20251001",
+      inputTokens: data.usage?.input_tokens,
+      outputTokens: data.usage?.output_tokens,
+      metadata: { mode },
+    });
 
     return successResponse({ reply, mode }, 200, corsHeaders);
   } catch (err) {

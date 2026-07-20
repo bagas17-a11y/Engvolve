@@ -12,6 +12,7 @@ import {
 } from "../shared/errors.ts";
 import { verifyUser } from "../shared/auth.ts";
 import { checkRateLimit } from "../shared/rate-limit.ts";
+import { logAiUsage } from "../shared/usage-log.ts";
 import { getMockWritingPrompt } from "./mock-data.ts";
 
 // ============================================================
@@ -369,6 +370,15 @@ Return ONLY valid JSON matching the Task 2 schema. No markdown.`;
 
     const data = await response.json();
     const aiText = data.content?.[0]?.text;
+
+    await logAiUsage({
+      userId: auth.userId!,
+      endpoint: "generate-writing",
+      model: "claude-haiku-4-5-20251001",
+      inputTokens: data.usage?.input_tokens,
+      outputTokens: data.usage?.output_tokens,
+      metadata: { task_type, topic, difficulty },
+    });
 
     let parsed;
     try {

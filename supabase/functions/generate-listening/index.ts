@@ -12,6 +12,7 @@ import {
 } from "../shared/errors.ts";
 import { verifyUser } from "../shared/auth.ts";
 import { checkRateLimit } from "../shared/rate-limit.ts";
+import { logAiUsage } from "../shared/usage-log.ts";
 import { getMockListeningTest } from "./mock-data.ts";
 
 // ============================================================
@@ -126,6 +127,7 @@ async function generateOnePart(
   topic: string,
   difficulty: string,
   apiKey: string,
+  userId: string,
   maxAttempts = 3,
 ): Promise<Record<string, unknown> | null> {
   const difficultyNote =
@@ -162,6 +164,14 @@ DIFFICULTY: ${difficulty} — ${difficultyNote}`;
       }
 
       const data = await res.json();
+      await logAiUsage({
+        userId,
+        endpoint: "generate-listening",
+        model: "claude-haiku-4-5-20251001",
+        inputTokens: data.usage?.input_tokens,
+        outputTokens: data.usage?.output_tokens,
+        metadata: { partLabel, attempt, difficulty },
+      });
       const text: string = data.content?.[0]?.text ?? "";
       const match = text.match(/\{[\s\S]*\}/);
       if (!match) {
@@ -264,7 +274,7 @@ serve(async (req) => {
       console.log("Generating AI listening test:", { difficulty, topics });
 
       const results = await Promise.all(
-        partLabels.map((p, i) => generateOnePart(p, topics[i], difficulty, ANTHROPIC_API_KEY)),
+        partLabels.map((p, i) => generateOnePart(p, topics[i], difficulty, ANTHROPIC_API_KEY, auth.userId!)),
       );
 
       if (results.every((r) => r !== null)) {
