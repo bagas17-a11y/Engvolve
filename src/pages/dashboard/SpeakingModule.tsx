@@ -444,7 +444,7 @@ export default function SpeakingModule() {
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>3 parts</span>
                     <span className="opacity-40">·</span>
-                    <span>~18 min</span>
+                    <span>~20 min</span>
                   </div>
 
                   <div className="space-y-1.5 text-xs text-muted-foreground">
