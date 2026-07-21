@@ -24,6 +24,7 @@ import {
   REVISION_NOTE_FORMAT_IDS,
 } from "@/content/revisionNotes";
 import { REVISION_TOPIC_COMPONENTS, WORKSHEET_COMPONENTS, TestFormatsView } from "./revision-notes";
+import { RevisionNotesAIChat } from "@/components/revision-notes/RevisionNotesAIChat";
 import {
   ChevronRight,
   ChevronDown,
@@ -85,6 +86,13 @@ export default function RevisionNotesPage() {
       : FIRST_TOPIC;
 
   const currentSubtopic = subtopicParam ?? null;
+
+  const currentTopicMeta = REVISION_NOTE_TOPICS.find((t) => t.id === currentTopic);
+  const currentCategoryLabel =
+    REVISION_NOTE_CATEGORIES.find((c) => c.id === currentTopicMeta?.category)?.label ?? "Grammar";
+  const currentSubtopicLabel = currentSubtopic
+    ? currentTopicMeta?.worksheets?.find((w) => w.id === currentSubtopic)?.label ?? currentSubtopic
+    : undefined;
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(260);
@@ -700,6 +708,17 @@ export default function RevisionNotesPage() {
             )}
           </AnimatePresence>
         </div>
+
+        {showMainContent && currentTopicMeta && (
+          <div className="hidden xl:flex p-3">
+            <RevisionNotesAIChat
+              topicTitle={currentTopicMeta.title}
+              categoryLabel={currentCategoryLabel}
+              subItems={currentTopicMeta.subItems.map((s) => s.label)}
+              subtopicLabel={currentSubtopicLabel}
+            />
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
