@@ -502,19 +502,6 @@ export default function DiagnosticQuiz() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  // Persist in-progress state to sessionStorage so a refresh/closed tab
-  // doesn't lose the attempt. Only saves while an in-progress module phase
-  // is active — nothing to resume at "intro" or "results".
-  useEffect(() => {
-    if (!user?.id || !IN_PROGRESS_PHASES.includes(phase)) return;
-    try {
-      sessionStorage.setItem(diagnosticCacheKey(user.id), JSON.stringify({
-        phase, readingAnswers, task1Text, task2Text, listeningAnswers,
-        speakingIndex, speakingTranscripts, timerEndAt,
-      }));
-    } catch { /* sessionStorage unavailable — non-fatal */ }
-  }, [user?.id, phase, readingAnswers, task1Text, task2Text, listeningAnswers, speakingIndex, speakingTranscripts, timerEndAt]);
-
   const handleRetake = () => {
     if (user?.id) {
       try { sessionStorage.removeItem(diagnosticCacheKey(user.id)); } catch { /* non-fatal */ }
@@ -725,6 +712,19 @@ export default function DiagnosticQuiz() {
   const { remaining, total, timerEndAt } = useModuleTimer(phase, handleTimerExpire, restoredTimerEndAt);
   const pctLeft = total ? (remaining / total) * 100 : 100;
   const timerWarn = remaining > 0 && remaining <= 60;
+
+  // Persist in-progress state to sessionStorage so a refresh/closed tab
+  // doesn't lose the attempt. Only saves while an in-progress module phase
+  // is active — nothing to resume at "intro" or "results".
+  useEffect(() => {
+    if (!user?.id || !IN_PROGRESS_PHASES.includes(phase)) return;
+    try {
+      sessionStorage.setItem(diagnosticCacheKey(user.id), JSON.stringify({
+        phase, readingAnswers, task1Text, task2Text, listeningAnswers,
+        speakingIndex, speakingTranscripts, timerEndAt,
+      }));
+    } catch { /* sessionStorage unavailable — non-fatal */ }
+  }, [user?.id, phase, readingAnswers, task1Text, task2Text, listeningAnswers, speakingIndex, speakingTranscripts, timerEndAt]);
 
   // ── Reading ─────────────────────────────────────────────────────────────────
   const setRAnswer = (q: string, val: string) => setReadingAnswers(prev => ({ ...prev, [q]: val }));
