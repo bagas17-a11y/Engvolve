@@ -200,16 +200,29 @@ export default function AdminDiagnosticResults() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Fetch all diagnostic results joined with profile email/name
+      // diagnostic_results.user_id references auth.users(id), not profiles(id),
+      // so there's no FK for PostgREST to embed profiles() through — fetch and
+      // join manually instead, keyed on profiles.user_id (which does equal
+      // auth.users.id, unlike profiles.id).
       const { data: results, error } = await supabase
         .from("diagnostic_results")
-        .select("*, profiles(email, full_name)")
+        .select("*")
         .order("taken_at", { ascending: false });
 
       if (error) throw error;
 
+      const userIds = Array.from(new Set((results ?? []).map((r: Record<string, unknown>) => r.user_id as string)));
+      const { data: profileRows, error: profileError } = userIds.length
+        ? await supabase.from("profiles").select("user_id, email, full_name").in("user_id", userIds)
+        : { data: [], error: null };
+      if (profileError) throw profileError;
+
+      const profileByUserId = new Map(
+        (profileRows ?? []).map(p => [p.user_id, { email: p.email, full_name: p.full_name }])
+      );
+
       const mapped: DiagnosticRow[] = (results ?? []).map((r: Record<string, unknown>) => {
-        const profile = r.profiles as { email: string; full_name: string | null } | null;
+        const profile = profileByUserId.get(r.user_id as string) ?? null;
         return {
           id: r.id as string,
           user_id: r.user_id as string,
